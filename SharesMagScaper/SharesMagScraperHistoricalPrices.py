@@ -1,4 +1,4 @@
-import WebScrapeCommon as WSC
+import SharesMagScraperCommon as smsc
 import requests
 from  bs4 import BeautifulSoup
 
@@ -7,7 +7,7 @@ def historicalPrices(URL):
     rarr = []
     keys = ['date','close']
     include_cols = [1,5]
-    methodMap = dict({1: WSC.standardizeDate, 5: WSC.optionalNumeric})
+    methodMap = dict({1: smsc.standardizeDate, 5: smsc.optionalNumeric})
     rarr.append(keys)
     page = requests.get(URL)
     soup  = BeautifulSoup(page.content, "html.parser")
