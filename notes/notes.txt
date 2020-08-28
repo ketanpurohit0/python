@@ -1,0 +1,52 @@
+Date:2020-08-19
+
+PostgreSql
+	1. Test with different col types
+	
+	DONE - see PostgreSql.txt
+
+	
+	2. Test via pyodbc and SqlAlchemy
+	
+	DONE - See PostgreSql.txt (SqlAlchemy returns json as dict, array as list. pyodbc does not)
+	
+	3. JDBC driver for PostgreSql
+	
+	DONE - Downloaded postgresql-42.2.14.jar
+	
+WebScrape
+
+	1. Rename git repo
+	
+	TODO
+	
+
+Apache Spark
+
+	1. Set-Up cluster
+	
+	TODO -
+	
+	2. Try sql against PostgreSql
+	
+	DONE - See ApacheSpark.txt
+	
+	
+	3.Basic Spark tests
+	
+	DONE - See SparkTestDrive.py
+	
+	4. Investigate NULL replacement (default for null per type)
+	
+	DONE - See SparkDefaultForNullPerType.sql and SparkDefaultForNullPerType.py
+
+	5. Investigate 'differential' joins (rescue outer join orphans!) (Work related problem)
+	
+	DONE - See SparkDifferentialJoin.sql and SparkDifferentialJoin.py
+
+
+Markdown Cheatsheet
+
+	https://www.markdownguide.org/cheat-sheet/
+	
+	
