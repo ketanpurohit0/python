@@ -20,6 +20,7 @@ if __name__ == "__main__":
         print(standardizeDate('03/05/18'))
         print(standardizeDate('31/12/18'))
         print(standardizeDate('31/03/18'))
+        print(standardizeDate('20200331'))
 
 
 
