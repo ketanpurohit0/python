@@ -1,6 +1,6 @@
 import SharesMagScraperCommon as WSC
 import requests
-from  bs4 import BeautifulSoup
+from bs4 import BeautifulSoup
 
 
 def fundamentals(URL):

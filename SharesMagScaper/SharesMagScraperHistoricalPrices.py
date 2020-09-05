@@ -14,7 +14,7 @@ def historicalPrices(URL):
     mt = soup.find('table', class_='footable-table table-1 gutter-under gutter-top-small')
     tbody = mt.find("tbody")
     for t in tbody.find_all("tr"):
-        rarr.append([methodMap[i](t.select(f"td:nth-of-type({str(i)})")[0].text) for i in include_cols])       
+        rarr.append([methodMap[i](t.select(f"td:nth-of-type({str(i)})")[0].text) for i in include_cols])
     return rarr
 
 

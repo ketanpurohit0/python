@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 
 def directorsDeals(URL):
     rarr = []
-    keys = ['date','type', 'dir','pos', 'volp','value']
+    keys = ['date', 'type', 'dir', 'pos', 'volp', 'value']
     rarr.append(keys)
     page = requests.get(URL)
     soup = BeautifulSoup(page.content, "html.parser")
