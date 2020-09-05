@@ -1,6 +1,6 @@
-import WebScrapeCommon
+import SharesMagScraperCommon
 import requests
-from  bs4 import BeautifulSoup
+from bs4 import BeautifulSoup
 
 
 def directorsDeals(URL):
@@ -8,9 +8,9 @@ def directorsDeals(URL):
     keys = ['date','type', 'dir','pos', 'volp','value']
     rarr.append(keys)
     page = requests.get(URL)
-    soup  = BeautifulSoup(page.content, "html.parser")
+    soup = BeautifulSoup(page.content, "html.parser")
     mt = soup.find('table', class_='table-1 director-deals-sm')
-    tbody= mt.find("tbody")
+    tbody = mt.find("tbody")
     for t in tbody.find_all("tr"):
         values = []
         elems = t.children
@@ -19,6 +19,7 @@ def directorsDeals(URL):
                 values.append(e.text.strip(' \n\t'))
         rarr.append(values)
     return rarr
+
 
 if __name__ == "__main__":
     # Fundamentals page

@@ -7,9 +7,11 @@ def optionalNumeric(s):
     except ValueError:
         return s
 
+
 def standardizeDate(s):
     d = parser.parse(s)
     return d.isoformat()
+
 
 if __name__ == "__main__":
         print(standardizeDate('Aug 12, 2020'))
