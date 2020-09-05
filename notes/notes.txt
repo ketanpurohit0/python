@@ -25,7 +25,7 @@ Apache Spark
 
 	1. Set-Up cluster
 	
-	TODO -
+	TODO - Notes not very good for Windowns
 	
 	2. Try sql against PostgreSql
 	
@@ -43,10 +43,30 @@ Apache Spark
 	5. Investigate 'differential' joins (rescue outer join orphans!) (Work related problem)
 	
 	DONE - See SparkDifferentialJoin.sql and SparkDifferentialJoin.py
+	
+	6. Upgrade ?
+	
+	TODO - 3.x ?
+	
+	7. Parquet file viewer
+	
+	TODO - No meaninfull utilities avaiable
 
 
 Markdown Cheatsheet
 
 	https://www.markdownguide.org/cheat-sheet/
 	
+	
+PyTest:
+	
+	1. Install pytest
+
+	DONE
+	
+Flake8:
+	
+	1. Install Flake8
+	
+	DONE - edited code to confirm with suggestions
 	
