@@ -2,6 +2,14 @@ from dateutil import parser
 
 
 def optionalNumeric(s):
+    """Convert a string to a float
+
+    Args:
+        s (str): A string representation of a number
+
+    Returns:
+        float: String converted to a float or original string returned
+    """
     try:
         return float(s)
     except ValueError:
