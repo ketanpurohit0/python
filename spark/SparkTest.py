@@ -1,4 +1,3 @@
-from pyspark.sql import SparkSession
 import SparkHelper as sh
 
 # Run with pyspark or spark-submit
