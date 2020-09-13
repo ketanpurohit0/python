@@ -35,14 +35,8 @@ def getQueryDataFrame(sparkSession, url, query):
 
 
 def getStandardizedType(dfType):
-    if (
-        dfType == "string"
-        or dfType == "date"
-        or dfType == "timestamp"
-        or dfType == "double"
-        or dfType == "int"
-        or dfType == "boolean"
-    ):
+    asis = ["string", "date", "timestamp", "double", "int", "boolean"]
+    if (dfType in asis):
         return dfType
     elif "decimal" in dfType:
         return "double"
@@ -89,7 +83,7 @@ def compareDfs(sparkSession, leftDf, rightDf, tolerance, keysLeft, keysRight, co
 
     newColNamesLeft = getNewColsNames(allLeftCols, leftSide_tag)
     newColNamesRight = getNewColsNames(allRightCols, rightSide_tag)
-  
+ 
     colDictOldNameToNewNames = {}
     for item in colsInLeftOnly:
         colDictOldNameToNewNames[item] = (f"{item}{leftSide_tag}", None, None)
