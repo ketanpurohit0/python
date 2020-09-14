@@ -59,7 +59,7 @@ def replaceBlanks(df):
     stringCols = [cn for (cn, ct) in df.dtypes if ct == "string"]
     for cn in stringCols:
         df = df.withColumn(cn, when(col(cn) == "", brv).otherwise(col(cn)))
-        df = df.withColumn(cn, regexp_replace(col(cn), "^\s+", brv))
+        df = df.withColumn(cn, regexp_replace(col(cn), r"^\s+", brv))
 
     return df
 
@@ -83,7 +83,7 @@ def compareDfs(sparkSession, leftDf, rightDf, tolerance, keysLeft, keysRight, co
 
     newColNamesLeft = getNewColsNames(allLeftCols, leftSide_tag)
     newColNamesRight = getNewColsNames(allRightCols, rightSide_tag)
- 
+
     colDictOldNameToNewNames = {}
     for item in colsInLeftOnly:
         colDictOldNameToNewNames[item] = (f"{item}{leftSide_tag}", None, None)
@@ -145,7 +145,12 @@ def getNewColsNames(columnNameList, tag):
 
 
 def joinCondAsString(joinConditionAsList):
-    conditions = [x for x in joinConditionAsList if not (x == "" or x == "None" or x is None)]
+    conditions = [
+        x
+        for x in joinConditionAsList
+        if x != "" and x != "None" and x is not None
+    ]
+
     code = ",".join(conditions)
     code = f"[{code}]"
     return code
@@ -173,13 +178,12 @@ def makeDfJoinCondition(leftDf, rightDf, tolerance, keysLeft, keysRight):
     leftKeysList = [x.strip() for x in keysLeft.split(",")]
     rightKeysList = [x.strip() for x in keysRight.split(",")]
     keyByKey = zip(leftKeysList, rightKeysList)
-    conditions = [
+    return [
         makeDfConditionWithTolerance(
             lname, leftTypesMap[lname], rname, rightTypesMap[rname], tolerance
         )
         for (lname, rname) in keyByKey
     ]
-    return conditions
 
 
 def makeDfConditionWithTolerance(leftColName, leftColType, rightColName, rightColType, tolerance):

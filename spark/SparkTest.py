@@ -2,10 +2,10 @@ import SparkHelper as sh
 
 # Run with pyspark or spark-submit
 # --pyspark
-# C:\MyInstalled\spark-2.4.5-bin-hadoop2.7\spark-2.4.5-bin-hadoop2.7\bin\pyspark --jars C:\MyWork\GIT\python\spark\postgresql-42.2.14.jar
+# C:\MyInstalled\spark-2.4.5-bin-hadoop2.7\spark-2.4.5-bin-hadoop2.7\bin\pyspark --jars C:\MyWork\GIT\python\spark\postgresql-42.2.14.jar #noqa: E501
 # import SparkTest
 # -- spark-submit
-# C:\MyInstalled\spark-2.4.5-bin-hadoop2.7\spark-2.4.5-bin-hadoop2.7\bin\spark-submit --jars C:\MyWork\GIT\python\spark\postgresql-42.2.14.jar SparkTest.py
+# C:\MyInstalled\spark-2.4.5-bin-hadoop2.7\spark-2.4.5-bin-hadoop2.7\bin\spark-submit --jars C:\MyWork\GIT\python\spark\postgresql-42.2.14.jar SparkTest.py #noqa: E501
 
 sparkSession = sh.getSpark()
 sparkSession.sparkContext.setLogLevel("ERROR")
