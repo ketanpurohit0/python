@@ -92,16 +92,9 @@ Python Training
 
 		Pycon2020
 			https://www.youtube.com/watch?v=fuJcSNUMrW0 [Tutorial: Matt Harrison - Hands-on Python for Programmers]
-			https://www.youtube.com/watch?v=WkUBx3g2QfQ&t=2529s [Tutorial: Sebastian Witowski - Modern Python Developer's Toolkit]
-				* pipx 45:00
-				* black 1:00:00
-				* cookiecutter 1:05:00
-				* flake8 1:20:00
-				* 1:22:00
-				* ipython , black, cookiecutter, flake8 = pipx
-				* sphinx 1h38 pipx
-				* solution to exercie 1:50:00
-				* docker 2:10:00
+			https://www.youtube.com/watch?v=WkUBx3g2QfQ&t=2529s [Tutorial: Sebastian Witowski - Modern Python Develop				* pipx 45min
+				* black 1hr
+				* cookiecutter 1hr5m
 			https://www.youtube.com/watch?v=RUQWPJ1T6Zc - [Tutorial: Kimberly Fessel - It's Officially Legal so Let's Scrape the Web]
 			https://www.youtube.com/watch?v=18B1pznaU1o  - [Tutorial: Santiago Basulto - Python Concurrency: from beginner to pro]
 			https://www.youtube.com/watch?v=T8CQwGIsrx4 -[Tutorial: Geir Arne Hjelle - Introduction to Decorators: Power Up Your Python Code]
