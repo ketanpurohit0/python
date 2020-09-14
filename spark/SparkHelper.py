@@ -53,7 +53,7 @@ def replaceNulls(df):
 
 
 def replaceBlanks(df):
-    from pyspark.sql.functions import col, when, lit, regexp_replace
+    from pyspark.sql.functions import col, when, regexp_replace
 
     brv = standardNullReplacementMapPerStandardType.get("string", "")
     stringCols = [cn for (cn, ct) in df.dtypes if ct == "string"]
