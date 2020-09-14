@@ -25,7 +25,7 @@ def df2(spark):
 
 @pytest.fixture
 def df3(spark):
-    dict_lst = {"letters": ["a", "b", "c", "d"], "numbers": [1, 2, 3, 4]}
+    dict_lst = {"letters": ["a", "b", "c", "d"], "numbers": [10, 20, 30, 40]}
 
     column_names, data = zip(*dict_lst.items())
     return spark.createDataFrame(zip(*data), column_names)

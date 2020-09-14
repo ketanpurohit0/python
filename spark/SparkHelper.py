@@ -121,7 +121,7 @@ def compareDfs(sparkSession, leftDf, rightDf, tolerance, keysLeft, keysRight, co
                     df = df.withColumn(newBoolCol, col(leftCol) == col(rightCol))
 
         colDictOldNameToNewNames[colInBoth] = (leftCol, rightCol, newBoolCol)
-        df.withColumn("PASS", col("PASS") & col(newBoolCol))
+        df = df.withColumn("PASS", col("PASS") & col(newBoolCol))
         newColNamesAll.append(newBoolCol)
 
         # - return data in its natural order list (ie the order as it existed in original dataframes)
