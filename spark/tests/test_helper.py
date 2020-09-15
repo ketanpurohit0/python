@@ -7,6 +7,7 @@ from typing import Optional
 
 
 @pytest.fixture(scope="module")
+@pytest.mark.skip("Skip test")
 def annotations_collect():
     # pipx install pyannotate==1.2.0
     from pyannotate_runtime import collect_types
@@ -18,13 +19,22 @@ def annotations_collect():
     collect_types.dump_stats("annotations.txt")
 
 
+@pytest.mark.skip("Skip test")
 def test_pyannotation_collect(annotations_collect: Optional[Any]) -> None:
     pass
 
 
 @pytest.fixture
-def spark() -> SparkSession:
-    return sh.getSpark()
+def sparkConf():
+    import os
+    from dotenv import load_dotenv
+    load_dotenv(verbose=True)
+    return sh.setSparkConfig(jars=os.getenv("JARS"))
+
+
+@pytest.fixture
+def spark(sparkConf) -> SparkSession:
+    return sh.getSpark(sparkConf)
 
 
 @pytest.fixture

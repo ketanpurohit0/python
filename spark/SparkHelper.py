@@ -1,4 +1,5 @@
 from pyspark.sql import SparkSession
+from pyspark import SparkConf
 
 standardNullReplacementMapPerStandardType = {
     "string": "-",
@@ -10,8 +11,17 @@ standardNullReplacementMapPerStandardType = {
 }
 
 
-def getSpark():
-    return SparkSession.builder.appName("Test").getOrCreate()
+def setSparkConfig(jars):
+    conf = SparkConf()
+    if (jars is not None):
+        conf.set("spark.jars", jars)
+    return conf
+
+
+def getSpark(conf):
+    return SparkSession.builder.appName("Test")\
+        .config(conf=conf)\
+        .getOrCreate()
 
 
 def getUrl(db, user, secret):

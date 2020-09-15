@@ -9,8 +9,8 @@ load_dotenv(verbose=True)
 # import SparkTest
 # -- spark-submit
 # C:\MyInstalled\spark-2.4.5-bin-hadoop2.7\spark-2.4.5-bin-hadoop2.7\bin\spark-submit --jars C:\MyWork\GIT\python\spark\postgresql-42.2.14.jar SparkTest.py #noqa: E501
-
-sparkSession = sh.getSpark()
+sparkConfig = sh.setSparkConfig(jars=os.getenv("JARS"))
+sparkSession = sh.getSpark(sparkConfig)
 sparkSession.sparkContext.setLogLevel("ERROR")
 
 url = sh.getUrl(db=os.getenv("POSTGRES_DB"), user=os.getenv("POSTGRES_USER"), secret=os.getenv("POSTGRES_SECRET"))
