@@ -1,4 +1,7 @@
 import SparkHelper as sh
+from dotenv import load_dotenv
+import os
+load_dotenv(verbose=True)
 
 # Run with pyspark or spark-submit
 # --pyspark
@@ -10,7 +13,7 @@ import SparkHelper as sh
 sparkSession = sh.getSpark()
 sparkSession.sparkContext.setLogLevel("ERROR")
 
-url = sh.getUrl(db="postgres", user="postgres", secret="foobar_secret")
+url = sh.getUrl(db=os.getenv("POSTGRES_DB"), user=os.getenv("POSTGRES_USER"), secret=os.getenv("POSTGRES_SECRET"))
 
 # Get base data
 baseSql = "SELECT * FROM tleft"
@@ -31,7 +34,7 @@ dfResult = sh.compareDfs(
     tolerance=0.1,
     keysLeft="bsr",
     keysRight="bsr",
-    colExcludeList=[],
+    colExcludeList=["n1", "n2", "n3", "n4", "n5", "tx"],
     joinType="full_outer",
 )
 
