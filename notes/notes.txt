@@ -75,6 +75,29 @@ Black:
 	1. Install Black
 	
 	
+PyAnnotate(pipx)
+
+	Virtual Environment location is C:\Users\ketan\.local\pipx\venvs.
+	Symlinks to apps are placed in C:\Users\ketan\.local\bin.
+	pipx install pyannotate
+	
+	..added following to pytest test file. It effectively triggers collection of annotations
+	into file annotations.txt
+	
+	@pytest.fixture(scope="module")
+	def annotations_collect():
+    collect_types.init_types_collection()
+    collect_types.start()
+    yield None
+    collect_types.stop()
+    collect_types.dump_stats("annotations.txt")
+	
+	% pyannotate  --type-info annotations.txt  SparkTest.py SparkHelper.py test_helper.py
+
+
+def test_pyannotation_collect(annotations_collect):
+    pass
+	
 Django or Flask
 
 	Investigate developer friendliness

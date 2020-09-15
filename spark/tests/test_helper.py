@@ -2,6 +2,22 @@ import pytest
 import SparkHelper as sh
 
 
+@pytest.fixture(scope="module")
+def annotations_collect():
+    # pipx install pyannotate==1.2.0
+    from pyannotate_runtime import collect_types
+
+    collect_types.init_types_collection()
+    collect_types.start()
+    yield None
+    collect_types.stop()
+    collect_types.dump_stats("annotations.txt")
+
+
+def test_pyannotation_collect(annotations_collect):
+    pass
+
+
 @pytest.fixture
 def spark():
     return sh.getSpark()
@@ -159,3 +175,5 @@ def test_blank_replacement(spark, df6):
     df6 = sh.replaceBlanks(df6)
     totalBlanks = countWSAcrossAllStringColumns(df6)
     assert totalBlanks == 0
+
+
