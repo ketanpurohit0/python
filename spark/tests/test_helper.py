@@ -1,5 +1,9 @@
 import pytest
 import SparkHelper as sh
+from pyspark.sql.session import SparkSession
+from pyspark.sql.dataframe import DataFrame
+from typing import Any
+from typing import Optional
 
 
 @pytest.fixture(scope="module")
@@ -14,17 +18,17 @@ def annotations_collect():
     collect_types.dump_stats("annotations.txt")
 
 
-def test_pyannotation_collect(annotations_collect):
+def test_pyannotation_collect(annotations_collect: Optional[Any]) -> None:
     pass
 
 
 @pytest.fixture
-def spark():
+def spark() -> SparkSession:
     return sh.getSpark()
 
 
 @pytest.fixture
-def df1(spark):
+def df1(spark: SparkSession) -> DataFrame:
     dict_lst = {"letters": ["a", "b", "c"], "numbers": [10, 20, 30]}
 
     column_names, data = zip(*dict_lst.items())
@@ -32,7 +36,7 @@ def df1(spark):
 
 
 @pytest.fixture
-def df2(spark):
+def df2(spark: SparkSession) -> DataFrame:
     dict_lst = {"letters": ["a", "b", "c"], "numbers": [1, 2, 3]}
 
     column_names, data = zip(*dict_lst.items())
@@ -40,7 +44,7 @@ def df2(spark):
 
 
 @pytest.fixture
-def df3(spark):
+def df3(spark: SparkSession) -> DataFrame:
     dict_lst = {"letters": ["a", "b", "c", "d"], "numbers": [10, 20, 30, 40]}
 
     column_names, data = zip(*dict_lst.items())
@@ -48,7 +52,7 @@ def df3(spark):
 
 
 @pytest.fixture
-def df4(spark):
+def df4(spark: SparkSession) -> DataFrame:
     dict_lst = {"letters": ["z", "y", "x"], "numbers": [1, 2, 3, 4]}
 
     column_names, data = zip(*dict_lst.items())
@@ -56,7 +60,7 @@ def df4(spark):
 
 
 @pytest.fixture
-def df5(spark):
+def df5(spark: SparkSession) -> DataFrame:
     dict_lst = {"letters": ["z", None, "x"], "numbers": [1, 2, None, 4]}
 
     column_names, data = zip(*dict_lst.items())
@@ -64,14 +68,14 @@ def df5(spark):
 
 
 @pytest.fixture
-def df6(spark):
+def df6(spark: SparkSession) -> DataFrame:
     dict_lst = {"letters": ["a", "", "b", " "], "numbers": [1, 2, 3, 4]}
 
     column_names, data = zip(*dict_lst.items())
     return spark.createDataFrame(zip(*data), column_names)
 
 
-def test_all_same(spark, df1):
+def test_all_same(spark: SparkSession, df1: DataFrame) -> None:
     dfResult = sh.compareDfs(
         spark,
         df1,
@@ -88,7 +92,7 @@ def test_all_same(spark, df1):
     assert df1.count() == overall_count
 
 
-def test_all_different(spark, df1, df2):
+def test_all_different(spark: SparkSession, df1: DataFrame, df2: DataFrame) -> None:
     dfResult = sh.compareDfs(
         spark,
         df1,
@@ -103,7 +107,7 @@ def test_all_different(spark, df1, df2):
     assert pass_count == 0
 
 
-def test_partial_same(spark, df1, df3):
+def test_partial_same(spark: SparkSession, df1: DataFrame, df3: DataFrame) -> None:
     dfResult = sh.compareDfs(
         spark,
         df1,
@@ -120,7 +124,7 @@ def test_partial_same(spark, df1, df3):
     assert pass_count > 0
 
 
-def test_no_common(spark, df1, df4):
+def test_no_common(spark: SparkSession, df1: DataFrame, df4: DataFrame) -> None:
     dfResult = sh.compareDfs(
         spark,
         df1,
@@ -135,7 +139,7 @@ def test_no_common(spark, df1, df4):
     assert pass_count == 0
 
 
-def countNullsAcrossAllColumns(df):
+def countNullsAcrossAllColumns(df: DataFrame) -> int:
     # https://www.datasciencemadesimple.com/count-of-missing-nanna-and-null-values-in-pyspark/
     from pyspark.sql.functions import isnull, when, count, expr
 
@@ -145,7 +149,7 @@ def countNullsAcrossAllColumns(df):
     return sumDf.collect()[0].TOTAL
 
 
-def countWSAcrossAllStringColumns(df):
+def countWSAcrossAllStringColumns(df: DataFrame) -> int:
     from pyspark.sql.functions import col, when, count, trim, expr
 
     stringCols = [cn for (cn, ct) in df.dtypes if ct == "string"]
@@ -157,7 +161,7 @@ def countWSAcrossAllStringColumns(df):
     return sumDf.collect()[0].TOTAL
 
 
-def test_null_replacement(spark, df5):
+def test_null_replacement(spark: SparkSession, df5: DataFrame) -> None:
     totalNulls = countNullsAcrossAllColumns(df5)
     assert totalNulls > 0
 
@@ -167,7 +171,7 @@ def test_null_replacement(spark, df5):
     assert totalNulls == 0
 
 
-def test_blank_replacement(spark, df6):
+def test_blank_replacement(spark: SparkSession, df6: DataFrame) -> None:
     totalBlanks = countWSAcrossAllStringColumns(df6)
     assert totalBlanks == 2
 

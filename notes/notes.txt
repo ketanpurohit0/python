@@ -92,7 +92,11 @@ PyAnnotate(pipx)
     collect_types.stop()
     collect_types.dump_stats("annotations.txt")
 	
-	% pyannotate  --type-info annotations.txt  SparkTest.py SparkHelper.py test_helper.py
+	% pyannotate  --type-info annotations.txt  --py3 -w SparkTest.py  
+	% pyannotate  --type-info annotations.txt  --py3 -w SparkHelper.py 
+	% pyannotate  --type-info annotations.txt  --py3 -w tests/test_helper.py
+	
+	after inspection and running mypy - Decided to not use type ann
 
 
 def test_pyannotation_collect(annotations_collect):
