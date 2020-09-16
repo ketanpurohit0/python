@@ -90,15 +90,19 @@ def dbUrl():
     from dotenv import load_dotenv
     import os
     load_dotenv(verbose=True)
-    url = sh.getUrl(db=os.getenv("POSTGRES_DB"), user=os.getenv("POSTGRES_USER"), secret=os.getenv("POSTGRES_SECRET"))
-    return url
+    return sh.getUrl(db=os.getenv("POSTGRES_DB"), user=os.getenv("POSTGRES_USER"), secret=os.getenv("POSTGRES_SECRET"))
 
 
 @pytest.fixture
-def df_from_db(spark: SparkSession, dbUrl) -> DataFrame:
-    baseSql = "SELECT * FROM tleft"
-    df = sh.getQueryDataFrame(spark, dbUrl, baseSql)
-    return df
+def df_from_db_left(spark: SparkSession, dbUrl) -> DataFrame:
+    sql = "SELECT * FROM tleft"
+    return sh.getQueryDataFrame(spark, dbUrl, sql)
+
+
+@pytest.fixture
+def df_from_db_right(spark: SparkSession, dbUrl) -> DataFrame:
+    sql = "SELECT * FROM tright"
+    return sh.getQueryDataFrame(spark, dbUrl, sql)
 
 
 def test_all_same(spark: SparkSession, df1: DataFrame) -> None:
@@ -207,11 +211,27 @@ def test_blank_replacement(spark: SparkSession, df6: DataFrame) -> None:
     assert totalBlanks == 0
 
 
-def test_from_db(spark: SparkSession, df_from_db: DataFrame) -> None:
+def test_from_db_self(spark: SparkSession, df_from_db_left: DataFrame) -> None:
     dfResult = sh.compareDfs(
         spark,
-        df_from_db,
-        df_from_db,
+        df_from_db_left,
+        df_from_db_left,
+        tolerance=0.1,
+        keysLeft="bsr",
+        keysRight="bsr",
+        colExcludeList=["n1", "n2", "n3", "n4", "n5", "tx"],
+        joinType="full_outer",
+    )
+    pass_count = dfResult.filter("PASS == True").count()
+    overall_count = dfResult.count()
+    assert pass_count == overall_count
+
+
+def test_from_db(spark: SparkSession, df_from_db_left: DataFrame, df_from_db_right: DataFrame) -> None:
+    dfResult = sh.compareDfs(
+        spark,
+        df_from_db_left,
+        df_from_db_right,
         tolerance=0.1,
         keysLeft="bsr",
         keysRight="bsr",

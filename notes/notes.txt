@@ -106,6 +106,17 @@ Django or Flask
 
 	Investigate developer friendliness
 	
+SqlAutoCodeGen
+	pipx install sqlacodegen
+	pipx install psycopg2 psycopg2-binary
+	%sqlacodegen postgresql://postgres:*secret*@localhost/postgres
+	
+	Specific to SqlAlchemy
+	
+PostgreSql
+	pg_dump -t 'schema-name.table-name' --schema-only database-name
+
+	
 VSCode Cheatsheet
 
 	https://code.visualstudio.com/shortcuts/keyboard-shortcuts-windows.pdf
