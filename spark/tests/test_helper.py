@@ -85,6 +85,17 @@ def df6(spark: SparkSession) -> DataFrame:
     return spark.createDataFrame(zip(*data), column_names)
 
 
+@pytest.fixture
+def df_from_db(spark: SparkSession) -> DataFrame:
+    from dotenv import load_dotenv
+    import os
+    load_dotenv(verbose=True)
+    url = sh.getUrl(db=os.getenv("POSTGRES_DB"), user=os.getenv("POSTGRES_USER"), secret=os.getenv("POSTGRES_SECRET"))
+    baseSql = "SELECT * FROM tleft"
+    df = sh.getQueryDataFrame(spark, url, baseSql)
+    return df
+
+
 def test_all_same(spark: SparkSession, df1: DataFrame) -> None:
     dfResult = sh.compareDfs(
         spark,
@@ -191,3 +202,17 @@ def test_blank_replacement(spark: SparkSession, df6: DataFrame) -> None:
     assert totalBlanks == 0
 
 
+def test_from_db(spark: SparkSession, df_from_db: DataFrame) -> None:
+    dfResult = sh.compareDfs(
+        spark,
+        df_from_db,
+        df_from_db,
+        tolerance=0.1,
+        keysLeft="bsr",
+        keysRight="bsr",
+        colExcludeList=["n1", "n2", "n3", "n4", "n5", "tx"],
+        joinType="full_outer",
+    )
+    pass_count = dfResult.filter("PASS == True").count()
+    overall_count = dfResult.count()
+    assert pass_count == overall_count
