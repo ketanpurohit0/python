@@ -1,108 +1,7 @@
-import pytest
 import SparkHelper as sh
+import tests.common as c
 from pyspark.sql.session import SparkSession
 from pyspark.sql.dataframe import DataFrame
-from typing import Any
-from typing import Optional
-
-
-@pytest.fixture(scope="module")
-@pytest.mark.skip("Skip test")
-def annotations_collect():
-    # pipx install pyannotate==1.2.0
-    from pyannotate_runtime import collect_types
-
-    collect_types.init_types_collection()
-    collect_types.start()
-    yield None
-    collect_types.stop()
-    collect_types.dump_stats("annotations.txt")
-
-
-@pytest.mark.skip("Skip test")
-def test_pyannotation_collect(annotations_collect: Optional[Any]) -> None:
-    pass
-
-
-@pytest.fixture
-def sparkConf():
-    import os
-    from dotenv import load_dotenv
-    load_dotenv(verbose=True)
-    return sh.setSparkConfig(jars=os.getenv("JARS"))
-
-
-@pytest.fixture
-def spark(sparkConf) -> SparkSession:
-    return sh.getSpark(sparkConf)
-
-
-@pytest.fixture
-def df1(spark: SparkSession) -> DataFrame:
-    dict_lst = {"letters": ["a", "b", "c"], "numbers": [10, 20, 30]}
-
-    column_names, data = zip(*dict_lst.items())
-    return spark.createDataFrame(zip(*data), column_names)
-
-
-@pytest.fixture
-def df2(spark: SparkSession) -> DataFrame:
-    dict_lst = {"letters": ["a", "b", "c"], "numbers": [1, 2, 3]}
-
-    column_names, data = zip(*dict_lst.items())
-    return spark.createDataFrame(zip(*data), column_names)
-
-
-@pytest.fixture
-def df3(spark: SparkSession) -> DataFrame:
-    dict_lst = {"letters": ["a", "b", "c", "d"], "numbers": [10, 20, 30, 40]}
-
-    column_names, data = zip(*dict_lst.items())
-    return spark.createDataFrame(zip(*data), column_names)
-
-
-@pytest.fixture
-def df4(spark: SparkSession) -> DataFrame:
-    dict_lst = {"letters": ["z", "y", "x"], "numbers": [1, 2, 3, 4]}
-
-    column_names, data = zip(*dict_lst.items())
-    return spark.createDataFrame(zip(*data), column_names)
-
-
-@pytest.fixture
-def df5(spark: SparkSession) -> DataFrame:
-    dict_lst = {"letters": ["z", None, "x"], "numbers": [1, 2, None, 4]}
-
-    column_names, data = zip(*dict_lst.items())
-    return spark.createDataFrame(zip(*data), column_names)
-
-
-@pytest.fixture
-def df6(spark: SparkSession) -> DataFrame:
-    dict_lst = {"letters": ["a", "", "b", " "], "numbers": [1, 2, 3, 4]}
-
-    column_names, data = zip(*dict_lst.items())
-    return spark.createDataFrame(zip(*data), column_names)
-
-
-@pytest.fixture
-def dbUrl():
-    from dotenv import load_dotenv
-    import os
-    load_dotenv(verbose=True)
-    return sh.getUrl(db=os.getenv("POSTGRES_DB"), user=os.getenv("POSTGRES_USER"), secret=os.getenv("POSTGRES_SECRET"))
-
-
-@pytest.fixture
-def df_from_db_left(spark: SparkSession, dbUrl) -> DataFrame:
-    sql = "SELECT * FROM tleft"
-    return sh.getQueryDataFrame(spark, dbUrl, sql)
-
-
-@pytest.fixture
-def df_from_db_right(spark: SparkSession, dbUrl) -> DataFrame:
-    sql = "SELECT * FROM tright"
-    return sh.getQueryDataFrame(spark, dbUrl, sql)
 
 
 def test_all_same(spark: SparkSession, df1: DataFrame) -> None:
@@ -169,75 +68,21 @@ def test_no_common(spark: SparkSession, df1: DataFrame, df4: DataFrame) -> None:
     assert pass_count == 0
 
 
-def countNullsAcrossAllColumns(df: DataFrame) -> int:
-    # https://www.datasciencemadesimple.com/count-of-missing-nanna-and-null-values-in-pyspark/
-    from pyspark.sql.functions import isnull, when, count, expr
-
-    nullCountDf = df.select([count(when(isnull(c), c)).alias(c) for c in df.columns])
-    sumExpr = "+".join(nullCountDf.columns) + " as TOTAL"
-    sumDf = nullCountDf.select(expr(sumExpr))
-    return sumDf.collect()[0].TOTAL
-
-
-def countWSAcrossAllStringColumns(df: DataFrame) -> int:
-    from pyspark.sql.functions import col, when, count, trim, expr
-
-    stringCols = [cn for (cn, ct) in df.dtypes if ct == "string"]
-    blanksCountdf = df.select(
-        [count(when(trim(col(c)) == "", True)).alias(c) for c in stringCols]
-    )
-    sumExpr = "+".join(blanksCountdf.columns) + " as TOTAL"
-    sumDf = blanksCountdf.select(expr(sumExpr))
-    return sumDf.collect()[0].TOTAL
-
-
 def test_null_replacement(spark: SparkSession, df5: DataFrame) -> None:
-    totalNulls = countNullsAcrossAllColumns(df5)
+    totalNulls = c.countNullsAcrossAllColumns(df5)
     assert totalNulls > 0
 
     # now replace NULLS
     df5 = sh.replaceNulls(df5)
-    totalNulls = countNullsAcrossAllColumns(df5)
+    totalNulls = c.countNullsAcrossAllColumns(df5)
     assert totalNulls == 0
 
 
 def test_blank_replacement(spark: SparkSession, df6: DataFrame) -> None:
-    totalBlanks = countWSAcrossAllStringColumns(df6)
+    totalBlanks = c.countWSAcrossAllStringColumns(df6)
     assert totalBlanks == 2
 
     # now replace BLANKS
     df6 = sh.replaceBlanks(df6)
-    totalBlanks = countWSAcrossAllStringColumns(df6)
+    totalBlanks = c.countWSAcrossAllStringColumns(df6)
     assert totalBlanks == 0
-
-
-def test_from_db_self(spark: SparkSession, df_from_db_left: DataFrame) -> None:
-    dfResult = sh.compareDfs(
-        spark,
-        df_from_db_left,
-        df_from_db_left,
-        tolerance=0.1,
-        keysLeft="bsr",
-        keysRight="bsr",
-        colExcludeList=["n1", "n2", "n3", "n4", "n5", "tx"],
-        joinType="full_outer",
-    )
-    pass_count = dfResult.filter("PASS == True").count()
-    overall_count = dfResult.count()
-    assert pass_count == overall_count
-
-
-def test_from_db(spark: SparkSession, df_from_db_left: DataFrame, df_from_db_right: DataFrame) -> None:
-    dfResult = sh.compareDfs(
-        spark,
-        df_from_db_left,
-        df_from_db_right,
-        tolerance=0.1,
-        keysLeft="bsr",
-        keysRight="bsr",
-        colExcludeList=["n1", "n2", "n3", "n4", "n5", "tx"],
-        joinType="full_outer",
-    )
-    pass_count = dfResult.filter("PASS == True").count()
-    overall_count = dfResult.count()
-    assert pass_count == overall_count
