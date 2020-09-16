@@ -86,13 +86,18 @@ def df6(spark: SparkSession) -> DataFrame:
 
 
 @pytest.fixture
-def df_from_db(spark: SparkSession) -> DataFrame:
+def dbUrl():
     from dotenv import load_dotenv
     import os
     load_dotenv(verbose=True)
     url = sh.getUrl(db=os.getenv("POSTGRES_DB"), user=os.getenv("POSTGRES_USER"), secret=os.getenv("POSTGRES_SECRET"))
+    return url
+
+
+@pytest.fixture
+def df_from_db(spark: SparkSession, dbUrl) -> DataFrame:
     baseSql = "SELECT * FROM tleft"
-    df = sh.getQueryDataFrame(spark, url, baseSql)
+    df = sh.getQueryDataFrame(spark, dbUrl, baseSql)
     return df
 
 
