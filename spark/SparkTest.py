@@ -1,4 +1,4 @@
-import SparkHelper as sh
+import SparkDFCompare as dfc
 from dotenv import load_dotenv
 import os
 load_dotenv(verbose=True)
@@ -9,25 +9,25 @@ load_dotenv(verbose=True)
 # import SparkTest
 # -- spark-submit
 # C:\MyInstalled\spark-2.4.5-bin-hadoop2.7\spark-2.4.5-bin-hadoop2.7\bin\spark-submit --jars C:\MyWork\GIT\python\spark\postgresql-42.2.14.jar SparkTest.py #noqa: E501
-sparkConfig = sh.setSparkConfig(jars=os.getenv("JARS"))
-sparkSession = sh.getSpark(sparkConfig)
+sparkConfig = dfc.setSparkConfig(jars=os.getenv("JARS"))
+sparkSession = dfc.getSpark(sparkConfig)
 sparkSession.sparkContext.setLogLevel("ERROR")
 
-url = sh.getUrl(db=os.getenv("POSTGRES_DB"), user=os.getenv("POSTGRES_USER"), secret=os.getenv("POSTGRES_SECRET"))
+url = dfc.getUrl(db=os.getenv("POSTGRES_DB"), user=os.getenv("POSTGRES_USER"), secret=os.getenv("POSTGRES_SECRET"))
 
 # Get base data
 baseSql = "SELECT * FROM tleft"
-dfBaseline = sh.getQueryDataFrame(sparkSession, url, baseSql)
+dfBaseline = dfc.getQueryDataFrame(sparkSession, url, baseSql)
 
 # Get test data
 testSql = "SELECT * FROM tright"
-dfTest = sh.getQueryDataFrame(sparkSession, url, testSql)
+dfTest = dfc.getQueryDataFrame(sparkSession, url, testSql)
 
 # To a side by side compare
 # c1_left, c1_right, c1_same, \
 # c2_left, c2_right, c2_same, \
 # c_inbaseonly, c_intargetonly
-dfResult = sh.compareDfs(
+dfResult = dfc.compareDfs(
     sparkSession,
     dfBaseline,
     dfTest,

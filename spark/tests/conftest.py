@@ -1,7 +1,7 @@
 import pytest
 from typing import Any
 from typing import Optional
-import SparkHelper as sh
+import SparkDFCompare as dfc
 from pyspark.sql.session import SparkSession
 from pyspark.sql.dataframe import DataFrame
 
@@ -29,12 +29,12 @@ def sparkConf():
     import os
     from dotenv import load_dotenv
     load_dotenv(verbose=True)
-    return sh.setSparkConfig(jars=os.getenv("JARS"))
+    return dfc.setSparkConfig(jars=os.getenv("JARS"))
 
 
 @pytest.fixture
 def spark(sparkConf) -> SparkSession:
-    return sh.getSpark(sparkConf)
+    return dfc.getSpark(sparkConf)
 
 
 @pytest.fixture
@@ -90,19 +90,19 @@ def dbUrl():
     from dotenv import load_dotenv
     import os
     load_dotenv(verbose=True)
-    return sh.getUrl(db=os.getenv("POSTGRES_DB"), user=os.getenv("POSTGRES_USER"), secret=os.getenv("POSTGRES_SECRET"))
+    return dfc.getUrl(db=os.getenv("POSTGRES_DB"), user=os.getenv("POSTGRES_USER"), secret=os.getenv("POSTGRES_SECRET"))
 
 
 @pytest.fixture
 def df_from_db_left(spark: SparkSession, dbUrl) -> DataFrame:
     sql = "SELECT * FROM tleft"
-    return sh.getQueryDataFrame(spark, dbUrl, sql)
+    return dfc.getQueryDataFrame(spark, dbUrl, sql)
 
 
 @pytest.fixture
 def df_from_db_right(spark: SparkSession, dbUrl) -> DataFrame:
     sql = "SELECT * FROM tright"
-    return sh.getQueryDataFrame(spark, dbUrl, sql)
+    return dfc.getQueryDataFrame(spark, dbUrl, sql)
 
 
 def countNullsAcrossAllColumns(df: DataFrame) -> int:

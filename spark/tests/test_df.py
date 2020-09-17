@@ -1,11 +1,11 @@
-import SparkHelper as sh
+import SparkDFCompare as dfc
 import tests.common as c
 from pyspark.sql.session import SparkSession
 from pyspark.sql.dataframe import DataFrame
 
 
 def test_all_same(spark: SparkSession, df1: DataFrame) -> None:
-    dfResult = sh.compareDfs(
+    dfResult = dfc.compareDfs(
         spark,
         df1,
         df1,
@@ -22,7 +22,7 @@ def test_all_same(spark: SparkSession, df1: DataFrame) -> None:
 
 
 def test_all_different(spark: SparkSession, df1: DataFrame, df2: DataFrame) -> None:
-    dfResult = sh.compareDfs(
+    dfResult = dfc.compareDfs(
         spark,
         df1,
         df2,
@@ -37,7 +37,7 @@ def test_all_different(spark: SparkSession, df1: DataFrame, df2: DataFrame) -> N
 
 
 def test_partial_same(spark: SparkSession, df1: DataFrame, df3: DataFrame) -> None:
-    dfResult = sh.compareDfs(
+    dfResult = dfc.compareDfs(
         spark,
         df1,
         df3,
@@ -54,7 +54,7 @@ def test_partial_same(spark: SparkSession, df1: DataFrame, df3: DataFrame) -> No
 
 
 def test_no_common(spark: SparkSession, df1: DataFrame, df4: DataFrame) -> None:
-    dfResult = sh.compareDfs(
+    dfResult = dfc.compareDfs(
         spark,
         df1,
         df4,
@@ -73,7 +73,7 @@ def test_null_replacement(spark: SparkSession, df5: DataFrame) -> None:
     assert totalNulls > 0
 
     # now replace NULLS
-    df5 = sh.replaceNulls(df5)
+    df5 = dfc.replaceNulls(df5)
     totalNulls = c.countNullsAcrossAllColumns(df5)
     assert totalNulls == 0
 
@@ -83,6 +83,6 @@ def test_blank_replacement(spark: SparkSession, df6: DataFrame) -> None:
     assert totalBlanks == 2
 
     # now replace BLANKS
-    df6 = sh.replaceBlanks(df6)
+    df6 = dfc.replaceBlanks(df6)
     totalBlanks = c.countWSAcrossAllStringColumns(df6)
     assert totalBlanks == 0

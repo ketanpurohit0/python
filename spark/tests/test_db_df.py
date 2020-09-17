@@ -1,10 +1,10 @@
-import SparkHelper as sh
+import SparkDFCompare as dfc
 from pyspark.sql.session import SparkSession
 from pyspark.sql.dataframe import DataFrame
 
 
 def test_from_db_self(spark: SparkSession, df_from_db_left: DataFrame) -> None:
-    dfResult = sh.compareDfs(
+    dfResult = dfc.compareDfs(
         spark,
         df_from_db_left,
         df_from_db_left,
@@ -20,7 +20,7 @@ def test_from_db_self(spark: SparkSession, df_from_db_left: DataFrame) -> None:
 
 
 def test_from_db(spark: SparkSession, df_from_db_left: DataFrame, df_from_db_right: DataFrame) -> None:
-    dfResult = sh.compareDfs(
+    dfResult = dfc.compareDfs(
         spark,
         df_from_db_left,
         df_from_db_right,
