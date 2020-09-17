@@ -114,9 +114,11 @@ SqlAutoCodeGen
 	Specific to SqlAlchemy
 	
 PostgreSql
-	pg_dump -t 'schema-name.table-name' --schema-only database-name
+	<Extract table schema and/or data as inserts>
+	C:\MyInstalled\PostgreSQL\12\bin\pg_dump -t public.tleft --schema-only  -U postgres -d postgres
+	C:\MyInstalled\PostgreSQL\12\bin\pg_dump -t public.tleft --data-only --column-inserts -U postgres -d postgres
+	C:\MyInstalled\PostgreSQL\12\bin\pg_dump -t public.tright --data-only --column-inserts -U postgres -d postgres
 
-	
 VSCode Cheatsheet
 
 	https://code.visualstudio.com/shortcuts/keyboard-shortcuts-windows.pdf
