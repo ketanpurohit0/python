@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS public.tleft;
 
 CREATE TABLE public.tleft
 (
@@ -19,7 +18,6 @@ CREATE TABLE public.tleft
 );
 
 
-DROP TABLE IF EXISTS public.tright;
 
 CREATE TABLE public.tright
 (
