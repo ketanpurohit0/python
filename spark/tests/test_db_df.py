@@ -1,4 +1,4 @@
-import SparkDFCompare as dfc
+import src.SparkDFCompare as dfc
 from pyspark.sql.session import SparkSession
 from pyspark.sql.dataframe import DataFrame
 
