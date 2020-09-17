@@ -5,6 +5,12 @@ from pyspark.sql.dataframe import DataFrame
 
 
 def test_all_same(spark: SparkSession, df1: DataFrame) -> None:
+    """[Compare a dataframe against itself. Expect no differences]
+
+    Args:
+        spark (SparkSession): [Spark session]
+        df1 (DataFrame): [A spark dataframe]
+    """
     dfResult = dfc.compareDfs(
         spark,
         df1,
@@ -22,6 +28,13 @@ def test_all_same(spark: SparkSession, df1: DataFrame) -> None:
 
 
 def test_all_different(spark: SparkSession, df1: DataFrame, df2: DataFrame) -> None:
+    """[Compare spark dataframes. Expect all rows to be different]
+
+    Args:
+        spark (SparkSession): [Spark session]
+        df1 (DataFrame): [A spark dataframe]
+        df2 (DataFrame): [A spark dataframe]
+    """
     dfResult = dfc.compareDfs(
         spark,
         df1,
@@ -37,6 +50,13 @@ def test_all_different(spark: SparkSession, df1: DataFrame, df2: DataFrame) -> N
 
 
 def test_partial_same(spark: SparkSession, df1: DataFrame, df3: DataFrame) -> None:
+    """Compare spark dataframes. Expect partial matches
+
+    Args:
+        spark (SparkSession): [Spark session]
+        df1 (DataFrame): [A spark dataframe]
+        df3 (DataFrame): [A spark dataframe]
+    """
     dfResult = dfc.compareDfs(
         spark,
         df1,
@@ -54,6 +74,13 @@ def test_partial_same(spark: SparkSession, df1: DataFrame, df3: DataFrame) -> No
 
 
 def test_no_common(spark: SparkSession, df1: DataFrame, df4: DataFrame) -> None:
+    """[Compare spark dataframes. Expect all to be different]
+
+    Args:
+        spark (SparkSession): [Spark session]
+        df1 (DataFrame): [A spark dataframe]
+        df4 (DataFrame): [A spark dataframe]
+    """
     dfResult = dfc.compareDfs(
         spark,
         df1,
@@ -69,6 +96,13 @@ def test_no_common(spark: SparkSession, df1: DataFrame, df4: DataFrame) -> None:
 
 
 def test_null_replacement(spark: SparkSession, df5: DataFrame) -> None:
+    """[Check for NULL replacement in dataframe. Expect there to be NULLS in dataframe before
+    and none after]
+
+    Args:
+        spark (SparkSession): [Spark session]
+        df5 (DataFrame): [A spark dataframe]
+    """
     totalNulls = c.countNullsAcrossAllColumns(df5)
     assert totalNulls > 0
 
@@ -79,6 +113,14 @@ def test_null_replacement(spark: SparkSession, df5: DataFrame) -> None:
 
 
 def test_blank_replacement(spark: SparkSession, df6: DataFrame) -> None:
+    """[Check for BLANK replacement in dataframe. Expect there to be BLANKS in dataframe before
+    and none after. BLANKs include a zero length string]
+
+    Args:
+        spark (SparkSession): [Spark session]
+        df6 (DataFrame): [A spark dataframe with BLANKS in the values]
+    """
+
     totalBlanks = c.countWSAcrossAllStringColumns(df6)
     assert totalBlanks == 2
 
