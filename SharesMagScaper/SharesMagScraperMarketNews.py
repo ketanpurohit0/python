@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 
 def marketNews(URL):
     rarr = []
-    keys = ['date', 'news', 'src']
+    keys = ['date', 'newsUrl', 'newsTitle', 'src']
     include_cols = "2,3,4"
     rarr.append(keys)
     page = requests.get(URL)
@@ -16,10 +16,17 @@ def marketNews(URL):
         elems = t.children
         i = 0
         for e in elems:
+            link = None
             if (e.name == 'td'):
                 i += 1
                 if (include_cols.find(str(i))):
+                    link = e.find('a', None)
+                    if (link is not None):
+                        link = link.get('href', None)
+                    if (link is not None):
+                        values.append(link)
                     values.append(e.text.strip(' \n\t'))
+        values[0] = WSC.standardizeDate(values[0])
         rarr.append(values)
     return rarr
 
