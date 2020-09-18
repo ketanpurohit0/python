@@ -118,6 +118,13 @@ PostgreSql
 	C:\MyInstalled\PostgreSQL\12\bin\pg_dump -t public.tleft --schema-only  -U postgres -d postgres
 	C:\MyInstalled\PostgreSQL\12\bin\pg_dump -t public.tleft --data-only --column-inserts -U postgres -d postgres
 	C:\MyInstalled\PostgreSQL\12\bin\pg_dump -t public.tright --data-only --column-inserts -U postgres -d postgres
+	
+Sentiment Analysis
+	pip install sentimentanalyzer
+	pip install textblob
+	Above two were tried bt not selected for use. 
+	
+	pip install vaderSentiment
 
 VSCode Cheatsheet
 
