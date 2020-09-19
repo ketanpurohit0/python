@@ -18,7 +18,27 @@ WebScrape
 
 	1. Rename git repo
 	
+	Stock (epic) - >> FundamentalsHistory (epic, asOfdate, seqId, ..)
+	Stock ->> NewsHistoryWithSentiment (epic, seqId, ..)
+	Stock ->> DirectorsDeals (epic, ..)
+	Stock ->> PriceHistory(epic, .., Highs(type,p%), ConstantRiser(n:p%), MonthlyAvgVolumeSpike(v%,p%), Risers(type,%))
+	
+	
 	TODO
+	
+	Test out a dataframe with json entries (im memory, from database)
+	
+	Highs = {"Weekly" : 97.3, "Monthly": 97.3, "Yearly": 97.3 }
+	ConstantRiser = {"2 days" : 12, "3 days" : 15, "4 days" : 18, "5 days" : 67.1}
+	MonthlyAvgVolumeSpike = {"VolDelta": 23,354.00, "PriceDelta" : 0}
+	Risers = {"PC": 239, "1W" : 74, "4W" : 44, "3M" :5, "6M" : 12}
+	
+	Test Json with missing entries
+	Test Json with NULL
+	
+	spark.read.json(sc.parallelize([json]))
+
+	
 	
 
 Apache Spark
@@ -149,6 +169,6 @@ Python Training
 		PyCon2019
 			https://www.youtube.com/watch?v=F6yLRM3b0q8 [Stuart Williams - Python by Immersion - PyCon 2019]
 			https://www.youtube.com/watch?v=mUu_4k6a5-I [Luciano Ramalho - Pythonic Objects: idiomatic OOP in Python - PyCon 2019]
-			https://www.youtube.com/watch?v=o1FZ_Bd4DSM [Ariel Ortiz - Design Patterns in Python for the Untrained Eye - PyCon 2019]
+			https://www.youtube.com/watch?v=o1FZ_Bd4DSM [Ariel Ortiz - Design Patterns in Python for the Untrained Eye - PyCon 2019] 
 		
 
