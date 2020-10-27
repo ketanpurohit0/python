@@ -159,16 +159,25 @@ Python Training
 
 		Pycon2020
 			https://www.youtube.com/watch?v=fuJcSNUMrW0 [Tutorial: Matt Harrison - Hands-on Python for Programmers]
+				* stop 1hr
+				1h45m -> testing
 			https://www.youtube.com/watch?v=WkUBx3g2QfQ&t=2529s [Tutorial: Sebastian Witowski - Modern Python Develop				* pipx 45min
 				* black 1hr
 				* cookiecutter 1hr5m
 			https://www.youtube.com/watch?v=RUQWPJ1T6Zc - [Tutorial: Kimberly Fessel - It's Officially Legal so Let's Scrape the Web]
-			https://www.youtube.com/watch?v=18B1pznaU1o  - [Tutorial: Santiago Basulto - Python Concurrency: from beginner to pro]
-			https://www.youtube.com/watch?v=T8CQwGIsrx4 -[Tutorial: Geir Arne Hjelle - Introduction to Decorators: Power Up Your Python Code]
+			https://www.youtube.com/watch?v=18B1pznaU1o - [Tutorial: Santiago Basulto - Python Concurrency: from beginner to pro]
+			https://www.youtube.com/watch?v=T8CQwGIsrx4 - [Tutorial: Geir Arne Hjelle - Introduction to Decorators: Power Up Your Python Code]
+			https://www.youtube.com/watch?v=36yw8VC3KU8 - [Talk - Let's talk databases ]
+				* completed
 			
 		PyCon2019
 			https://www.youtube.com/watch?v=F6yLRM3b0q8 [Stuart Williams - Python by Immersion - PyCon 2019]
 			https://www.youtube.com/watch?v=mUu_4k6a5-I [Luciano Ramalho - Pythonic Objects: idiomatic OOP in Python - PyCon 2019]
 			https://www.youtube.com/watch?v=o1FZ_Bd4DSM [Ariel Ortiz - Design Patterns in Python for the Untrained Eye - PyCon 2019] 
 		
+Excercises
 
+	https://www.scala-exercises.org/
+	edabit.com
+	leetcode.com
+	
