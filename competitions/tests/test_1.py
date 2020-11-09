@@ -50,8 +50,27 @@ def testPasswords() -> None:
     pwds = {"this1sAGoodPass": True,
             "thisisnotagoodpass": False,
             "THISISNOTAGOODPASS": False,
-            "ThisIIISnotaG00dPass" : False}
+            "ThisIIISnotaG00dPass": False}
 
     for (pwd, expect) in pwds.items():
         list = [Solution420.minCharacters(pwd), Solution420.domainCheck(pwd), Solution420.repeatCheck(pwd)]
         assert(expect == all(list))
+
+
+def testSolution() -> None:
+    pwds = {"this1sAGoodPass": 0,
+            "thisisnotagoodpass": 1,
+            "THISISNOTAGOODPASS": 1,
+            "thisi": 2,
+            "THISI": 2,
+            "TTT": 3,
+            "AAAAAAAAAAAAAAAAAAAAAAAAA": 3,
+            "ThisIIISnotaG00dPass": 1}
+
+    f = Solution420()
+
+    for (pwd, expect) in pwds.items():
+        nErrors = f.strongPasswordChecker(s=pwd)
+        assert(expect == nErrors)
+        # list = [Solution420.minCharacters(pwd), Solution420.domainCheck(pwd), Solution420.repeatCheck(pwd)]
+        # assert(expect == list.count(False))

@@ -3,7 +3,8 @@ class Solution420:
     regex: str = ""
 
     def strongPasswordChecker(self, s: str) -> int:
-        return 0
+        list = [Solution420.minCharacters(s), Solution420.domainCheck(s), Solution420.repeatCheck(s)]
+        return list.count(False)
 
     # It has at least 6 characters and at most 20 characters.
     def minCharacters(s: str) -> bool:
