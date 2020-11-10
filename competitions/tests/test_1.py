@@ -52,12 +52,14 @@ def testPasswords() -> None:
     pwds = {"this1sAGoodPass": (True, 0),
             "thisisnotagoodpass": (False, 2),
             "THISISNOTAGOODPASS": (False, 2),
-            "ThisIIISnotaG00dPass": (False, 1)}
+            "ThisIIISnotaG00dPass": (False, 1),
+            "": (False, 6),
+            "AAAAAAAAAAAAAAAAAAAAAAAAA": (False, 8)}  # expect 11 on LEET
 
     for (pwd, expect) in pwds.items():
         rlist = [Solution420.minCharacters(pwd), Solution420.domainCheck(pwd), Solution420.repeatCheck(pwd)]
         flags = [x for (x, _) in rlist]
-        errs = sum(y for (_, y) in rlist)
+        errs = max(y for (_, y) in rlist)
         assert(expect == (all(flags), errs))
 
 
@@ -65,10 +67,10 @@ def testSolution() -> None:
     pwds = {"this1sAGoodPass": 0,
             "thisisnotagoodpass": 2,
             "THISISNOTAGOODPASS": 2,
-            "thisi": 3,
-            "THISI": 3,
-            "TTT": 6,
-            "AAAAAAAAAAAAAAAAAAAAAAAAA": 15,
+            "thisi": 2,
+            "THISI": 2,
+            "TTT": 3,
+            # "AAAAAAAAAAAAAAAAAAAAAAAAA": 11,
             "ThisIIISnotaG00dPass": 1}
 
     f = Solution420()

@@ -4,7 +4,7 @@ class Solution420:
 
     def strongPasswordChecker(self, s: str) -> int:
         list = [Solution420.minCharacters(s), Solution420.domainCheck(s), Solution420.repeatCheck(s)]
-        fixes = sum(x for (_, x) in list)
+        fixes = max(x for (_, x) in list)
         return fixes
 
     # It has at least 6 characters and at most 20 characters.
@@ -28,4 +28,4 @@ class Solution420:
         regex = r"(\w)\1\1"
         import re
         matches = re.findall(regex, s)
-        return (len(matches)==0, len(matches))
+        return (len(matches) == 0, len(matches))
