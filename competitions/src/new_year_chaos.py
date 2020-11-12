@@ -1,5 +1,7 @@
 from typing import List
 
+# https://www.hackerrank.com/challenges/new-year-chaos/problem
+
 
 def minimumBribes(q: List[int]):
     # decide if the list has impossible state
@@ -13,6 +15,7 @@ def minimumBribes(q: List[int]):
             # print(q,swap,swapcnt)
             totalswaps += swapcnt
         result = str(totalswaps)
+    print(result)
     return result
 
 
@@ -40,18 +43,11 @@ def validState(q: List[int]) -> bool:
 
 
 if __name__ == '__main__':
-    q = [1, 2, 5, 3, 7, 8, 6, 4]
-    q = [2, 1, 5, 3, 4]
-    q = [5, 1, 2, 3, 7, 8, 6, 4]
-    q = [1, 2, 5, 3, 4, 7, 8, 6]
-    print(minimumBribes(q))
-    """
-    swap: bool = True
-    swapcnt: int = 0
-    totalswaps: int = 0
-    while(swap):
-        (q, swap, swapcnt) = bsort(q)
-        # print(q,swap,swapcnt)
-        totalswaps += swapcnt
-    print(totalswaps)
-    """
+    t = int(input())
+
+    for t_itr in range(t):
+        n = int(input())
+
+        q = list(map(int, input().rstrip().split()))
+
+        minimumBribes(q)
