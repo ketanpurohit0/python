@@ -1,21 +1,27 @@
 # https://leetcode.com/problems/fancy-sequence/
-from typing import List
+from typing import Dict
 
 
 class Fancy:
-    ll: List[int] = []
+    ll: Dict[int, int] = {}
+    idx: int = 0
 
     def __init__(self):
-        self.ll = []
+        self.ll = {}
 
     def append(self, val: int) -> None:
-        self.ll.append(val)
+        # self.ll(val)
+        self.ll[self.idx] = val
+        self.idx += 1
 
     def addAll(self, inc: int) -> None:
-        self.ll = list(map(lambda x: x + inc, self.ll))
+        # map(lambda x: x + inc, self.ll)
+        for k in self.ll.keys():
+            self.ll[k] = self.ll[k] + inc
 
     def multAll(self, m: int) -> None:
-        self.ll = list(map(lambda x: x * m, self.ll))
+        for k in self.ll.keys():
+            self.ll[k] = self.ll[k] * m
 
     def getIndex(self, idx: int) -> int:
         if 0 <= idx <= len(self.ll)-1:
