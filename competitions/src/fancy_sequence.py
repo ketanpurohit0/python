@@ -4,12 +4,14 @@ from typing import Dict, List
 
 class Fancy:
     ops = []
-    opp: List[int] = []
     valloc: List[int] = []
     idx: int = 0
+    fn = {}
 
     def __init__(self):
-        self.ll = {}
+        self.fn = {self.append: "A",
+                   self.add: "+",
+                   self.mult: "*"}
 
     def add(ll: int, m: int) -> int:
         return ll+m
@@ -18,33 +20,32 @@ class Fancy:
         return ll*m
 
     def append(self, val: int) -> None:
-        self.ops.append(self.append)
-        self.opp.append(val)
+        self.ops.append((self.append, val))
         self.valloc.append(self.idx)
         self.idx += 1
 
     def addAll(self, inc: int) -> None:
-        self.ops.append(self.add)
-        self.opp.append(inc)
+        self.ops.append((self.add, inc))
         self.idx += 1
 
     def multAll(self, m: int) -> None:
-        self.ops.append(self.mult)
-        self.opp.append(m)
+        self.ops.append((self.mult, m))
         self.idx += 1
+
+    def evaluate(self, idx: int) -> int:
+        ridx = self.valloc[idx]
+        print(self.ops[ridx][1])
+        # print(self.ops[ridx+1:])
+        print("ops   :", [(self.fn[f], v) for (f, v) in self.ops[ridx+1:] if f != self.append])
 
     def getIndex(self, idx: int) -> int:
         if (0 <= idx <= len(self.valloc)):
-            pass
+            self.evaluate(idx)
         else:
             return -1
 
     def info(self):
-        fn = {self.append: "A",
-              self.add: "+",
-              self.mult: "*"}
-        print("ops   :", [fn[f] for f in self.ops])
-        print("opp   :", self.opp)
+        print("ops   :", [(self.fn[f], v) for (f, v) in self.ops])
         print("valloc:", self.valloc)
 
 
