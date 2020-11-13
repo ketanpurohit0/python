@@ -9,6 +9,12 @@ class Fancy:
     def __init__(self):
         self.ll = {}
 
+    def add(l: int, m: int) -> int:
+        return l+m
+
+    def mult(l: int, m:int) -> int:
+        return l*m
+
     def append(self, val: int) -> None:
         # self.ll(val)
         self.ll[self.idx] = val
@@ -30,7 +36,31 @@ class Fancy:
             return -1
 
 
+def invoke_f(f, a, b):
+    print(a, b)
+    return f(a, b)
+
+
+def foo(a, b, c):
+    return a + b if c else a * b
+
+
 if __name__ == '__main__':
+    import functools
+    import operator
+    fadd = [Fancy.add, Fancy.add, Fancy.add]
+    print(functools.reduce(Fancy.add, [1, 2, 3], 0))
+    print(functools.reduce(operator.add, [1, 2, 3], 0))
+    print(functools.reduce(operator.mul, [1, 2, 3], 1))
+    print(invoke_f(Fancy.add, 3, 5))
+    # print(functools.reduce(invoke_f,fadd,0))
+    print(functools.reduce(functools.partial(foo, c=True), [1, 2, 3, 4, 5], 0))
+    print(functools.reduce(functools.partial(foo, c=False), [1, 2, 3, 4, 5], 1))
+
+
+
+
+if __name__ == '__foo__':
     fancy: Fancy = Fancy()
     fancy.append(2)  # fancy sequence: [2]
     fancy.addAll(3)  # fancy sequence: [2+3] -> [5]
