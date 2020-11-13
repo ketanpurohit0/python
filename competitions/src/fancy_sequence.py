@@ -1,5 +1,5 @@
 # https://leetcode.com/problems/fancy-sequence/
-from typing import Dict, List
+from typing import List
 
 
 class Fancy:
@@ -13,9 +13,11 @@ class Fancy:
                    self.add: "+",
                    self.mult: "*"}
 
+    @staticmethod
     def add(ll: int, m: int) -> int:
         return ll+m
 
+    @staticmethod
     def mult(ll: int, m: int) -> int:
         return ll*m
 
@@ -34,13 +36,20 @@ class Fancy:
 
     def evaluate(self, idx: int) -> int:
         ridx = self.valloc[idx]
-        print(self.ops[ridx][1])
+        # print(self.ops[ridx][1])
+        sv = self.ops[ridx][1]
         # print(self.ops[ridx+1:])
-        print("ops   :", [(self.fn[f], v) for (f, v) in self.ops[ridx+1:] if f != self.append])
+        # print("ops   :", [(self.fn[f], v) for (f, v) in self.ops[ridx+1:] if f != self.append])
+        x = [(f, v) for (f, v) in self.ops[ridx+1:] if f != self.append]
+        for f, v in x:
+            sv = f(sv, v)
+        # print(sv)
+
+        return sv % (10**9+7)
 
     def getIndex(self, idx: int) -> int:
         if (0 <= idx <= len(self.valloc)):
-            self.evaluate(idx)
+            return self.evaluate(idx)
         else:
             return -1
 
@@ -83,4 +92,4 @@ if __name__ == '__main__':
     print(fancy.getIndex(0))  # return 26
     print(fancy.getIndex(1))  # return 34
     print(fancy.getIndex(2))  # return 20
-    fancy.info()
+    # fancy.info()
