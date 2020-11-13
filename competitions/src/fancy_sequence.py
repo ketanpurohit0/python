@@ -1,39 +1,51 @@
 # https://leetcode.com/problems/fancy-sequence/
-from typing import Dict
+from typing import Dict, List
 
 
 class Fancy:
-    ll: Dict[int, int] = {}
+    ops = []
+    opp: List[int] = []
+    valloc: List[int] = []
     idx: int = 0
 
     def __init__(self):
         self.ll = {}
 
-    def add(l: int, m: int) -> int:
-        return l+m
+    def add(ll: int, m: int) -> int:
+        return ll+m
 
-    def mult(l: int, m:int) -> int:
-        return l*m
+    def mult(ll: int, m: int) -> int:
+        return ll*m
 
     def append(self, val: int) -> None:
-        # self.ll(val)
-        self.ll[self.idx] = val
+        self.ops.append(self.append)
+        self.opp.append(val)
+        self.valloc.append(self.idx)
         self.idx += 1
 
     def addAll(self, inc: int) -> None:
-        # map(lambda x: x + inc, self.ll)
-        for k in self.ll.keys():
-            self.ll[k] = self.ll[k] + inc
+        self.ops.append(self.add)
+        self.opp.append(inc)
+        self.idx += 1
 
     def multAll(self, m: int) -> None:
-        for k in self.ll.keys():
-            self.ll[k] = self.ll[k] * m
+        self.ops.append(self.mult)
+        self.opp.append(m)
+        self.idx += 1
 
     def getIndex(self, idx: int) -> int:
-        if 0 <= idx <= len(self.ll)-1:
-            return self.ll[idx] % (10**9+7)
+        if (0 <= idx <= len(self.valloc)):
+            pass
         else:
             return -1
+
+    def info(self):
+        fn = {self.append: "A",
+              self.add: "+",
+              self.mult: "*"}
+        print("ops   :", [fn[f] for f in self.ops])
+        print("opp   :", self.opp)
+        print("valloc:", self.valloc)
 
 
 def invoke_f(f, a, b):
@@ -44,7 +56,7 @@ def foo(a, b, c):
     return a + b if c else a * b
 
 
-if __name__ == '__main__':
+if __name__ == '__foo__':
     import functools
     import operator
     fadd = [Fancy.add, Fancy.add, Fancy.add]
@@ -57,7 +69,7 @@ if __name__ == '__main__':
     print(functools.reduce(functools.partial(foo, c=False), [1, 2, 3, 4, 5], 1))
 
 
-if __name__ == '__foo__':
+if __name__ == '__main__':
     fancy: Fancy = Fancy()
     fancy.append(2)  # fancy sequence: [2]
     fancy.addAll(3)  # fancy sequence: [2+3] -> [5]
@@ -70,3 +82,4 @@ if __name__ == '__foo__':
     print(fancy.getIndex(0))  # return 26
     print(fancy.getIndex(1))  # return 34
     print(fancy.getIndex(2))  # return 20
+    fancy.info()
