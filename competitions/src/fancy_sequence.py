@@ -3,15 +3,17 @@ from typing import List
 
 
 class Fancy:
-    ops = []
-    valloc: List[int] = []
-    idx: int = 0
-    fn = {}
 
     def __init__(self):
         self.fn = {self.append: "A",
                    self.add: "+",
-                   self.mult: "*"}
+                   self.mult: "*",
+                  }
+
+        self.ops = []
+        self.valloc: List[int] = []
+        self.idx: int = 0
+        self.anyAppends: bool = False
 
     @staticmethod
     def add(ll: int, m: int) -> int:
@@ -25,6 +27,7 @@ class Fancy:
         self.ops.append((self.append, val))
         self.valloc.append(self.idx)
         self.idx += 1
+        self.anyAppends = True
 
     def addAll(self, inc: int) -> None:
         self.ops.append((self.add, inc))
@@ -48,7 +51,7 @@ class Fancy:
         return sv % (10**9+7)
 
     def getIndex(self, idx: int) -> int:
-        if (0 <= idx <= len(self.valloc)):
+        if (self.anyAppends) and (0 <= idx < len(self.valloc)):
             return self.evaluate(idx)
         else:
             return -1
@@ -56,6 +59,7 @@ class Fancy:
     def info(self):
         print("ops   :", [(self.fn[f], v) for (f, v) in self.ops])
         print("valloc:", self.valloc)
+        print(self.ops)
 
 
 def invoke_f(f, a, b):
@@ -64,6 +68,13 @@ def invoke_f(f, a, b):
 
 def foo(a, b, c):
     return a + b if c else a * b
+
+
+def gen():
+    calls =   ["append","multAll","append","getIndex","addAll","append","append","getIndex","append","append","addAll","addAll","getIndex","append","getIndex","getIndex","addAll","getIndex","addAll","getIndex","getIndex","getIndex","append","addAll","append","getIndex","multAll","append","append","addAll","getIndex","addAll","getIndex"]
+    params = [[2],[10],[8],[0],[9],[8],[10],[0],[10],[3],[6],[3],[3],[5],[4],[0],[8],[3],[6],[7],[4],[3],[1],[8],[5],[3],[3],[7],[5],[2],[3],[2],[9]]
+    for (a, b) in zip(calls, params):
+        print(f"fancy.{a}({b[0]})")
 
 
 if __name__ == '__foo__':
@@ -93,3 +104,5 @@ if __name__ == '__main__':
     print(fancy.getIndex(1))  # return 34
     print(fancy.getIndex(2))  # return 20
     # fancy.info()
+    gen()
+
