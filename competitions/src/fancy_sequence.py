@@ -37,7 +37,6 @@ class Fancy:
 
 
 def invoke_f(f, a, b):
-    print(a, b)
     return f(a, b)
 
 
@@ -56,8 +55,6 @@ if __name__ == '__main__':
     # print(functools.reduce(invoke_f,fadd,0))
     print(functools.reduce(functools.partial(foo, c=True), [1, 2, 3, 4, 5], 0))
     print(functools.reduce(functools.partial(foo, c=False), [1, 2, 3, 4, 5], 1))
-
-
 
 
 if __name__ == '__foo__':
