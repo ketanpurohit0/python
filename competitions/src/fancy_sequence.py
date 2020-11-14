@@ -9,7 +9,7 @@ class Fancy:
                    self.add: "+",
                    self.mult: "*"}
 
-        self.ops = []
+        self.ops = {}  # ix: sv, ops
         self.valloc: List[int] = []
         self.idx: int = 0
         self.anyAppends: bool = False
@@ -23,29 +23,30 @@ class Fancy:
         return ll*m
 
     def append(self, val: int) -> None:
-        self.ops.append((self.append, val))
+        self.ops[self.idx] = (val, [])
         self.valloc.append(self.idx)
         self.idx += 1
         self.anyAppends = True
 
     def addAll(self, inc: int) -> None:
-        self.ops.append((self.add, inc))
-        self.idx += 1
+        for k in self.ops.keys():
+            self.ops[k][1].append((self.add, inc))
 
     def multAll(self, m: int) -> None:
-        self.ops.append((self.mult, m))
-        self.idx += 1
+        for k in self.ops.keys():
+            self.ops[k][1].append((self.mult, m))
 
     def evaluate(self, idx: int) -> int:
         ridx = self.valloc[idx]
         # print(self.ops[ridx][1])
-        (l, sv) = self.ops[ridx]
+        (sv, ops) = self.ops[ridx]
         # print(self.ops[ridx+1:])
-        # print("ops   :", [(self.fn[f], v) for (f, v) in self.ops[ridx+1:] if f != self.append])
-        x = [(f, v) for (f, v) in self.ops[ridx+1:] if f != self.append]
+        #print("ops   :", [(self.fn[f], v) for (f, v) in ops])
+        x = [(f, v) for (f, v) in ops]
         for f, v in x:
             sv = f(sv, v) % (10**9+7)
         # print(sv)
+        self.ops[ridx] = (sv, [])
         return sv
 
     def getIndex(self, idx: int) -> int:
@@ -99,9 +100,15 @@ if __name__ == '__main__':
     fancy.append(10)  # fancy sequence: [13, 17, 10]
     fancy.multAll(2)  # fancy sequence: [13*2, 17*2, 10*2] -> [26, 34, 20]
     print(fancy.getIndex(0))  # return 26
-    print(fancy.getIndex(0))
     print(fancy.getIndex(1))  # return 34
     print(fancy.getIndex(2))  # return 20
-    # fancy.info()
-    #gen()
+    print(fancy.getIndex(0))  # return 26
+    print(fancy.getIndex(1))  # return 34
+    print(fancy.getIndex(2))  # return 20
+    fancy.addAll(5)
+    print(fancy.getIndex(0))  # return 26
+    print(fancy.getIndex(1))  # return 34
+    print(fancy.getIndex(2))  # return 20
 
+    # fancy.info()
+    # gen()
