@@ -1,0 +1,3 @@
+config:C:\Users\ketan\airflow\airflow.cfg
+sql_alchemy_conn = postgresql+psycopg2://postgres:foobar_secret@localhost:5432/airflow
+

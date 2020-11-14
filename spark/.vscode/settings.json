@@ -1,5 +1,15 @@
 {
     "python.pythonPath": "c:\\MyWork\\GIT\\python\\venv\\Scripts\\python.exe",
     "debug.node.autoAttach": "off",
-	"python.autoComplete.extraPaths" : ["./src", ".\\src"]
+    "python.autoComplete.extraPaths": [
+        "./src",
+        ".\\src"
+    ],
+    "python.analysis.extraPaths": [
+        "./src",
+        ".\\src"
+    ],
+    "files.watcherExclude": {
+        "**/target": true
+    }
 }
