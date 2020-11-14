@@ -7,8 +7,7 @@ class Fancy:
     def __init__(self):
         self.fn = {self.append: "A",
                    self.add: "+",
-                   self.mult: "*",
-                  }
+                   self.mult: "*"}
 
         self.ops = []
         self.valloc: List[int] = []
@@ -40,15 +39,14 @@ class Fancy:
     def evaluate(self, idx: int) -> int:
         ridx = self.valloc[idx]
         # print(self.ops[ridx][1])
-        sv = self.ops[ridx][1]
+        (l, sv) = self.ops[ridx]
         # print(self.ops[ridx+1:])
         # print("ops   :", [(self.fn[f], v) for (f, v) in self.ops[ridx+1:] if f != self.append])
         x = [(f, v) for (f, v) in self.ops[ridx+1:] if f != self.append]
         for f, v in x:
-            sv = f(sv, v)
+            sv = f(sv, v) % (10**9+7)
         # print(sv)
-
-        return sv % (10**9+7)
+        return sv
 
     def getIndex(self, idx: int) -> int:
         if (self.anyAppends) and (0 <= idx < len(self.valloc)):
@@ -101,8 +99,9 @@ if __name__ == '__main__':
     fancy.append(10)  # fancy sequence: [13, 17, 10]
     fancy.multAll(2)  # fancy sequence: [13*2, 17*2, 10*2] -> [26, 34, 20]
     print(fancy.getIndex(0))  # return 26
+    print(fancy.getIndex(0))
     print(fancy.getIndex(1))  # return 34
     print(fancy.getIndex(2))  # return 20
     # fancy.info()
-    gen()
+    #gen()
 
