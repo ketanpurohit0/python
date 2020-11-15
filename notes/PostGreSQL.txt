@@ -61,7 +61,7 @@ conn.close()
 
 <SQLAlchemy->PostgreSQL : Works correctly with json (->map) and arrays (->list) >
 import sqlalchemy
-conn_str="postgresql+psycopg2://postgres:*secret*@localhost/postgres"
+conn_str="postgresql+psycopg2://postgres:foobar_secret@localhost/postgres"
 engine = sqlalchemy.create_engine(conn_str)
 conn=engine.connect()
 result=conn.execute('SELECT * FROM Foo')
@@ -73,7 +73,7 @@ for r in result:
 		
 <SQLAlchemy->PostgreSQL : Works correctly with json and arrays>
 import sqlalchemy
-conn_str="postgresql://postgres:*secret*@localhost/postgres"
+conn_str="postgresql://postgres:foobar_secret@localhost/postgres"
 engine = sqlalchemy.create_engine(conn_str)
 conn=engine.connect()
 result=conn.execute('SELECT * FROM Foo')

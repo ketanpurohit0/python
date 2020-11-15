@@ -1,5 +1,5 @@
 config:C:\Users\ketan\airflow\airflow.cfg
-sql_alchemy_conn = postgresql+psycopg2://airflow:airflow_secret@localhost:5432/airflow
+sql_alchemy_conn = postgresql+psycopg2://airflow:airflow_secret@192.168.0.16:5432/airflow
 
 CREATE USER airflow;
 CREATE DATABASE airflow;
@@ -18,3 +18,7 @@ pip install \
 PATH=$PATH:~/.local/bin
 
 airflow initdb
+create_tag_template_field_result
+--
+airflow webserver -p 8080&
+airflow scheduler&
