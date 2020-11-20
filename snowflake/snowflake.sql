@@ -25,8 +25,8 @@ CREATE OR REPLACE STORAGE INTEGRATION awss3_int
   TYPE = EXTERNAL_STAGE
   STORAGE_PROVIDER = S3
   ENABLED = TRUE
-  STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::345735352353:role/mysnowflakerole'
-  STORAGE_ALLOWED_LOCATIONS = ('s3://bdh5pketanpurohit0','s3://bdh5pketanpurohit0/');
+  STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::..:role/mysnowflakerole'
+  STORAGE_ALLOWED_LOCATIONS = ('s3://..','s3://../');
   
 desc integration awss3_int;
 
@@ -48,15 +48,15 @@ show file formats;
 
 create or replace  stage my_awss3_stage
   storage_integration = awss3_int
-  url = 's3://bdh5pketanpurohit0/LoadUp.csv'
+  url = 's3://../...csv'
   file_format = my_csv_format;
   
 -- SQL compilation error: The supplied properties CREDENTIALS and STORAGE_INTEGRATION are incompatible with each other. (1) For credential-based operations, only use CREDENTIALS. (2) For credential-less operations, only use STORAGE_INTEGRATION.
 
 create or replace stage my_awss3_stage2
   storage_integration = awss3_int
-  credentials=(aws_key_id='AKIAJAB5AK55CI2WQPPA' aws_secret_key='EuTtPTeA6uduNPNnJOiZQGilKWPjf11vBPSPx9Cg')
-  url = 's3://bdh5pketanpurohit0'
+  credentials=(aws_key_id='' aws_secret_key='')
+  url = 's3://..'
   file_format = my_csv_format;
     
 select $1 from @my_awss3_stage;
@@ -72,14 +72,14 @@ desc stage my_awss3_stage;
 copy into BUSINESSES from @my_awss3_stage ;
 
  
-copy into BUSINESSES from @my_awss3_stage2 credentials=(aws_key_id='AKIAJAB5AK55CI2WQPPA' aws_secret_key='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');
+copy into BUSINESSES from @my_awss3_stage2 credentials=(aws_key_id='' aws_secret_key='');
 
 pattern='.*sales.*.csv';
 
 -- works
 
 copy into BUSINESSES
-  from s3://bdh5pketanpurohit0 credentials=(aws_key_id='AKIAJAB5AK55CI2WQPPA' aws_secret_key='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')
+  from s3://bdh5pketanpurohit0 credentials=(aws_key_id='' aws_secret_key='')
   file_format = (format_name = my_csv_format);
 
 
