@@ -1,5 +1,8 @@
 # https://youtu.be/lyDLAutA88s
 
+from collections import defaultdict
+
+
 def test_1():
     x = ['a', 'b', 'c']
     y = [x.upper() for x in iter(x)]
@@ -45,6 +48,24 @@ def test_5():
 
 def test_6():
     import csv
+    # 18m
     data = list(csv.DictReader(open(r'data\data.csv')))
-    assert(len(data) == 3)
-    row = data[0]
+    assert(len(data) == 5)
+    uniqueOnlycolC1 = {row["C1"] for row in data}
+    allcolC1 = [row["C1"] for row in data]
+    from collections import Counter
+    c1 = Counter(uniqueOnlycolC1)
+    c2 = Counter(allcolC1)
+    print(c1)
+    print(c2)
+    # 24m
+    upperC1 = [ {**row, 'C1' : row['C1'].upper()} for row in data]
+    c3 = Counter([x['C1'] for x in upperC1])
+
+def test_7():
+    from collections import Counter
+    c = defaultdict(Counter)
+    c[1]["a"] += 1
+    c[1]["b"] += 1
+    c[2]["a"] += 1
+    pass
