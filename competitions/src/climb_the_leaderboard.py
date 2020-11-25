@@ -9,12 +9,13 @@ def climbingLeaderboard(ranked, player):
             leaderboard[score] = rank
             rank += 1
 
-    ll = list(leaderboard.keys())
-    # walk the board
-    r = []
+    ll = sorted(list(leaderboard.keys()))
+    print(ll)
+    print(player)
     for score in player:
-        r.append(1 + len([x for x in ll if x > score]))
-
+        print(len([x for x in ll if x <= score]))
+    # walk the board - denser code than I would like
+    r = [1 + len([x for x in ll if x > score]) for score in player]
     return r
 
 
