@@ -4,16 +4,18 @@ def climbingLeaderboard(ranked, player):
     leaderboard = {}
     rank = 1
     # set-up initial
-    for (index, score) in enumerate(sorted(ranked, reverse=True), start=1):
+    for score in sorted(ranked, reverse=True):
         if (score not in leaderboard):
             leaderboard[score] = rank
             rank += 1
 
     ll = list(leaderboard.keys())
     # walk the board
+    r = []
     for score in player:
-        nr = [x for x in ll if x > score]
-        print(1+len(nr))
+        r.append(1 + len([x for x in ll if x > score]))
+
+    return r
 
 
 if __name__ == '__main__':
