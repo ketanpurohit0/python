@@ -10,12 +10,20 @@ def climbingLeaderboard(ranked, player):
             rank += 1
 
     ll = sorted(list(leaderboard.keys()))
-    print(ll)
-    print(player)
+    lenll = len(ll)
+    # print(ll)
+    # print(player)
+    r = []
     for score in player:
-        print(len([x for x in ll if x <= score]))
+        search_index = 0
+        pos = len([x for x in ll[search_index:] if x <= score])
+        # print(search_index, pos, lenll-pos+1)
+        r.append(lenll - pos + 1)
+        search_index = pos
     # walk the board - denser code than I would like
-    r = [1 + len([x for x in ll if x > score]) for score in player]
+    # print(r)
+    # r = [1 + len([x for x in ll if x > score]) for score in player]
+    # print(r)
     return r
 
 
