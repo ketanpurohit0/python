@@ -16,7 +16,8 @@ def climbingLeaderboard(ranked, player):
     r = []
     for score in player:
         search_index = 0
-        pos = len([x for x in ll[search_index:] if x <= score])
+        # pos = len([x for x in ll[search_index:] if x <= score])
+        pos = sum(map(lambda x: x <= score, ll[search_index:]))
         # print(search_index, pos, lenll-pos+1)
         r.append(lenll - pos + 1)
         search_index = pos
