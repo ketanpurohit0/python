@@ -1,5 +1,8 @@
 # https://www.hackerrank.com/challenges/climbing-the-leaderboard/problem
 
+from typing import List, Set
+
+
 def climbingLeaderboard(ranked, player):
     leaderboard = {}
     rank = 1
@@ -28,7 +31,47 @@ def climbingLeaderboard(ranked, player):
     return r
 
 
+def dfs(tree, visited: Set, rootNodeKey):
+    if (rootNodeKey in tree) and rootNodeKey not in visited:
+        print(rootNodeKey)
+        visited.add(rootNodeKey)
+        for c in tree[rootNodeKey]:
+            dfs(tree, visited, c)
+
+
+def bfs(tree, visited: List, rootNodeKey):
+    visitChildrenOf: List = []
+    if (rootNodeKey in tree) and rootNodeKey not in visited:
+        visited.append(rootNodeKey)
+        visitChildrenOf.append(rootNodeKey)
+        while visitChildrenOf:
+            v = visitChildrenOf.pop(0)
+            for c in tree[v]:
+                if c not in visited:
+                    visited.append(c)
+                    visitChildrenOf.append(c)
+                    # print("appended", c)
+    print(visited)
+
+
 if __name__ == '__main__':
+
+    graph = {
+        'A': ['B', 'C'],
+        'B': ['D', 'E'],
+        'C': ['F'],
+        'D': [],
+        'E': ['F'],
+        'F': []
+    }
+    visited = set()
+
+    dfs(graph, visited, "A")
+
+    visited = list()
+    bfs(graph, visited, "A")
+
+    exit
     ranked = [100, 100, 50, 40, 40, 20, 10]
     player = [5, 25, 50, 120]
 
