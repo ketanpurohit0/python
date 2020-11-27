@@ -71,6 +71,19 @@ if __name__ == '__main__':
     visited = list()
     bfs(graph, visited, "A")
 
+    graph = {
+        '*': ['A', 'D', 'E'],
+        'A': ['B'],
+        'B': ['C'],
+        'C': [],
+        'D': [],
+        'E': ['F'],
+        'F': []
+    }
+    for r in "*ADE":
+        visited = list()
+        bfs(graph, visited, r)
+
     exit
     ranked = [100, 100, 50, 40, 40, 20, 10]
     player = [5, 25, 50, 120]
