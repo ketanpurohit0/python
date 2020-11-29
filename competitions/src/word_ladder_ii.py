@@ -66,32 +66,20 @@ def buildTree(wordList: List[str]) -> Dict[str, List[str]]:
 class Solution:
     def findLadders(self, beginWord: str, endWord: str, wordList: List[str]) -> List[List[str]]:
         visited = []
-        tree = {}
         if endWord in wordList:
             queue = []
             queue.append(beginWord)
             while queue:
                 print("Q:", queue)
-                print("W", wordList)
-                # print("V:", visited)
+                print("V:", visited)
                 wordToSearch = queue.pop(0)
                 visited.append(wordToSearch)
                 selector = self.wordSelector(self.wordListDiff(wordToSearch, wordList), 1)
-                # print(wordToSearch, selector)
+                print(wordToSearch, selector)
                 if any(selector):
                     # found at least one word with 1 letter diff
-                    # print(wordToSearch, "->", [i for i in itertools.compress(wordList, selector)])
-                    e = [i for i in itertools.compress(wordList, selector) if i not in queue]
-                    print("E", wordToSearch, e)
-                    queue.extend(e)
-                    tree[wordToSearch] = e
+                    queue.extend([i for i in itertools.compress(wordList, selector) if i not in queue])
                     wordList = self.removeWord(wordToSearch, wordList)
-                else:
-                    # No moves possible?.. 0 that are just 1 diff, apart.
-                    print("Z", wordToSearch, wordList)
-                    if (wordList == [endWord]):
-                        tree[wordToSearch] = []
-            print(tree)
         else:
             return []
 
