@@ -12,11 +12,14 @@ def dfs(tree, visited: Set, rootNodeKey):
     return visited
 
 
+visitedList = [[]]
 def dfs2(tree, visited: List, rootNodeKey):
-    if (rootNodeKey in tree):
-        visited.append(rootNodeKey)
-        for c in tree[rootNodeKey]:
-            dfs2(tree, visited, c)
+    # print(rootNodeKey)
+    visited.append(rootNodeKey)
+    for c in tree[rootNodeKey]:
+        if c not in visited:
+            dfs2(tree, visited.copy(), c)
+    visitedList.append(visited)
     return visited
 
 
@@ -97,4 +100,8 @@ if __name__ == '__main__':
     print("dfs:", dfs(tree, visited, "hit"))
     visited: List[str] = list()
     print("dfs2:", dfs2(tree, visited, "hit"))
+    print(visitedList)
+    longest = max(map(len, visitedList))
+    for l in filter(lambda x: len(x) == longest,visitedList):
+        print(l)
 
