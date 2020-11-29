@@ -102,6 +102,10 @@ if __name__ == '__main__':
     print("dfs2:", dfs2(tree, visited, "hit"))
     print(visitedList)
     longest = max(map(len, visitedList))
-    for l in filter(lambda x: len(x) == longest,visitedList):
-        print(l)
+    for ll in filter(lambda x: len(x) == longest, visitedList):
+        print(ll)
+
+    for ll in filter(lambda x: len(x) and x[-1] == endWord, visitedList):
+        print(ll)
+
 
