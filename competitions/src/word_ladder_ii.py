@@ -1,6 +1,7 @@
 # https://leetcode.com/problems/word-ladder-ii/
 from collections import defaultdict, deque
 from typing import List, Set, Dict
+import itertools
 
 
 def dfs(tree, visited: Set, rootNodeKey):
@@ -13,6 +14,8 @@ def dfs(tree, visited: Set, rootNodeKey):
 
 
 visitedList = [[]]
+
+
 def dfs2(tree, visited: List, rootNodeKey):
     # print(rootNodeKey)
     visited.append(rootNodeKey)
@@ -62,16 +65,39 @@ def buildTree(wordList: List[str]) -> Dict[str, List[str]]:
 
 class Solution:
     def findLadders(self, beginWord: str, endWord: str, wordList: List[str]) -> List[List[str]]:
+        visited = []
         if endWord in wordList:
-            tree = buildTree(wordList)
-            print(tree)
-
-            visited: List[str] = list()
-            print("bfs:", bfs(tree, visited, "*"))
-            visited: List[str] = list()
-            print("dfs:", dfs(tree, visited, "*"))
+            queue = []
+            queue.append(beginWord)
+            while queue:
+                print("Q:", queue)
+                print("V:", visited)
+                wordToSearch = queue.pop(0)
+                visited.append(wordToSearch)
+                selector = self.wordSelector(self.wordListDiff(wordToSearch, wordList), 1)
+                print(wordToSearch, selector)
+                if any(selector):
+                    # found at least one word with 1 letter diff
+                    queue.extend([i for i in itertools.compress(wordList, selector) if i not in queue])
+                    wordList = self.removeWord(wordToSearch, wordList)
         else:
             return []
+
+    def wordDiff(self, w1: str, w2: str):
+        return sum(l1 != l2 for l1, l2 in zip(w1, w2))
+
+    def wordListDiff(self, beginWord: str, wordList: List[str]) -> List[int]:
+        return [self.wordDiff(beginWord, x)for x in wordList]
+
+    def wordSelector(self, wordListDiff: List[int], count: int):
+        return [x == count for x in wordListDiff]
+
+    def removeWord(self, word: str, wordList: List[str]):
+        for (i, w) in enumerate(wordList):
+            if w == word:
+                wordList.pop(i)
+                break
+        return wordList
 
 
 if __name__ == '__main__':
@@ -80,32 +106,8 @@ if __name__ == '__main__':
     wordList = ["hot", "dot", "dog", "lot", "log", "cog"]
     s = Solution()
     s.findLadders(beginWord, endWord, wordList)
-
-    # wordList = ["hot","dot","dog","lot","log"]
-    # s.findLadders(beginWord, endWord, wordList)
-
-    tree = {
-        'hit': ['hot'],
-        'hot': ['dot', 'lot'],
-        'dot': ['dog'],
-        'lot': ['log'],
-        'dog': ['cog'],
-        'log': ['cog'],
-        'cog': []
-    }
-
-    visited: List[str] = list()
-    print("bfs:", bfs(tree, visited, "hit"))
-    visited: List[str] = list()
-    print("dfs:", dfs(tree, visited, "hit"))
-    visited: List[str] = list()
-    print("dfs2:", dfs2(tree, visited, "hit"))
-    print(visitedList)
-    longest = max(map(len, visitedList))
-    for ll in filter(lambda x: len(x) == longest, visitedList):
-        print(ll)
-
-    for ll in filter(lambda x: len(x) and x[-1] == endWord, visitedList):
-        print(ll)
-
-
+    # print(s.wordListDiff("hit", wordList))
+    # print(s.wordSelector([1, 2, 3, 4], 1))
+    # print(s.wordSelector([1, 2, 3, 4], 4))
+    # x = itertools.compress(wordList, [True, False, False, False, False, False])
+    # print([i for i in x])
