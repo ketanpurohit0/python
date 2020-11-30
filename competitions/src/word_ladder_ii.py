@@ -72,6 +72,7 @@ class Solution:
             while queue:
                 print("Q:", queue)
                 print("V:", visited)
+                print("W:", wordList)
                 wordToSearch = queue.pop(0)
                 visited.append(wordToSearch)
                 selector = self.wordSelector(self.wordListDiff(wordToSearch, wordList), 1)
