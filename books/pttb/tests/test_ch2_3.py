@@ -48,15 +48,19 @@ def test_indentor(capsys):
     indentor.out("Again")
 
     captured = capsys.readouterr()
-    expected = " " + "\nHello\n" + "  " + "World\n" + " "+ "Hello\n" + "Again\n"
+    expected = " " + "\nHello\n" + "  " + "World\n" + " " + "Hello\n" + "Again\n"
 
-    assert(captured.out == expected)
+    assert (captured.out == expected)
 
 
 def test_nanotimer():
-    for l in [randint(0,5) for t in range(5)]:
-        with mfi.NanoTimer() as timer:
-            # execute code block
-            sleep(l)
-        #print(timer.getElapsed())
-        assert (l*1_000_000_000 <= timer.getElapsed() <= (l+1)*1_000_000_000)
+    total_time_expected: int = 0
+    with mfi.NanoTimer() as outer_timer:
+        for tts in [randint(0, 5) for _ in range(5)]:
+            with mfi.NanoTimer() as timer:
+                # execute code block
+                sleep(tts)
+                total_time_expected += tts
+                # print(timer.getElapsed())
+            assert (tts * 1_000_000_000 <= timer.getElapsed() <= (tts + 1) * 1_000_000_000)
+    assert (total_time_expected * 1_000_000_000 <= outer_timer.getElapsed() < (total_time_expected + 1) * 1_000_000_000)
