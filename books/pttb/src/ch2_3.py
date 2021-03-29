@@ -2,7 +2,7 @@ from contextlib import contextmanager
 from typing import TextIO, Optional, Iterator
 from time import time_ns
 
-
+# Context managers and the with statement
 @contextmanager
 def managedFile(name: str) -> Iterator[Optional[TextIO]]:
     f = None
