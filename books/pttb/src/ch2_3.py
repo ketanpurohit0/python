@@ -1,8 +1,9 @@
 from contextlib import contextmanager
+from typing import TextIO, Optional, Iterator
 
 
 @contextmanager
-def managedFile(name: str):
+def managedFile(name: str) -> Iterator[Optional[TextIO]]:
     f = None
     try:
         f = open(name, "r")
@@ -15,7 +16,7 @@ def managedFile(name: str):
 
 
 class ManagedFile:
-    def __init__(self, name):
+    def __init__(self, name: str):
         self.name = name
         self.file = None
 
@@ -31,5 +32,5 @@ class ManagedFile:
         if self.file:
             self.file.close()
 
-    def isClosed(self):
+    def isClosed(self) -> bool:
         return True if not self.file else self.file and self.file.closed
