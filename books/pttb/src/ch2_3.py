@@ -1,5 +1,6 @@
 from contextlib import contextmanager
 from typing import TextIO, Optional, Iterator
+from time import time_ns
 
 
 @contextmanager
@@ -51,3 +52,20 @@ class Indentor:
 
     def out(self, text: str) -> None:
         print(" " * self.level + text)
+
+
+class NanoTimer:
+
+    def __init__(self):
+        pass
+
+    def __enter__(self):
+        self.start_ts = time_ns()
+        self.elapsed = 0
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.elapsed = time_ns() - self.start_ts
+
+    def getElapsed(self):
+        return self.elapsed

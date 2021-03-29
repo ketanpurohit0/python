@@ -1,5 +1,7 @@
 # context manager and with statement
 import src.ch2_3 as mfi
+from time import sleep
+from random import randint
 
 
 def test_managed_file_without_cm():
@@ -49,3 +51,12 @@ def test_indentor(capsys):
     expected = " " + "\nHello\n" + "  " + "World\n" + " "+ "Hello\n" + "Again\n"
 
     assert(captured.out == expected)
+
+
+def test_nanotimer():
+    for l in [randint(0,5) for t in range(5)]:
+        with mfi.NanoTimer() as timer:
+            # execute code block
+            sleep(l)
+        #print(timer.getElapsed())
+        assert (l*1_000_000_000 <= timer.getElapsed() <= (l+1)*1_000_000_000)
