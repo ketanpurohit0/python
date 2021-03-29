@@ -35,3 +35,17 @@ def test_decorated_managedFile_expect_mixed():
         assert (mf and not mf.closed)
 
     assert (mf and mf.closed)
+
+
+def test_indentor(capsys):
+    with mfi.Indentor() as indentor:
+        indentor.out("\nHello")
+        with indentor:
+            indentor.out("World")
+        indentor.out("Hello")
+    indentor.out("Again")
+
+    captured = capsys.readouterr()
+    expected = " " + "\nHello\n" + "  " + "World\n" + " "+ "Hello\n" + "Again\n"
+
+    assert(captured.out == expected)
