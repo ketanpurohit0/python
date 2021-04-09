@@ -1,3 +1,6 @@
+from typing import Optional
+
+
 def foo(*args, **kwargs):
     # print(required)
     # print(args)
@@ -10,6 +13,10 @@ def bar(*args, **kwargs):
     kwargs["FOO"] = 'BAR'
     # r1,r2 = foo(args, kwargs)
     return args, kwargs
+
+
+def arg_unpack(x, y, z):
+    return f"<{x},{y},{z}>"
 
 
 class Car:
@@ -97,6 +104,37 @@ def test_trace():
 
     do_something()
     do_something(k1='v1', k2='v2')
-    do_something('1', '2')
-    do_something('1', '2', k1='v1', k2='v2')
+    do_something()
+    do_something(k1='v1', k2='v2')
 
+
+def test_argunpack():
+    assert (arg_unpack(1, 2, 3) == "<1,2,3>")
+    arr = [1, 2, 3]
+    assert (arg_unpack(*arr) == "<1,2,3>")
+    tup = (1, 2, 3)
+    assert (arg_unpack(*tup) == "<1,2,3>")
+    s = {1, 2, 3, 3}
+    assert (arg_unpack(*s) == "<1,2,3>")
+    dic = {"x": 1, "y": 2, "z": 3}
+    assert (arg_unpack(**dic) == "<1,2,3>")
+    dic2 = {"a": 1, "y": 2, "z": 3}
+    try:
+        assert (arg_unpack(**dic2) == "<1,2,3>")
+    except TypeError:
+        assert True
+    else:
+        assert False
+
+
+def test_optional():
+    def return_optional(a) -> Optional[str]:
+        if a:
+            return a
+        return None
+
+    assert (return_optional(None) is None)
+    assert (return_optional(2) == 2)
+
+    r = return_optional("2")
+    assert (r == "2")
