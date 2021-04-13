@@ -49,4 +49,5 @@ def test_base2():
 
 def test_derive2():
     with pytest.raises(TypeError):
+        assert issubclass(Derived2, Base2)
         derived2 = Derived2()
