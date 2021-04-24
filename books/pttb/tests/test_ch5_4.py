@@ -82,21 +82,29 @@ def test_deque():
     assert (dq.popleft() == "B")
 
 
-def test_lifoqueue():
+def test_lifoQueue():
     from queue import LifoQueue, Empty
+    from threading import Thread, current_thread
+
     lifo = LifoQueue()
     with pytest.raises(Empty):
         lifo.get(block=False, timeout=3)
 
-    def producer(lifo: LifoQueue):
-        lifo.put("Foo")
+    def producer(lifoIn: LifoQueue, n: int):
+        for i in range(n):
+            print("Producing", current_thread().getName())
+            lifoIn.put("Foo")
 
-    def consumer(lifo: LifoQueue):
-        assert (lifo.get() == "Foo")
+    def consumer(lifoIn: LifoQueue):
+        while not lifoIn.empty():
+            print("Consuming", current_thread().getName())
 
-    from threading import Thread
+            assert (lifoIn.get() == "Foo")
 
-    t1 = Thread(target=producer, name="Producer", args=(lifo,))
+        with pytest.raises(Empty):
+            assert(lifoIn.get_nowait())
+
+    t1 = Thread(target=producer, name="Producer", args=(lifo,5))
     t1.start()
     print(lifo.qsize())
 
@@ -104,4 +112,7 @@ def test_lifoqueue():
     t2.start()
     print(lifo.qsize())
 
-
+    t1.join()
+    print("Producer joined")
+    t2.join()
+    print("Consumer joined")
