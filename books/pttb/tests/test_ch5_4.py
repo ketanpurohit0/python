@@ -106,13 +106,50 @@ def test_lifoQueue():
 
     t1 = Thread(target=producer, name="Producer", args=(lifo,5))
     t1.start()
-    print(lifo.qsize())
+    assert(lifo.qsize()>= 0)
 
     t2 = Thread(target=consumer, name="Consumer", args=(lifo,))
     t2.start()
-    print(lifo.qsize())
+    assert(lifo.qsize() <= 5)
 
     t1.join()
     print("Producer joined")
     t2.join()
     print("Consumer joined")
+
+    assert(lifo.qsize() == 0)
+
+
+def test_fifoQueue():
+    from queue import Queue, Empty
+    from threading import Thread, current_thread
+    fifo = Queue()
+    with pytest.raises(Empty):
+        fifo.get(block=False, timeout=5)
+
+    def producer(pfifo: Queue, n: int):
+        for i in range(n):
+            print(f"Producing {i}  {current_thread().getName()}")
+            pfifo.put(i)
+
+    def consumer(pfifo: Queue):
+        while not fifo.empty():
+            try:
+                i = fifo.get_nowait()
+                print(f"Consuming {i}  {current_thread().getName()}")
+            except Empty:
+                pass
+
+    producerThreads = [Thread(name=f"Produce{t}", args=(fifo, t, ), target=producer) for t in range(1, 4)]
+    [thread.start() for thread in producerThreads]
+
+    assert(0 <= fifo.qsize() <= 6)
+
+    consumerThreads = [Thread(name=f"Consume{t}", target=consumer, args=(fifo, )) for t in range(4)]
+    [thread.start() for thread in consumerThreads]
+
+    [thread.join() for thread in producerThreads]
+    [thread.join() for thread in consumerThreads]
+
+    assert(fifo.qsize() == 0)
+
