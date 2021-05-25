@@ -185,12 +185,10 @@ def compareDfs(sparkSession, leftDf, rightDf, tolerance, keysLeft, keysRight, co
     newColNamesLeft = getNewColsNames(allLeftCols, leftSide_tag)
     newColNamesRight = getNewColsNames(allRightCols, rightSide_tag)
 
-    colDictOldNameToNewNames = {}
-    for item in colsInLeftOnly:
-        colDictOldNameToNewNames[item] = (f"{item}{leftSide_tag}", None, None)
-    for item in colsInRightOnly:
-        colDictOldNameToNewNames[item] = (None, f"{item}{leftSide_tag}", None)
 
+    colDictOldNameToNewNames = {item: (f"{item}{leftSide_tag}", None, None) for item in colsInLeftOnly}
+    rightDict = {item: (None, f"{item}{leftSide_tag}", None) for item in colsInRightOnly}
+    colDictOldNameToNewNames.update(rightDict)
     newColNamesAll = list(newColNamesLeft)
     newColNamesAll.extend(newColNamesRight)
 
