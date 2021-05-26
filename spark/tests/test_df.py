@@ -93,6 +93,8 @@ def test_no_common(spark: SparkSession, df1: DataFrame, df4: DataFrame) -> None:
     )
     pass_count = dfResult.filter("PASS == True").count()
     assert pass_count == 0
+    orphan_count = dfResult.filter("PASS IS NULL").count()
+    assert dfResult.count() == orphan_count
 
 
 def test_null_replacement(spark: SparkSession, df5: DataFrame) -> None:
@@ -128,3 +130,30 @@ def test_blank_replacement(spark: SparkSession, df6: DataFrame) -> None:
     df6 = dfc.replaceBlanks(df6)
     totalBlanks = c.countWSAcrossAllStringColumns(df6)
     assert totalBlanks == 0
+
+
+def test_orphans(spark: SparkSession, df6: DataFrame, df7: DataFrame) -> None:
+    """[Compare dataframes where there are expected to be matches and orphans]
+
+    Args:
+        spark (SparkSession): [Spark session]
+        df6 (DataFrame): [A spark dataframe with BLANKS in the values]
+        df7 (DataFrame): [A spark dataframe]
+    """
+    dfResult = dfc.compareDfs(
+        spark,
+        df6,
+        df7,
+        tolerance=0.1,
+        keysLeft="letters",
+        keysRight="letters",
+        colExcludeList=[],
+        joinType="full_outer",
+    )
+    pass_count = dfResult.filter("PASS == True").count()
+    assert pass_count == 2
+    orphans_count = dfResult.filter("PASS IS NULL").count()
+    assert orphans_count == 4
+    orphans_count_left = dfResult.filter("PASS IS NULL AND letters_left IS NULL").count()
+    orphans_count_right = dfResult.filter("PASS IS NULL AND letters_right IS NULL").count()
+    assert orphans_count_left == 2 and orphans_count_right == 2

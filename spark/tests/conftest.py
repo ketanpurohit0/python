@@ -173,6 +173,24 @@ def df6(spark: SparkSession) -> DataFrame:
 
 
 @pytest.fixture
+def df7(spark: SparkSession) -> DataFrame:
+    """Generate a test spark dataframe with two columns. With BLANK valued columns
+       (letters, numbers).
+       (letters,numbers)=[("a",1),("o1",2),("b",3),("o2",4)]
+
+    Args:
+        spark (SparkSession): [Spark session fixture]
+
+    Returns:
+        DataFrame: [Test spark dataframe]
+    """
+    dict_lst = {"letters": ["a", "o1", "b", "o2"], "numbers": [1, 2, 3, 4]}
+
+    column_names, data = zip(*dict_lst.items())
+    return spark.createDataFrame(zip(*data), column_names)
+
+
+@pytest.fixture
 def dbUrl():
     """Fixture to generate a postgresql URL
 
