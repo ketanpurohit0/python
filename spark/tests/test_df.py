@@ -157,3 +157,30 @@ def test_orphans(spark: SparkSession, df6: DataFrame, df7: DataFrame) -> None:
     orphans_count_left = dfResult.filter("PASS IS NULL AND letters_left IS NULL").count()
     orphans_count_right = dfResult.filter("PASS IS NULL AND letters_right IS NULL").count()
     assert orphans_count_left == 2 and orphans_count_right == 2
+
+
+def test_orphans_diffent_keys(spark: SparkSession, df6: DataFrame, df8: DataFrame) -> None:
+    """[Compare dataframes where there are expected to be matches and orphans, use different key names on each side]
+
+    Args:
+        spark (SparkSession): [Spark session]
+        df6 (DataFrame): [A spark dataframe with BLANKS in the values]
+        df7 (DataFrame): [A spark dataframe]
+    """
+    dfResult = dfc.compareDfs(
+        spark,
+        df6,
+        df8,
+        tolerance=0.1,
+        keysLeft="letters",
+        keysRight="letters2",
+        colExcludeList=[],
+        joinType="full_outer",
+    )
+    pass_count = dfResult.filter("PASS == True").count()
+    assert pass_count == 2
+    orphans_count = dfResult.filter("PASS IS NULL").count()
+    assert orphans_count == 4
+    orphans_count_left = dfResult.filter("PASS IS NULL AND letters_left IS NULL").count()
+    orphans_count_right = dfResult.filter("PASS IS NULL AND letters2_right IS NULL").count()
+    assert orphans_count_left == 2 and orphans_count_right == 2
