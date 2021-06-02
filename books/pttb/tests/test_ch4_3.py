@@ -28,4 +28,5 @@ def test_validate_2():
 
 
 def test_validate_2_1():
-    validate_2("foo")
+    with pytest.raises(ValidationError):
+        validate_2("foo")

@@ -165,7 +165,7 @@ def test_orphans_diffent_keys(spark: SparkSession, df6: DataFrame, df8: DataFram
     Args:
         spark (SparkSession): [Spark session]
         df6 (DataFrame): [A spark dataframe with BLANKS in the values]
-        df7 (DataFrame): [A spark dataframe]
+        df8 (DataFrame): [A spark dataframe]
     """
     dfResult = dfc.compareDfs(
         spark,
