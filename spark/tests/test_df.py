@@ -212,3 +212,8 @@ def test_group_status(spark: SparkSession, df_group_status: DataFrame) -> None:
 
     df_final.show()
     df_final.printSchema()
+
+    df_final: DataFrame = df_final.drop(*["cond1_set", "cond2_set"])
+    df_enrich: DataFrame = df_enrich.drop(*["cond1", "cond2"])
+
+    df_enrich.join(df_final, df_enrich["grp"] == df_final["grp"], "inner").show()
