@@ -191,16 +191,24 @@ def test_group_status(spark: SparkSession, df_group_status: DataFrame) -> None:
     from pyspark.sql import functions as F
     from pyspark.sql.types import BooleanType
 
+    df_group_status.show()
+    df_group_status.printSchema()
 
     df_enrich: DataFrame = df_group_status \
                     .withColumn("cond1", when(col("dt") >= to_date(lit('2020-01-01'), 'yyyy-MM-dd'), lit(True)).otherwise(lit(False))) \
                     .withColumn("cond2", when(col("dt") >= to_date(lit('2021-01-01'), 'yyyy-MM-dd'), lit(True)).otherwise(lit(False)))
 
-    udf_func = udf(lambda l: any(l), BooleanType())
-    df_enrich_further: DataFrame = df_enrich.groupBy("grp") \
-                        .agg(F.collect_set("cond1")).toDF(*["grp", "cond1_set"])
+    df_enrich.show()
     df_enrich.printSchema()
+
+    df_enrich_further: DataFrame = df_enrich.groupBy("grp") \
+                        .agg(F.collect_set("cond1"), F.collect_set("cond2")).toDF(*["grp", "cond1_set", "cond2_set"])
+
     df_enrich_further.show()
     df_enrich_further.printSchema()
 
-    df_enrich_further.withColumn("set", ~F.array_contains(F.col("cond1_set"), False)).show()
+    df_final: DataFrame = df_enrich_further.withColumn("from_cond1_set", ~F.array_contains(F.col("cond1_set"), False)) \
+                        .withColumn("from_cond2_set", ~F.array_contains(F.col("cond2_set"), False))
+
+    df_final.show()
+    df_final.printSchema()
