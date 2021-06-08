@@ -2,6 +2,7 @@ import src.SparkDFCompare as dfc
 import tests.common as c
 from pyspark.sql.session import SparkSession
 from pyspark.sql.dataframe import DataFrame
+from pyspark.sql.functions import *
 
 
 def test_all_same(spark: SparkSession, df1: DataFrame) -> None:
@@ -184,3 +185,22 @@ def test_orphans_diffent_keys(spark: SparkSession, df6: DataFrame, df8: DataFram
     orphans_count_left = dfResult.filter("PASS IS NULL AND letters_left IS NULL").count()
     orphans_count_right = dfResult.filter("PASS IS NULL AND letters2_right IS NULL").count()
     assert orphans_count_left == 2 and orphans_count_right == 2
+
+
+def test_group_status(spark: SparkSession, df_group_status: DataFrame) -> None:
+    from pyspark.sql import functions as F
+    from pyspark.sql.types import BooleanType
+
+
+    df_enrich: DataFrame = df_group_status \
+                    .withColumn("cond1", when(col("dt") >= to_date(lit('2020-01-01'), 'yyyy-MM-dd'), lit(True)).otherwise(lit(False))) \
+                    .withColumn("cond2", when(col("dt") >= to_date(lit('2021-01-01'), 'yyyy-MM-dd'), lit(True)).otherwise(lit(False)))
+
+    udf_func = udf(lambda l: any(l), BooleanType())
+    df_enrich_further: DataFrame = df_enrich.groupBy("grp") \
+                        .agg(F.collect_set("cond1")).toDF(*["grp", "cond1_set"])
+    df_enrich.printSchema()
+    df_enrich_further.show()
+    df_enrich_further.printSchema()
+
+    df_enrich_further.withColumn("set", ~F.array_contains(F.col("cond1_set"), False)).show()

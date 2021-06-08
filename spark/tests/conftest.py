@@ -1,6 +1,9 @@
 import pytest
 from typing import Any
 from typing import Optional
+
+from pyspark.sql.types import StructType, StructField, StringType, DateType, BooleanType
+
 import src.SparkDFCompare as dfc
 from pyspark.sql.session import SparkSession
 from pyspark.sql.dataframe import DataFrame
@@ -250,3 +253,47 @@ def df_from_db_right(spark: SparkSession, dbUrl) -> DataFrame:
 
     sql = "SELECT * FROM tright"
     return dfc.getQueryDataFrame(spark, dbUrl, sql)
+
+
+@pytest.fixture
+def df_group_status(spark: SparkSession) -> DataFrame:
+    """Generate a test spark dataframe with three columns. With BLANK valued columns
+       (grp, dt, status).
+
+    Args:
+        spark (SparkSession): [Spark session fixture]
+
+    Returns:
+        DataFrame: [Test spark dataframe]
+
+        +---+----------+------+
+        |grp|        dt|status|
+        +---+----------+------+
+        |  A|2020-03-21|  null|
+        |  A|      null|  null|
+        |  A|2020-03-22|  null|
+        |  A|2020-03-25|  null|
+        |  B|2020-02-21|  null|
+        |  B|2020-02-22|  null|
+        |  B|2020-02-25|  null|
+        +---+----------+------+
+    """
+    from datetime import datetime
+    dict_lst = {"grp": ["A", "A", "A", "A"], "dt": [datetime(2020, 3, 21), None, datetime(2020, 3, 22), datetime(2020, 3, 25)],
+                "status": [None, None, None, None]}
+
+    dict_lst2 = {"grp": ["B", "B", "B"], "dt": [datetime(2020, 2, 21), datetime(2020, 2, 22), datetime(2020, 2, 25)],
+                "status": [None, None, None]}
+
+    column_names, data = zip(*dict_lst.items())
+
+    schema = StructType([
+        StructField("grp", StringType(), True),
+        StructField("dt", DateType(), True),
+        StructField("status", BooleanType(), True)
+        ])
+
+    df1 = spark.createDataFrame(zip(*data), schema)
+
+    column_names, data = zip(*dict_lst2.items())
+    return df1.union(spark.createDataFrame(zip(*data), schema))
