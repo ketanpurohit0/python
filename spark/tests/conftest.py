@@ -297,3 +297,24 @@ def df_group_status(spark: SparkSession) -> DataFrame:
 
     column_names, data = zip(*dict_lst2.items())
     return df1.union(spark.createDataFrame(zip(*data), schema))
+
+
+@pytest.fixture
+def df_booleans(spark: SparkSession) -> DataFrame:
+    """Generate a test spark dataframe with two columns. With BLANK valued columns
+       (pass, bool1, bool2, bool3).
+       (pass, bool1, bool2, bool3)=[(true, false, false, false),(true, false, true, true),(true, true, true, true),(true, false, false, true)]
+
+    Args:
+        spark (SparkSession): [Spark session fixture]
+
+    Returns:
+        DataFrame: [Test spark dataframe]
+    """
+    dict_lst = {"pass": [True, True, True, True],
+                "bool1": [False, True, True, True],
+                "bool2": [False, False, True, False],
+                "bool3": [False, True, True, True]}
+
+    column_names, data = zip(*dict_lst.items())
+    return spark.createDataFrame(zip(*data), column_names)
