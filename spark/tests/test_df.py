@@ -245,7 +245,7 @@ def test_adjustment(spark: SparkSession, dfAdj: DataFrame):
         # dfLarge.show()
         print("end", mod, datetime.now())
 
-    dfAdj = dfAdj.filter(f"{flag_col} = True")
+    dfAdj = dfAdj.filter(f"{flag_col} = True").drop(flag_col)
 
     # force action
     dfAdj.count()
