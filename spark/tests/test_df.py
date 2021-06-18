@@ -1,4 +1,5 @@
 import src.SparkDFCompare as dfc
+import tests.common
 import tests.common as c
 from pyspark.sql.session import SparkSession
 from pyspark.sql.dataframe import DataFrame
@@ -217,3 +218,37 @@ def test_group_status(spark: SparkSession, df_group_status: DataFrame) -> None:
     df_enrich: DataFrame = df_enrich.drop(*["cond1", "cond2"])
 
     df_enrich.join(df_final, df_enrich["grp"] == df_final["grp"], "inner").show()
+
+
+def test_adjustment(spark: SparkSession, dfAdj: DataFrame):
+
+    tests.common.printSparkConf(spark)
+    print(f"count:{dfAdj.count()},partitions:{dfAdj.rdd.getNumPartitions()}")
+    # root
+    # |-- dept_name: string (nullable = true)
+    # |-- dept_id: long (nullable = true)
+
+    # col, value, where
+    from collections import namedtuple
+    from pyspark.sql.functions import when, expr
+    from datetime import datetime
+    Modification = namedtuple('Modification', 'col set where')
+    modifications_list = [("dept_name", "Marketing2.0", "dept_name = 'Marketing'"), ("dept_id", 30, "dept_name = 'CTS' AND dept_id = 42")]
+    flag_col = "isModified"
+    dfAdj = dfAdj.withColumn(flag_col, lit(False))
+    for m in modifications_list:
+        mod = Modification(*m)
+        print("start", mod, datetime.now())
+        dfAdj = dfAdj.withColumn(flag_col, when(expr(mod.where), lit(True)).otherwise(col(flag_col)))
+        dfAdj = dfAdj.withColumn(mod.col, when(expr(mod.where), lit(mod.set)).otherwise(col(mod.col)))
+        assert dfAdj.filter(mod.where).count() == 0
+        # dfLarge.show()
+        print("end", mod, datetime.now())
+
+    dfAdj = dfAdj.filter(f"{flag_col} = True")
+
+    # force action
+    dfAdj.count()
+    print("completed", datetime.now())
+
+

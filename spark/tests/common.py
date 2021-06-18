@@ -1,5 +1,6 @@
 from pyspark.sql.dataframe import DataFrame
-
+from pyspark.conf import SparkConf
+from pyspark.sql import SparkSession
 
 def countNullsAcrossAllColumns(df: DataFrame) -> int:
     """Given a spark dataframe count the total number of cells with a null in them
@@ -37,3 +38,8 @@ def countWSAcrossAllStringColumns(df: DataFrame) -> int:
     sumExpr = "+".join(blanksCountdf.columns) + " as TOTAL"
     sumDf = blanksCountdf.select(expr(sumExpr))
     return sumDf.collect()[0].TOTAL
+
+
+def printSparkConf(sparkSession: SparkSession) -> None:
+    for k, v in sparkSession.sparkContext.getConf().getAll():
+        print(f"Spark Conf [{k}] => [{v}]")

@@ -47,7 +47,9 @@ def sparkConf():
     import os
     from dotenv import load_dotenv
     load_dotenv(verbose=True)
-    return dfc.setSparkConfig(jars=os.getenv("JARS"))
+    conf = dfc.setSparkConfig(jars=os.getenv("JARS"))
+    conf.set("spark.sql.shuffle.partitions", os.getenv("PARTITIONS"))
+    return conf
 
 
 @pytest.fixture
@@ -209,6 +211,16 @@ def df8(spark: SparkSession) -> DataFrame:
 
     column_names, data = zip(*dict_lst.items())
     return spark.createDataFrame(zip(*data), column_names)
+
+
+@pytest.fixture
+def dfAdj(spark: SparkSession) -> DataFrame:
+
+    data = [("Finance", 10), ("Marketing", 20), ("Sales", 30), ("IT", 40), ("CTS", 41), ("CTS", 42)]
+    for _ in range(8):
+        data.extend(data)
+    deptColumns = ["dept_name", "dept_id"]
+    return spark.createDataFrame(data=data, schema=deptColumns)
 
 
 @pytest.fixture
