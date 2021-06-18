@@ -4,6 +4,9 @@ import tests.common as c
 from pyspark.sql.session import SparkSession
 from pyspark.sql.dataframe import DataFrame
 from pyspark.sql.functions import *
+from collections import namedtuple
+from pyspark.sql.functions import when, expr
+from datetime import datetime
 
 
 def test_all_same(spark: SparkSession, df1: DataFrame) -> None:
@@ -223,19 +226,19 @@ def test_group_status(spark: SparkSession, df_group_status: DataFrame) -> None:
 def test_adjustment(spark: SparkSession, dfAdj: DataFrame):
 
     tests.common.printSparkConf(spark)
+
+    flag_col = "isModified"
+    partition_cols = ["dept_name"]
+    dfAdj = dfAdj.withColumn(flag_col, lit(False)).repartition(8, *partition_cols)
+
     print(f"count:{dfAdj.count()},partitions:{dfAdj.rdd.getNumPartitions()}")
     # root
     # |-- dept_name: string (nullable = true)
     # |-- dept_id: long (nullable = true)
 
     # col, value, where
-    from collections import namedtuple
-    from pyspark.sql.functions import when, expr
-    from datetime import datetime
     Modification = namedtuple('Modification', 'col set where')
     modifications_list = [("dept_name", "Marketing2.0", "dept_name = 'Marketing'"), ("dept_id", 30, "dept_name = 'CTS' AND dept_id = 42")]
-    flag_col = "isModified"
-    dfAdj = dfAdj.withColumn(flag_col, lit(False))
     for m in modifications_list:
         mod = Modification(*m)
         print("start", mod, datetime.now())
@@ -248,7 +251,7 @@ def test_adjustment(spark: SparkSession, dfAdj: DataFrame):
     dfAdj = dfAdj.filter(f"{flag_col} = True").drop(flag_col)
 
     # force action
-    dfAdj.count()
+    print(f"Rows affected: {dfAdj.count()}")
     print("completed", datetime.now())
 
 

@@ -217,7 +217,7 @@ def df8(spark: SparkSession) -> DataFrame:
 def dfAdj(spark: SparkSession) -> DataFrame:
 
     data = [("Finance", 10), ("Marketing", 20), ("Sales", 30), ("IT", 40), ("CTS", 41), ("CTS", 42)]
-    for _ in range(8):
+    for _ in range(18):
         data.extend(data)
     deptColumns = ["dept_name", "dept_id"]
     return spark.createDataFrame(data=data, schema=deptColumns)
