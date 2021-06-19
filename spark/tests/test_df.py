@@ -222,43 +222,57 @@ def test_group_status(spark: SparkSession, df_group_status: DataFrame) -> None:
 
     df_enrich.join(df_final, df_enrich["grp"] == df_final["grp"], "inner").show()
 
+Modification = namedtuple('Modification', 'col set where')
 
-def test_adjustment(spark: SparkSession, dfAdj: DataFrame, modifications_list: list):
+
+def test_adjustment(spark: SparkSession, df_base, modifications_list: list):
 
     tests.common.printSparkConf(spark)
 
     flag_col = "isModified"
     partition_cols = ["dept_name", "dept_id"]
     check_point_interval = 5
-    dfAdj = dfAdj.withColumn(flag_col, lit(False)).repartition(8, *partition_cols).cache()
+    df_base = df_base.withColumn(flag_col, lit(False)).repartition(8, *partition_cols).cache()
 
-    print(f"data_count:{dfAdj.count()}, partition_count:{dfAdj.rdd.getNumPartitions()}, rule_count: {len(modifications_list)}")
+    print(f"data_count:{df_base.count()}, partition_count:{df_base.rdd.getNumPartitions()}, rule_count: {len(modifications_list)}")
     # root
     # |-- dept_name: string (nullable = true)
     # |-- dept_id: long (nullable = true)
 
     # col, value, where
     check_point_stale = True
-    Modification = namedtuple('Modification', 'col set where')
     for index, m in enumerate(modifications_list, 1):
         mod = Modification(*m)
         # print("start", mod, datetime.now())
-        dfAdj = dfAdj.withColumn(flag_col, when(expr(mod.where), lit(True)).otherwise(col(flag_col)))\
+        df_base = df_base.withColumn(flag_col, when(expr(mod.where), lit(True)).otherwise(col(flag_col)))\
                      .withColumn(mod.col, when(expr(mod.where), lit(mod.set)).otherwise(col(mod.col)))
         check_point_stale = True
         if index % check_point_interval == 0:
-            dfAdj = dfAdj.cache().checkpoint(True)
+            df_base = df_base.cache().checkpoint(True)
             check_point_stale = False
         # print("end", mod, datetime.now())
 
     if check_point_stale:
-        dfAdj = dfAdj.checkpoint(True)
+        df_base = df_base.checkpoint(True)
 
-    dfAdj = dfAdj.filter(f"{flag_col} = True").drop(flag_col).cache()
+    df_base = df_base.filter(f"{flag_col} = True").drop(flag_col).cache()
 
     # force action, takes a looong time if there are a large number of transforms, even with a small df
-    rows_affected = dfAdj.count()
+    rows_affected = df_base.count()
     print(f"Rows affected: {rows_affected}")
     print("completed", datetime.now())
 
 
+def test_adjustment_2(df_base: DataFrame, modifications_list: list):
+    df_collection: DataFrame = None
+    for index, m in enumerate(modifications_list, 1):
+        mod = Modification(*m)
+        df_collection = (df_collection.union(df_base.filter(mod.where))
+                         if df_collection
+                         else df_base.filter(mod.where))
+
+    rows_affected = (df_collection.distinct().count()
+                     if df_collection
+                     else 0)
+    print(f"Rows affected: {rows_affected}")
+    print("completed", datetime.now())

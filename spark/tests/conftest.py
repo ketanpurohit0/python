@@ -219,12 +219,12 @@ def df8(spark: SparkSession) -> DataFrame:
 
 
 @pytest.fixture
-def dfAdj(spark: SparkSession) -> DataFrame:
+def df_base(spark: SparkSession) -> DataFrame:
 
-    data = [("Finance", 10), ("Marketing", 20), ("Sales", 30), ("IT", 40), ("CTS", 41), ("CTS", 42)]
-    for _ in range(20):
+    data = [(1, "Finance", 10), (2, "Marketing", 20), (3, "Sales", 30), (4, "IT", 40), (5, "CTS", 41), (6, "CTS", 42)]
+    for _ in range(5):
         data.extend(data)
-    deptColumns = ["dept_name", "dept_id"]
+    deptColumns = ["ID", "dept_name", "dept_id"]
     return spark.createDataFrame(data=data, schema=deptColumns)
 
 
@@ -353,7 +353,7 @@ def modifications_list() -> list:
             ("dept_id", 30, "dept_name = 'CTS' AND dept_id = 42"),
     ]
 
-    for _ in range(6):
+    for _ in range(0):
         # seems like extending rules is affecting spark behaviour
         rules.extend(rules)
 
