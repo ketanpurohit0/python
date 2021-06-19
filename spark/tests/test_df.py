@@ -229,7 +229,7 @@ def test_adjustment(spark: SparkSession, dfAdj: DataFrame, modifications_list: l
 
     flag_col = "isModified"
     partition_cols = ["dept_name"]
-    check_point_interval = 4
+    check_point_interval = 5
     dfAdj = dfAdj.withColumn(flag_col, lit(False)).repartition(4, *partition_cols).cache()
 
     print(f"data_count:{dfAdj.count()}, partition_count:{dfAdj.rdd.getNumPartitions()}, rule_count: {len(modifications_list)}")
