@@ -65,7 +65,9 @@ def spark(sparkConf) -> SparkSession:
     Returns:
         SparkSession: [A spark session fixture]
     """
-    return dfc.getSpark(sparkConf)
+    spark: SparkSession = dfc.getSpark(sparkConf)
+    spark.sparkContext.setCheckpointDir(".")
+    return spark
 
 
 @pytest.fixture
@@ -347,18 +349,11 @@ def modifications_list() -> list:
             ("dept_id", 30, "dept_name = 'xCTS' AND dept_id = 42"),
             ("dept_id", 30, "dept_name = 'xCTS' AND dept_id = 142"),
             ("dept_name", "xMarketing2.0", "dept_name = 'XMarketing'"),
-        ("dept_name", "Marketing2.0", "dept_name = 'Marketing'"),
-        ("dept_id", 30, "dept_name = 'CTS' AND dept_id = 42"),
-        ("dept_id", 30, "dept_name = 'CTS' AND dept_id = 142"),
-        ("dept_name", "Marketing2.0", "dept_name = 'XMarketing'"),
-        ("dept_name", "cMarketing2.0", "dept_name = 'cXMarketing'"),
-
-        ("dept_id", 30, "dept_name = 'CTS' AND dept_id = 142"),
-        ("dept_name", "Marketing2.0", "dept_name = 'XMarketing'"),
-        ("dept_name", "cMarketing2.0", "dept_name = 'cXMarketing'"),
+            ("dept_name", "Marketing2.0", "dept_name = 'Marketing'"),
+            ("dept_id", 30, "dept_name = 'CTS' AND dept_id = 42"),
     ]
 
-    for _ in range(1):
+    for _ in range(6):
         # seems like extending rules is affecting spark behaviour
         rules.extend(rules)
 

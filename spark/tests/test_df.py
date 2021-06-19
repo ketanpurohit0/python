@@ -243,7 +243,7 @@ def test_adjustment(spark: SparkSession, dfAdj: DataFrame, modifications_list: l
         print("start", mod, datetime.now())
         dfAdj = dfAdj.withColumn(flag_col, when(expr(mod.where), lit(True)).otherwise(col(flag_col)))\
                      .withColumn(mod.col, when(expr(mod.where), lit(mod.set)).otherwise(col(mod.col)))\
-                     .cache()
+                     .checkpoint(True)
         print("end", mod, datetime.now())
 
     dfAdj = dfAdj.filter(f"{flag_col} = True").drop(flag_col).cache()
