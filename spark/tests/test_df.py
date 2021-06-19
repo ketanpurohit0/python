@@ -223,13 +223,13 @@ def test_group_status(spark: SparkSession, df_group_status: DataFrame) -> None:
     df_enrich.join(df_final, df_enrich["grp"] == df_final["grp"], "inner").show()
 
 
-def test_adjustment(spark: SparkSession, dfAdj: DataFrame):
+def test_adjustment(spark: SparkSession, dfAdj: DataFrame, modifications_list: list):
 
     tests.common.printSparkConf(spark)
 
     flag_col = "isModified"
     partition_cols = ["dept_name"]
-    dfAdj = dfAdj.withColumn(flag_col, lit(False)).repartition(8, *partition_cols)
+    dfAdj = dfAdj.withColumn(flag_col, lit(False)).repartition(1, *partition_cols).cache()
 
     print(f"count:{dfAdj.count()},partitions:{dfAdj.rdd.getNumPartitions()}")
     # root
@@ -238,20 +238,19 @@ def test_adjustment(spark: SparkSession, dfAdj: DataFrame):
 
     # col, value, where
     Modification = namedtuple('Modification', 'col set where')
-    modifications_list = [("dept_name", "Marketing2.0", "dept_name = 'Marketing'"), ("dept_id", 30, "dept_name = 'CTS' AND dept_id = 42")]
-    for m in modifications_list:
+    for index, m in enumerate(modifications_list, 1):
         mod = Modification(*m)
         print("start", mod, datetime.now())
-        dfAdj = dfAdj.withColumn(flag_col, when(expr(mod.where), lit(True)).otherwise(col(flag_col)))
-        dfAdj = dfAdj.withColumn(mod.col, when(expr(mod.where), lit(mod.set)).otherwise(col(mod.col)))
-        assert dfAdj.filter(mod.where).count() == 0
-        # dfLarge.show()
+        dfAdj = dfAdj.withColumn(flag_col, when(expr(mod.where), lit(True)).otherwise(col(flag_col)))\
+                     .withColumn(mod.col, when(expr(mod.where), lit(mod.set)).otherwise(col(mod.col)))\
+                     .cache()
         print("end", mod, datetime.now())
 
-    dfAdj = dfAdj.filter(f"{flag_col} = True").drop(flag_col)
+    dfAdj = dfAdj.filter(f"{flag_col} = True").drop(flag_col).cache()
 
-    # force action
-    print(f"Rows affected: {dfAdj.count()}")
+    # force action, takes a looong time if there are a large number of transforms, even with a small df
+    rows_affected = dfAdj.count()
+    print(f"Rows affected: {rows_affected}")
     print("completed", datetime.now())
 
 

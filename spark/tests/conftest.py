@@ -49,6 +49,9 @@ def sparkConf():
     load_dotenv(verbose=True)
     conf = dfc.setSparkConfig(jars=os.getenv("JARS"))
     conf.set("spark.sql.shuffle.partitions", os.getenv("PARTITIONS"))
+    conf.set("spark.master", os.getenv("SPARK_MASTER"))
+    conf.set("spark.executor.instances", os.getenv("SPARK_EXECUTORS"))
+    conf.set("spark.executor.cores", os.getenv("SPARK_CORES_PER_EXECUTOR"))
     return conf
 
 
@@ -217,7 +220,7 @@ def df8(spark: SparkSession) -> DataFrame:
 def dfAdj(spark: SparkSession) -> DataFrame:
 
     data = [("Finance", 10), ("Marketing", 20), ("Sales", 30), ("IT", 40), ("CTS", 41), ("CTS", 42)]
-    for _ in range(18):
+    for _ in range(3):
         data.extend(data)
     deptColumns = ["dept_name", "dept_id"]
     return spark.createDataFrame(data=data, schema=deptColumns)
@@ -330,3 +333,34 @@ def df_booleans(spark: SparkSession) -> DataFrame:
 
     column_names, data = zip(*dict_lst.items())
     return spark.createDataFrame(zip(*data), column_names)
+
+
+@pytest.fixture
+def modifications_list() -> list:
+    rules = [
+            ("dept_name", "Marketing2.0", "dept_name = 'Marketing'"),
+            ("dept_id", 30, "dept_name = 'CTS' AND dept_id = 42"),
+            ("dept_id", 30, "dept_name = 'CTS' AND dept_id = 142"),
+            ("dept_name", "Marketing2.0", "dept_name = 'XMarketing'"),
+            ("dept_id", 30, "dept_name = 'XCTS' AND dept_id = 142"),
+            ("dept_name", "Marketing2.0", "dept_name = 'XMarketing'"),
+            ("dept_id", 30, "dept_name = 'xCTS' AND dept_id = 42"),
+            ("dept_id", 30, "dept_name = 'xCTS' AND dept_id = 142"),
+            ("dept_name", "xMarketing2.0", "dept_name = 'XMarketing'"),
+        ("dept_name", "Marketing2.0", "dept_name = 'Marketing'"),
+        ("dept_id", 30, "dept_name = 'CTS' AND dept_id = 42"),
+        ("dept_id", 30, "dept_name = 'CTS' AND dept_id = 142"),
+        ("dept_name", "Marketing2.0", "dept_name = 'XMarketing'"),
+        ("dept_name", "cMarketing2.0", "dept_name = 'cXMarketing'"),
+
+        ("dept_id", 30, "dept_name = 'CTS' AND dept_id = 142"),
+        ("dept_name", "Marketing2.0", "dept_name = 'XMarketing'"),
+        ("dept_name", "cMarketing2.0", "dept_name = 'cXMarketing'"),
+    ]
+
+    for _ in range(1):
+        # seems like extending rules is affecting spark behaviour
+        rules.extend(rules)
+
+    return rules
+
