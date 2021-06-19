@@ -229,6 +229,7 @@ def test_adjustment(spark: SparkSession, dfAdj: DataFrame, modifications_list: l
 
     flag_col = "isModified"
     partition_cols = ["dept_name"]
+    check_point_interval = 4
     dfAdj = dfAdj.withColumn(flag_col, lit(False)).repartition(4, *partition_cols).cache()
 
     print(f"data_count:{dfAdj.count()}, partition_count:{dfAdj.rdd.getNumPartitions()}, rule_count: {len(modifications_list)}")
@@ -237,14 +238,21 @@ def test_adjustment(spark: SparkSession, dfAdj: DataFrame, modifications_list: l
     # |-- dept_id: long (nullable = true)
 
     # col, value, where
+    check_point_stale = True
     Modification = namedtuple('Modification', 'col set where')
     for index, m in enumerate(modifications_list, 1):
         mod = Modification(*m)
         # print("start", mod, datetime.now())
         dfAdj = dfAdj.withColumn(flag_col, when(expr(mod.where), lit(True)).otherwise(col(flag_col)))\
-                     .withColumn(mod.col, when(expr(mod.where), lit(mod.set)).otherwise(col(mod.col)))\
-                     .checkpoint(True)
+                     .withColumn(mod.col, when(expr(mod.where), lit(mod.set)).otherwise(col(mod.col)))
+        check_point_stale = True
+        if index % check_point_interval == 0:
+            dfAdj = dfAdj.cache().checkpoint(True)
+            check_point_stale = False
         # print("end", mod, datetime.now())
+
+    if check_point_stale:
+        dfAdj = dfAdj.checkpoint(True)
 
     dfAdj = dfAdj.filter(f"{flag_col} = True").drop(flag_col).cache()
 
