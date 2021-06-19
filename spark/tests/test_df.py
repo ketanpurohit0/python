@@ -229,9 +229,9 @@ def test_adjustment(spark: SparkSession, dfAdj: DataFrame, modifications_list: l
 
     flag_col = "isModified"
     partition_cols = ["dept_name"]
-    dfAdj = dfAdj.withColumn(flag_col, lit(False)).repartition(1, *partition_cols).cache()
+    dfAdj = dfAdj.withColumn(flag_col, lit(False)).repartition(4, *partition_cols).cache()
 
-    print(f"count:{dfAdj.count()},partitions:{dfAdj.rdd.getNumPartitions()}")
+    print(f"data_count:{dfAdj.count()}, partition_count:{dfAdj.rdd.getNumPartitions()}, rule_count: {len(modifications_list)}")
     # root
     # |-- dept_name: string (nullable = true)
     # |-- dept_id: long (nullable = true)
@@ -240,11 +240,11 @@ def test_adjustment(spark: SparkSession, dfAdj: DataFrame, modifications_list: l
     Modification = namedtuple('Modification', 'col set where')
     for index, m in enumerate(modifications_list, 1):
         mod = Modification(*m)
-        print("start", mod, datetime.now())
+        # print("start", mod, datetime.now())
         dfAdj = dfAdj.withColumn(flag_col, when(expr(mod.where), lit(True)).otherwise(col(flag_col)))\
                      .withColumn(mod.col, when(expr(mod.where), lit(mod.set)).otherwise(col(mod.col)))\
                      .checkpoint(True)
-        print("end", mod, datetime.now())
+        # print("end", mod, datetime.now())
 
     dfAdj = dfAdj.filter(f"{flag_col} = True").drop(flag_col).cache()
 
