@@ -264,15 +264,29 @@ def test_adjustment(spark: SparkSession, df_base, modifications_list: list):
 
 
 def test_adjustment_2(df_base: DataFrame, modifications_list: list):
-    df_collection: DataFrame = None
+    def not_where(where: str):
+        return f'!({where})'
+
+    flag_col = "isModified"
+    partition_cols = ["dept_name", "dept_id"]
+    df_base = df_base.withColumn(flag_col, lit(False)).repartition(8, *partition_cols).cache()
+
+    print(f"data_count:{df_base.count()}, partition_count:{df_base.rdd.getNumPartitions()}, rule_count: {len(modifications_list)}")
+
     for index, m in enumerate(modifications_list, 1):
         mod = Modification(*m)
-        df_collection = (df_collection.union(df_base.filter(mod.where))
-                         if df_collection
-                         else df_base.filter(mod.where))
+        # Apply modification
+        print("start", mod, datetime.now())
+        df_mods = df_base.filter(mod.where).withColumn(mod.col, lit(mod.set)).withColumn(flag_col, lit(True))
+        df_unmod = df_base.filter(not_where(mod.where))
+        df_base = df_unmod.union(df_mods).cache()
+        print("end", mod, datetime.now())
 
-    rows_affected = (df_collection.distinct().count()
-                     if df_collection
-                     else 0)
+    # df_base.show(200, False)
+    df_base = df_base.filter(f"{flag_col} = True").cache().drop(flag_col).cache()
+
+    # force action, takes a looong time if there are a large number of transforms, even with a small df
+    rows_affected = df_base.count()
     print(f"Rows affected: {rows_affected}")
     print("completed", datetime.now())
+
