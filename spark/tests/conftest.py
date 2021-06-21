@@ -52,6 +52,7 @@ def sparkConf():
     conf.set("spark.master", os.getenv("SPARK_MASTER"))
     conf.set("spark.executor.instances", os.getenv("SPARK_EXECUTORS"))
     conf.set("spark.executor.cores", os.getenv("SPARK_CORES_PER_EXECUTOR"))
+    conf.set("spark.executor.heartbeatInterval", os.getenv("SPARK_EXECUTOR_HB_INTERVAL"))
     return conf
 
 

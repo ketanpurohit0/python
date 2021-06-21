@@ -1,3 +1,5 @@
+import pytest
+
 import src.SparkDFCompare as dfc
 import tests.common
 import tests.common as c
@@ -241,19 +243,18 @@ def test_adjustment(spark: SparkSession, df_base, modifications_list: list):
 
     # col, value, where
     check_point_stale = True
+    print("start", datetime.now())
     for index, m in enumerate(modifications_list, 1):
         mod = Modification(*m)
-        # print("start", mod, datetime.now())
         df_base = df_base.withColumn(flag_col, when(expr(mod.where), lit(True)).otherwise(col(flag_col)))\
                      .withColumn(mod.col, when(expr(mod.where), lit(mod.set)).otherwise(col(mod.col)))
         check_point_stale = True
         if index % check_point_interval == 0:
             df_base = df_base.cache().checkpoint(True)
             check_point_stale = False
-        # print("end", mod, datetime.now())
 
     if check_point_stale:
-        df_base = df_base.checkpoint(True)
+        df_base = df_base.cache().checkpoint(True)
 
     df_base = df_base.filter(f"{flag_col} = True").drop(flag_col).cache()
 
@@ -263,30 +264,41 @@ def test_adjustment(spark: SparkSession, df_base, modifications_list: list):
     print("completed", datetime.now())
 
 
+@pytest.mark.skipif(True, reason= 'Problematic - takes long time - used coalence to reduce number of partitions as they would double every iteration. This is a union feature.')
 def test_adjustment_2(df_base: DataFrame, modifications_list: list):
     def not_where(where: str):
         return f'!({where})'
 
     flag_col = "isModified"
     partition_cols = ["dept_name", "dept_id"]
-    df_base = df_base.withColumn(flag_col, lit(False)).repartition(8, *partition_cols).cache()
+    check_point_interval = 5
+    df_base_mut = df_base.withColumn(flag_col, lit(False)).repartition(8, *partition_cols).cache()
 
-    print(f"data_count:{df_base.count()}, partition_count:{df_base.rdd.getNumPartitions()}, rule_count: {len(modifications_list)}")
+    print(f"data_count:{df_base_mut.count()}, partition_count:{df_base_mut.rdd.getNumPartitions()}, rule_count: {len(modifications_list)}")
 
+    check_point_stale = True
+    print("start", datetime.now())
     for index, m in enumerate(modifications_list, 1):
         mod = Modification(*m)
         # Apply modification
-        print("start", mod, datetime.now())
-        df_mods = df_base.filter(mod.where).withColumn(mod.col, lit(mod.set)).withColumn(flag_col, lit(True))
-        df_unmod = df_base.filter(not_where(mod.where))
-        df_base = df_unmod.union(df_mods).cache()
-        print("end", mod, datetime.now())
+        # print("start", mod, datetime.now())
+        df_mods = df_base_mut.filter(mod.where).withColumn(mod.col, lit(mod.set)).withColumn(flag_col, lit(True))
+        df_unmod = df_base_mut.filter(not_where(mod.where))
+        df_base_mut = df_unmod.union(df_mods).cache()
+        check_point_stale = True
+        if index % check_point_interval == 0:
+            df_base_mut = df_base_mut.coalesce(8).checkpoint(True)
+            check_point_stale = False
+        # print("end", mod, datetime.now())
+
+    if check_point_stale:
+        df_base_mut = df_base_mut.coalesce(8).checkpoint(True)
 
     # df_base.show(200, False)
-    df_base = df_base.filter(f"{flag_col} = True").cache().drop(flag_col).cache()
+    df_base_mut = df_base_mut.filter(f"{flag_col} = True").drop(flag_col).cache()
 
     # force action, takes a looong time if there are a large number of transforms, even with a small df
-    rows_affected = df_base.count()
+    rows_affected = df_base_mut.count()
     print(f"Rows affected: {rows_affected}")
     print("completed", datetime.now())
 
