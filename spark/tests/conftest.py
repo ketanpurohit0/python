@@ -223,7 +223,7 @@ def df8(spark: SparkSession) -> DataFrame:
 def df_base(spark: SparkSession) -> DataFrame:
 
     data = [(1, "Finance", 10), (2, "Marketing", 20), (3, "Sales", 30), (4, "IT", 40), (5, "CTS", 41), (6, "CTS", 42)]
-    for _ in range(5):
+    for _ in range(20):
         data.extend(data)
     deptColumns = ["ID", "dept_name", "dept_id"]
     return spark.createDataFrame(data=data, schema=deptColumns)
@@ -342,19 +342,13 @@ def df_booleans(spark: SparkSession) -> DataFrame:
 def modifications_list() -> list:
     rules = [
             ("dept_name", "Marketing2.0", "dept_name = 'Marketing'"),
-            ("dept_id", 30, "dept_name = 'CTS' AND dept_id = 42"),
-            ("dept_id", 30, "dept_name = 'CTS' AND dept_id = 142"),
             ("dept_name", "Marketing2.0", "dept_name = 'XMarketing'"),
-            ("dept_id", 30, "dept_name = 'XCTS' AND dept_id = 142"),
             ("dept_name", "Marketing2.0", "dept_name = 'XMarketing'"),
-            ("dept_id", 30, "dept_name = 'xCTS' AND dept_id = 42"),
-            ("dept_id", 30, "dept_name = 'xCTS' AND dept_id = 142"),
             ("dept_name", "xMarketing2.0", "dept_name = 'XMarketing'"),
             ("dept_name", "Marketing2.0", "dept_name = 'Marketing'"),
-            ("dept_id", 30, "dept_name = 'CTS' AND dept_id = 42"),
     ]
 
-    for _ in range(0):
+    for _ in range(6):
         # seems like extending rules is affecting spark behaviour
         rules.extend(rules)
 
