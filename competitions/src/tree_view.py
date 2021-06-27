@@ -2,9 +2,17 @@ from enum import Enum
 
 
 class TraversalType(Enum):
+    pass
+
+
+class DepthFirst(TraversalType):
     InOrder = 1
     PreOrder = 2
     PostOrder = 3
+
+
+class BreathFirst(TraversalType):
+    LevelOrder = 1
 
 
 class KPTree:
@@ -28,35 +36,35 @@ class KPTree:
             self.right.pp(level + 1)
 
     def dftraverse(self, traversalOrder: TraversalType, traversalList):
-        if traversalOrder == TraversalType.PreOrder:
+        if traversalOrder == DepthFirst.PreOrder:
             self.__dftraverse_preorder(traversalList)
-        if traversalOrder == TraversalType.InOrder:
+        if traversalOrder == DepthFirst.InOrder:
             self.__dftraverse_inorder(traversalList)
-        if traversalOrder == TraversalType.PostOrder:
+        if traversalOrder == DepthFirst.PostOrder:
             self.__dftraverse_postorder(traversalList)
 
     def __dftraverse_preorder(self, traversalList):
         if self:
             traversalList.extend([self.data])
             if self.left:
-                self.left.dftraverse(TraversalType.PreOrder, traversalList)
+                self.left.dftraverse(DepthFirst.PreOrder, traversalList)
             if self.right:
-                self.right.dftraverse(TraversalType.PreOrder, traversalList)
+                self.right.dftraverse(DepthFirst.PreOrder, traversalList)
 
     def __dftraverse_inorder(self, traversalList):
         if self:
             if self.left:
-                self.left.dftraverse(TraversalType.InOrder, traversalList)
+                self.left.dftraverse(DepthFirst.InOrder, traversalList)
             traversalList.extend([self.data])
             if self.right:
-                self.right.dftraverse(TraversalType.InOrder, traversalList)
+                self.right.dftraverse(DepthFirst.InOrder, traversalList)
 
     def __dftraverse_postorder(self, traversalList):
         if self:
             if self.left:
-                self.left.dftraverse(TraversalType.PostOrder, traversalList)
+                self.left.dftraverse(DepthFirst.PostOrder, traversalList)
             if self.right:
-                self.right.dftraverse(TraversalType.PostOrder, traversalList)
+                self.right.dftraverse(DepthFirst.PostOrder, traversalList)
             traversalList.extend([self.data])
 
     def bftraverse(self, traversalList):
@@ -75,24 +83,6 @@ class KPTree:
 
 
 if __name__ == "__main__":
-    tree = KPTree("data")
-    left = KPTree("left")
-    right = KPTree("right")
-    left.add_left(KPTree("left_left"))
-    left.add_right(KPTree("left_right"))
-    right.add_left(KPTree("right_left"))
-    right.add_right(KPTree("right_right"))
-    tree.add_left(left)
-    tree.add_right(right)
-    tree.pp()
-
-    bfTraversalList = []
-    tree.bftraverse(bfTraversalList)
-    print(bfTraversalList)
-
-    dfTraversalList = []
-    tree.dftraverse(TraversalType.PreOrder, dfTraversalList)
-    print(dfTraversalList)
 
     dfTraversalList = []
     tree = KPTree(1)
@@ -102,7 +92,7 @@ if __name__ == "__main__":
     tree.add_right(right)
     left.add_left(KPTree(4))
     left.add_right(KPTree(5))
-    for traversalType in [TraversalType.InOrder, TraversalType.PreOrder, TraversalType.PostOrder]:
+    for traversalType in [DepthFirst.InOrder, DepthFirst.PreOrder, DepthFirst.PostOrder]:
         dfTraversalList = []
         tree.dftraverse(traversalType, dfTraversalList)
         print(traversalType, dfTraversalList)
