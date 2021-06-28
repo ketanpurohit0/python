@@ -67,6 +67,7 @@ class KPTree:
                 self.right.dftraverse(DepthFirst.PostOrder, traversalList)
             traversalList.extend([self.data])
 
+
     def bftraverse(self, traversalList):
         if self:
             if self.data not in traversalList:
@@ -82,6 +83,38 @@ class KPTree:
                 self.right.bftraverse(traversalList)
 
 
+    def bftraverseWithViewTagging(self, traversalList, nodesVisited = [], level: int = 0):
+        if self:
+            if self not in nodesVisited:
+                nodesVisited.append(self)
+                traversalList.append(f":{level}")
+                traversalList.append(self.data)
+            if self.left and self.left not in nodesVisited:
+                nodesVisited.append(self.left)
+                traversalList.append(f":{level+1}")
+                traversalList.append(self.left.data)
+            if self.right and self.right not in nodesVisited:
+                nodesVisited.append(self.right)
+                traversalList.append(f":{level+1}")
+                traversalList.append(self.right.data)
+
+            if self.left:
+                self.left.bftraverseWithViewTagging(traversalList, nodesVisited, level + 1)
+            if self.right:
+                self.right.bftraverseWithViewTagging(traversalList, nodesVisited, level + 1)
+
+
+    def traversalListToLeftView(traversalList):
+        result = []
+        doneItems = {}
+        for index, item in enumerate(traversalList):
+            if str(item).startswith(":") and item not in doneItems:
+                doneItems[item] = True
+                result.append(traversalList[index+1])
+
+        return result
+
+
 if __name__ == "__main__":
 
     dfTraversalList = []
@@ -92,11 +125,33 @@ if __name__ == "__main__":
     tree.add_right(right)
     left.add_left(KPTree(4))
     left.add_right(KPTree(5))
+    right.add_right(KPTree(6))
+
+    r = KPTree(1)
+    l1 = KPTree(2)
+    r1 = KPTree(3)
+    r2 = KPTree(4)
+    r3 = KPTree(5)
+    r4 = KPTree(6)
+    r3.add_right(r4)
+    r2.add_right(r3)
+    l1.add_right(r2)
+    r.add_left(l1)
+    r.add_right(r1)
+
     for traversalType in [DepthFirst.InOrder, DepthFirst.PreOrder, DepthFirst.PostOrder]:
-        dfTraversalList = []
-        tree.dftraverse(traversalType, dfTraversalList)
-        print(traversalType, dfTraversalList)
+            dfTraversalList = []
+            tree.dftraverse(traversalType, dfTraversalList)
+            print(traversalType, dfTraversalList)
 
     bfTraversalList = []
-    tree.bftraverse(bfTraversalList)
+    tree.bftraverseWithViewTagging(bfTraversalList)
     print(bfTraversalList)
+    result = KPTree.traversalListToLeftView(bfTraversalList)
+    print(result)
+
+    bfTraversalList = []
+    r.bftraverseWithViewTagging(bfTraversalList)
+    print(bfTraversalList)
+    result = KPTree.traversalListToLeftView(bfTraversalList)
+    print(result)
