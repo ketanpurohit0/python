@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import List
-
+from extratypes import Tree
 class TraversalType(Enum):
     PREORDER = 1
     INORDER = 2
@@ -154,3 +154,8 @@ if __name__ == "__main__":
     rebuiltTree_preorder = rebuiltTree.dfs(TraversalType.PREORDER)
     print(preorder)
     print(rebuiltTree_preorder)
+
+    example_preorder = [  5, 3, 20, None, None, 21, None, None, 10, 1, None, None, None]
+    rebuiltTree = Tree.reconstruct_from_preorder(example_preorder)
+    print(rebuiltTree.dfs(TraversalType.PREORDER))
+    print(rebuiltTree.right_height(), rebuiltTree.left_height())
