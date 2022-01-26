@@ -74,3 +74,12 @@ def test_from_db_column(spark: SparkSession, df_from_db_left: DataFrame, df_from
     pass_count = dfResult.filter("PASS == True").count()
     overall_count = dfResult.count()
     assert pass_count == overall_count
+
+
+def test_ml_dd_dd(spark: SparkSession) -> None:
+    from pyspark.ml.feature import StringIndexer
+    
+
+    data = [("A","B"),("C","D")]
+    spark.createDataFrame(data).show()
+    assert(True)

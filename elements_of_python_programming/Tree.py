@@ -1,6 +1,5 @@
 from enum import Enum
 from typing import List
-from extratypes import Tree
 class TraversalType(Enum):
     PREORDER = 1
     INORDER = 2
@@ -61,6 +60,14 @@ class Tree:
             return 1 + self.right_child.right_height()
         else:
             return 0
+
+    def max_zig_zag(self):
+
+        def max_zig_zag_node(node):
+            if node:
+                return max_zig_zag(node)
+
+        return max(max_zig_zag_node(self.right_child, "r"), max_zig_zag_node(self.left_child, "l"))
 
     def dfs(self, mode: TraversalType):
 
@@ -156,6 +163,11 @@ if __name__ == "__main__":
     print(rebuiltTree_preorder)
 
     example_preorder = [  5, 3, 20, None, None, 21, None, None, 10, 1, None, None, None]
+    rebuiltTree = Tree.reconstruct_from_preorder(example_preorder)
+    print(rebuiltTree.dfs(TraversalType.PREORDER))
+    print(rebuiltTree.right_height(), rebuiltTree.left_height())
+
+    example_preorder = [5, 3, 20, 6, None, None, None, None, 10, 1, None, None, 15, 30, None, 9, None, None, 8, None, None]
     rebuiltTree = Tree.reconstruct_from_preorder(example_preorder)
     print(rebuiltTree.dfs(TraversalType.PREORDER))
     print(rebuiltTree.right_height(), rebuiltTree.left_height())

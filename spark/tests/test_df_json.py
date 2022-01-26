@@ -89,7 +89,7 @@ def test_json_risers(spark: SparkSession) -> None:
     Args:
         spark (SparkSession): [Spark session]
     """
-    json = '{"ConstantRiser" : {"2 days" : 12, "3 days" : 15, "4 days" : 18, "5 days" : 67.1}}'
+    json = '{"ConstantRiser" : {"2 days" : 12, "3 days" : -15, "4 days" : 18, "5 days" : 67.1}}'
     df = spark.read.json(spark.sparkContext.parallelize([json]))
     assert(df.count() == 1)
     assert(df.filter("ConstantRiser['3 days']> 0").count(), 1)
