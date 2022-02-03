@@ -1,8 +1,7 @@
 import json
-from typing import Any, Dict
+from typing import Any, Dict, Generator
 import dataclasses
-from collections import defaultdict
-
+from string import Template
 
 # Utilities
 def fixJson(json: str) -> str:
@@ -31,7 +30,10 @@ class SecuritiesDict:
         return self.securitiesDictionary[securityId]
 
     def getSecurityAttribute(self, securityId: int, attribute: str):
-        return self.securitiesDictionary[securityId][attribute]
+        return self.securitiesDictionary[securityId][attribute] if self.contains(securityId) else f"*SECID({securityId}) MISSING*"
+
+    def contains(self, securityId: int):
+        return securityId in self.securitiesDictionary
 
     def __repr__(self):
         return f"{self.__class__.__name__} records {len(self.securitiesDictionary)}"
@@ -39,18 +41,41 @@ class SecuritiesDict:
 
 @dataclasses.dataclass
 class OrderAggregate:
-    accumulateBuys : float = 0
-    accumulateSells : float = 0
+
+    accumulateBuys: float = 0
+    accumulateSells: float = 0
 
     securityId: int = 0
     totalBuyOrders: int = 0
     totalSellOrders: int = 0
     totalBuyQty: int = 0
     totalSellQty: int = 0
-    weightedAverageBuyPrice: float = 0 if totalBuyQty == 0 else accumulateBuys/totalBuyQty
-    weightedAverageSellPrice: float = 0 if totalSellQty == 0 else accumulateSells/totalSellQty
     maxBuyPrice: float = 0
-    maxSellPrice: float = 0
+    minSellPrice: float = 0
+
+    def weightedAverageBuyPrice(self):
+        return 0 if self.totalBuyQty == 0 else self.accumulateBuys / self.totalBuyQty
+
+    def weightedAverageSellPrice(self):
+        return 0 if self.totalSellQty == 0 else self.accumulateSells / self.totalSellQty
+
+    def toList(self, securitiesDict: SecuritiesDict) -> str:
+        isin = securitiesDictionary.getSecurityAttribute(self.securityId, "isin_")
+        currency = securitiesDictionary.getSecurityAttribute(self.securityId, "currency_")
+        return [isin,
+                currency,
+                self.totalBuyOrders,
+                self.totalSellOrders,
+                self.totalBuyQty,
+                self.totalSellQty,
+                self.weightedAverageBuyPrice(),
+                self.weightedAverageSellPrice(),
+                self.maxBuyPrice,
+                self.minSellPrice
+                ]
+
+
+
 
 
 # Contains order aggregated by securityId
@@ -67,7 +92,7 @@ class OrderStatisticsDict:
         oa.totalBuyOrders += 1
         oa.totalBuyQty += quantity
         oa.maxBuyPrice = max(oa.maxBuyPrice, price)
-        oa.accumulateBuys += quantity*price
+        oa.accumulateBuys += quantity * price
         return oa
 
     def accumulateSell(self, oa: OrderAggregate, jsonObj: Any) -> OrderAggregate:
@@ -75,26 +100,25 @@ class OrderStatisticsDict:
         quantity = jsonObj["bookEntry_"]["quantity_"]
         oa.totalSellOrders += 1
         oa.totalSellQty += quantity
-        oa.maxSellPrice = max(oa.maxSellPrice, price)
-        oa.accumulateSells += quantity*price
+        oa.minSellPrice = min(oa.minSellPrice, price)
+        oa.accumulateSells += quantity * price
         return oa
 
     def aggregate(self, jsonObj: Any) -> None:
         securityId = jsonObj["bookEntry_"]["securityId_"]
         direction = jsonObj["bookEntry_"]["side_"]
-        fn = self.accumulatorFunction[direction]
+        accumulatorFn = self.accumulatorFunction[direction]
         oa = self.getAggregatedOrderForId(securityId)
-        if (oa is None):
-            print("->",securityId, oa)
-        self.orders[securityId] = self.accumulateSell(oa,  jsonObj)
+        self.orders[securityId] = accumulatorFn(oa, jsonObj)
 
     def getAggregatedOrderForId(self, securityId: int) -> OrderAggregate:
         return self.orders.get(securityId, OrderAggregate(securityId=securityId))
 
-    def collectAll(self) -> list:
+    def collectAll(self) -> Generator:
         for o in self.orders.values():
-            print(o.securityId, o.totalSellOrders, o.totalSellQty, o.accumulateSells, o.weightedAverageSellPrice)
-        return []
+            yield o
+            #print(o.securityId, o.totalSellOrders, o.totalSellQty, o.accumulateSells, o.weightedAverageSellPrice())
+        #return []
         # print(self.orders.keys())
 
 
@@ -119,6 +143,7 @@ if __name__ == '__main__':
             elif msgType == 12:
                 orderStatistics.aggregate(jsonObj)
 
-        print(i, securitiesDictionary, securitiesDictionary.getSecurityAttribute(3450, "isin_"))
+        #print(i, securitiesDictionary, securitiesDictionary.getSecurityAttribute(3450, "isin_"))
         # print(orderStatistics.getAggregateFor(123).totalSellOrders)
-        print(orderStatistics.collectAll())
+    for o in orderStatistics.collectAll():
+        print(o.toList(securitiesDictionary))
