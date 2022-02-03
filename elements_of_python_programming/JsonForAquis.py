@@ -39,13 +39,16 @@ class SecuritiesDict:
 
 @dataclasses.dataclass
 class OrderAggregate:
+    accumulateBuys : float = 0
+    accumulateSells : float = 0
+
     securityId: int = 0
     totalBuyOrders: int = 0
     totalSellOrders: int = 0
     totalBuyQty: int = 0
     totalSellQty: int = 0
-    weightedAverageBuyPrice: float = 0
-    weightedAverageSellPrice: float = 0
+    weightedAverageBuyPrice: float = 0 if totalBuyQty == 0 else accumulateBuys/totalBuyQty
+    weightedAverageSellPrice: float = 0 if totalSellQty == 0 else accumulateSells/totalSellQty
     maxBuyPrice: float = 0
     maxSellPrice: float = 0
 
@@ -56,26 +59,42 @@ class OrderStatisticsDict:
     def __init__(self):
         # securityId_ -> statistics
         self.orders: Dict[int, OrderAggregate] = {}  # = defaultdict(default_factory=OrderAggregate())
+        self.accumulatorFunction: Dict[str, Any] = {"BUY": self.accumulateBuy, "SELL": self.accumulateSell}
 
-    def accumulateBuy(self, agg: OrderAggregate) -> OrderAggregate:
-        pass
+    def accumulateBuy(self, oa: OrderAggregate, jsonObj: Any) -> OrderAggregate:
+        price = jsonObj["bookEntry_"]["price_"]
+        quantity = jsonObj["bookEntry_"]["quantity_"]
+        oa.totalBuyOrders += 1
+        oa.totalBuyQty += quantity
+        oa.maxBuyPrice = max(oa.maxBuyPrice, price)
+        oa.accumulateBuys += quantity*price
+        return oa
 
-    def accumulateSell(self, agg: OrderAggregate) -> OrderAggregate:
-        pass
+    def accumulateSell(self, oa: OrderAggregate, jsonObj: Any) -> OrderAggregate:
+        price = jsonObj["bookEntry_"]["price_"]
+        quantity = jsonObj["bookEntry_"]["quantity_"]
+        oa.totalSellOrders += 1
+        oa.totalSellQty += quantity
+        oa.maxSellPrice = max(oa.maxSellPrice, price)
+        oa.accumulateSells += quantity*price
+        return oa
 
     def aggregate(self, jsonObj: Any) -> None:
         securityId = jsonObj["bookEntry_"]["securityId_"]
-        o = self.getAggregateFor(securityId)
-        o.totalSellOrders += 1
-        o.securityId = securityId
-        self.orders[securityId] = o
+        direction = jsonObj["bookEntry_"]["side_"]
+        fn = self.accumulatorFunction[direction]
+        oa = self.getAggregatedOrderForId(securityId)
+        if (oa is None):
+            print("->",securityId, oa)
+        self.orders[securityId] = self.accumulateSell(oa,  jsonObj)
 
-    def getAggregateFor(self, securityId: int) -> OrderAggregate:
-        return self.orders.get(securityId, OrderAggregate())
+    def getAggregatedOrderForId(self, securityId: int) -> OrderAggregate:
+        return self.orders.get(securityId, OrderAggregate(securityId=securityId))
 
     def collectAll(self) -> list:
         for o in self.orders.values():
-            print(o.securityId, o.totalSellOrders)
+            print(o.securityId, o.totalSellOrders, o.totalSellQty, o.accumulateSells, o.weightedAverageSellPrice)
+        return []
         # print(self.orders.keys())
 
 
