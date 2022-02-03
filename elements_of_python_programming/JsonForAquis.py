@@ -1,7 +1,8 @@
+import csv
 import json
-from typing import Any, Dict, Generator
+from typing import Any, Dict, Generator, List
 import dataclasses
-from string import Template
+
 
 # Utilities
 def fixJson(json: str) -> str:
@@ -30,7 +31,8 @@ class SecuritiesDict:
         return self.securitiesDictionary[securityId]
 
     def getSecurityAttribute(self, securityId: int, attribute: str):
-        return self.securitiesDictionary[securityId][attribute] if self.contains(securityId) else f"*SECID({securityId}) MISSING*"
+        return self.securitiesDictionary[securityId][attribute] if self.contains(
+            securityId) else f"*SECID({securityId}) MISSING*"
 
     def contains(self, securityId: int):
         return securityId in self.securitiesDictionary
@@ -41,7 +43,6 @@ class SecuritiesDict:
 
 @dataclasses.dataclass
 class OrderAggregate:
-
     accumulateBuys: float = 0
     accumulateSells: float = 0
 
@@ -53,15 +54,23 @@ class OrderAggregate:
     maxBuyPrice: float = 0
     minSellPrice: float = 0
 
+    @classmethod
+    def header(cls):
+        return ["ISIN", "Currency", "Total Buy Count", "Total Sell Count", "Total Buy Quantity", "Total Sell Quantity",
+                "Weighted Average Buy Price", "Weighted Average Sell Price", "Max Buy Price", "Min Sell Price"]
+
+    # calculated fields from accumulated
     def weightedAverageBuyPrice(self):
         return 0 if self.totalBuyQty == 0 else self.accumulateBuys / self.totalBuyQty
 
     def weightedAverageSellPrice(self):
         return 0 if self.totalSellQty == 0 else self.accumulateSells / self.totalSellQty
 
-    def toList(self, securitiesDict: SecuritiesDict) -> str:
-        isin = securitiesDictionary.getSecurityAttribute(self.securityId, "isin_")
-        currency = securitiesDictionary.getSecurityAttribute(self.securityId, "currency_")
+    # return a list of attributes of interest for express purpose
+    # of writing a delimited file
+    def toList(self, securitiesDict: SecuritiesDict) -> List[Any]:
+        isin = securitiesDict.getSecurityAttribute(self.securityId, "isin_")
+        currency = securitiesDict.getSecurityAttribute(self.securityId, "currency_")
         return [isin,
                 currency,
                 self.totalBuyOrders,
@@ -75,11 +84,8 @@ class OrderAggregate:
                 ]
 
 
-
-
-
 # Contains order aggregated by securityId
-class OrderStatisticsDict:
+class OrderStatisticsAggregator:
 
     def __init__(self):
         # securityId_ -> statistics
@@ -117,33 +123,43 @@ class OrderStatisticsDict:
     def collectAll(self) -> Generator:
         for o in self.orders.values():
             yield o
-            #print(o.securityId, o.totalSellOrders, o.totalSellQty, o.accumulateSells, o.weightedAverageSellPrice())
-        #return []
-        # print(self.orders.keys())
 
 
 if __name__ == '__main__':
-    file = r"C:\Users\ketan\Downloads\pretrade_current.txt"
+    # use argparse here
+    sourceFile = r"C:\Users\ketan\Downloads\pretrade_current.txt"
+    targetTsvFile = r".\pretrade_current.tsv"
 
+    # create a lookup for securities built from messages of type 8
+    # it has been observed that not all 'traded' have a type 8
+    # hence referential integrity problem. See output
     securitiesDictionary = SecuritiesDict()
-    orderStatistics = OrderStatisticsDict()
 
-    with open(file, "r") as filereader:
-        i = 0
+    # aggregate orders in a collection here
+    orderStatistics = OrderStatisticsAggregator()
+
+    # start reading the file, we only keep the message type 8 and 12
+    # for purposes of this specific task
+    with open(sourceFile, "r") as filereader:
         # use filereader as iterator, only keep lines with msgType_ in them.
         # this is to avoid 'spurious' entries (at least as I understand it presently)
         for line in filter(lambda x: filterIn(x), filereader):
-            i += 1
+            # remove the first two characters in source
             jsonStr = line[2:]
+            # apply fixes for 'malformed' json
             fixedJson = fixJson(jsonStr)
+            # parse the json
             jsonObj = json.loads(fixedJson)
             msgType = jsonObj["header"]["msgType_"]
+            # place the parsed json in relevant containers
             if msgType == 8:
                 securitiesDictionary.add(jsonObj)
             elif msgType == 12:
                 orderStatistics.aggregate(jsonObj)
 
-        #print(i, securitiesDictionary, securitiesDictionary.getSecurityAttribute(3450, "isin_"))
-        # print(orderStatistics.getAggregateFor(123).totalSellOrders)
-    for o in orderStatistics.collectAll():
-        print(o.toList(securitiesDictionary))
+    # Write to target
+    with open(targetTsvFile, "w", newline='') as filewriter:
+        filewriter.write(" | ".join(OrderAggregate.header()) + "\n")
+        tsvWriter = csv.writer(filewriter, delimiter="\t")
+        for o in orderStatistics.collectAll():
+            tsvWriter.writerow(o.toList(securitiesDictionary))
