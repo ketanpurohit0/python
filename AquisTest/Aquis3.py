@@ -17,7 +17,7 @@ async def innerWorker(jsonStr: str, securitiesDictionary: SecuritiesDict, orderS
         elif msgType == 12:
             orderStatistics.aggregate(jsonObj)
 
-
+# worker on the queue, there would be multiple instances of these
 async def worker(name, queue, securitiesDictionary: SecuritiesDict, orderStatistics: OrderStatisticsAggregator):
     while True:
         jsonStr = await queue.get()
@@ -67,6 +67,7 @@ if __name__ == '__main__':
     # launch
     asyncio.run(main(sourceFile, securitiesDictionary, orderStatistics))
 
+    # write final results
     with open(targetTsvFile, "w", newline='') as filewriter:
         filewriter.write(" | ".join(OrderAggregate.header()) + "\n")
         tsvWriter = csv.writer(filewriter, delimiter="\t")
