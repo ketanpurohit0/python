@@ -26,14 +26,7 @@ async def worker(name, queue, securitiesDictionary: SecuritiesDict, orderStatist
         queue.task_done()
 
 
-async def main(sourceFile: str, targetTsvFile: str) -> None:
-    # create a lookup for securities built from messages of type 8
-    # it has been observed that not all 'traded' have a type 8
-    # hence referential integrity problem. See output
-    securitiesDictionary = SecuritiesDict()
-
-    # aggregate orders in a collection here
-    orderStatistics = OrderStatisticsAggregator()
+async def main(sourceFile: str, securitiesDictionary: SecuritiesDict, orderStatistics: OrderStatisticsAggregator) -> None:
 
     # inboundQueue and associated workers
     inboundQueue = asyncio.Queue()
@@ -59,16 +52,24 @@ async def main(sourceFile: str, targetTsvFile: str) -> None:
     # Wait until all worker tasks are cancelled.
     await asyncio.gather(*tasks, return_exceptions=True)
 
-    # Now process results
+if __name__ == '__main__':
+    sourceFile = r"https://aquis-public-files.s3.eu-west-2.amazonaws.com/market_data/current/pretrade_current.txt"
+    targetTsvFile = r".\pretrade_current_ac3.tsv"
+
+    # create a lookup for securities built from messages of type 8
+    # it has been observed that not all 'traded' have a type 8
+    # hence referential integrity problem. See output
+    securitiesDictionary = SecuritiesDict()
+
+    # aggregate orders in a collection here
+    orderStatistics = OrderStatisticsAggregator()
+
+    # launch
+    asyncio.run(main(sourceFile, securitiesDictionary, orderStatistics))
+
     with open(targetTsvFile, "w", newline='') as filewriter:
         filewriter.write(" | ".join(OrderAggregate.header()) + "\n")
         tsvWriter = csv.writer(filewriter, delimiter="\t")
         for o in orderStatistics.collectAll():
             tsvWriter.writerow(o.toList(securitiesDictionary))
 
-
-if __name__ == '__main__':
-    sourceFile = r"https://aquis-public-files.s3.eu-west-2.amazonaws.com/market_data/current/pretrade_current.txt"
-    targetTsvFile = r".\pretrade_current_ac3.tsv"
-    # launch
-    asyncio.run(main(sourceFile, targetTsvFile))
