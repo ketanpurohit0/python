@@ -5,16 +5,16 @@ import dataclasses
 
 
 # Utilities
-def fixJson(json: str) -> str:
-    fixJson = json.replace('{{', '{"header":{')
+def fixJson(jsonStr: str) -> str:
+    fixJson = jsonStr.replace('{{', '{"header":{')
     fixJson = fixJson.replace('SELL', '"SELL"')
     fixJson = fixJson.replace('BUY', '"BUY"')
     fixJson = fixJson.replace('"flags_":"{"', '"flags_":{"')
     return fixJson
 
 
-def filterIn(json: str) -> bool:
-    return json.find("msgType_") > 0 and not json.find('"msgType_":11') > 0
+def filterIn(jsonStr: str) -> bool:
+    return jsonStr.find("msgType_") > 0 and not jsonStr.find('"msgType_":11') > 0
 
 
 # Contains securities indexed by securityId
@@ -128,7 +128,7 @@ class OrderStatisticsAggregator:
 if __name__ == '__main__':
     # use argparse here
     sourceFile = r"C:\Users\ketan\Downloads\pretrade_current.txt"
-    targetTsvFile = r".\pretrade_current.tsv"
+    targetTsvFile = r".\pretrade_current_ac1.tsv"
 
     # create a lookup for securities built from messages of type 8
     # it has been observed that not all 'traded' have a type 8
