@@ -6,28 +6,27 @@ from Aquis1 import OrderAggregate
 import csv
 
 
+async def innerWorker(jsonStr: str, securitiesDictionary: SecuritiesDict, orderStatistics: OrderStatisticsAggregator):
+    if filterIn(jsonStr):
+        fixedJson = fixJson(jsonStr[2:])
+        jsonObj = json.loads(fixedJson)
+        msgType = jsonObj["header"]["msgType_"]
+        # place the parsed json in relevant containers
+        if msgType == 8:
+            securitiesDictionary.add(jsonObj)
+        elif msgType == 12:
+            orderStatistics.aggregate(jsonObj)
+
+
 async def worker(name, queue, securitiesDictionary: SecuritiesDict, orderStatistics: OrderStatisticsAggregator):
     while True:
         jsonStr = await queue.get()
         jsonStr = jsonStr.decode('ASCII')
-        if filterIn(jsonStr):
-            fixedJson = fixJson(jsonStr[2:])
-            jsonObj = json.loads(fixedJson)
-            msgType = jsonObj["header"]["msgType_"]
-            # place the parsed json in relevant containers
-            if msgType == 8:
-                securitiesDictionary.add(jsonObj)
-            elif msgType == 12:
-                orderStatistics.aggregate(jsonObj)
-        else:
-            # not of interest
-            pass
-        print(name)
+        await innerWorker(jsonStr, securitiesDictionary, orderStatistics)
         queue.task_done()
 
 
 async def main(sourceFile: str, targetTsvFile: str) -> None:
-
     # create a lookup for securities built from messages of type 8
     # it has been observed that not all 'traded' have a type 8
     # hence referential integrity problem. See output
@@ -45,7 +44,7 @@ async def main(sourceFile: str, targetTsvFile: str) -> None:
 
     # do a streaming read
     streamingReadFromURL = requests.get(sourceFile, stream=True)
-    for chunkId, chunk in enumerate(streamingReadFromURL.iter_lines()):
+    for chunk in streamingReadFromURL.iter_lines(65536):
         inboundQueue.put_nowait(chunk)
 
     # informational
