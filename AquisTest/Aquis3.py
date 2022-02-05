@@ -1,10 +1,13 @@
 import json
+from datetime import time
+
 import requests
 import asyncio
 from Aquis1 import filterIn, fixJson, SecuritiesDict, OrderStatisticsAggregator
 from Aquis1 import OrderAggregate
-from AquisCommon import timing_val, async_timing_val
+from AquisCommon import timing_val
 import csv
+import time
 
 
 async def innerWorker(jsonStr: str, securitiesDictionary: SecuritiesDict, orderStatistics: OrderStatisticsAggregator):
@@ -18,6 +21,7 @@ async def innerWorker(jsonStr: str, securitiesDictionary: SecuritiesDict, orderS
         elif msgType == 12:
             orderStatistics.aggregate(jsonObj)
 
+
 # worker on the queue, there would be multiple instances of these
 async def worker(name, queue, securitiesDictionary: SecuritiesDict, orderStatistics: OrderStatisticsAggregator):
     while True:
@@ -26,8 +30,9 @@ async def worker(name, queue, securitiesDictionary: SecuritiesDict, orderStatist
         await innerWorker(jsonStr, securitiesDictionary, orderStatistics)
         queue.task_done()
 
-async def main(sourceFile: str, securitiesDictionary: SecuritiesDict, orderStatistics: OrderStatisticsAggregator) -> None:
 
+async def main(sourceFile: str, securitiesDictionary: SecuritiesDict,
+               orderStatistics: OrderStatisticsAggregator) -> None:
     # inboundQueue and associated workers
     inboundQueue = asyncio.Queue()
     tasks = []
@@ -52,10 +57,8 @@ async def main(sourceFile: str, securitiesDictionary: SecuritiesDict, orderStati
     # Wait until all worker tasks are cancelled.
     await asyncio.gather(*tasks, return_exceptions=True)
 
-if __name__ == '__main__':
-    sourceFile = r"https://aquis-public-files.s3.eu-west-2.amazonaws.com/market_data/current/pretrade_current.txt"
-    targetTsvFile = r".\pretrade_current_ac3.tsv"
-
+@timing_val
+def useAsyncIo(sourceFile: str, targetTsvFile: str) -> None:
     # create a lookup for securities built from messages of type 8
     # it has been observed that not all 'traded' have a type 8
     # hence referential integrity problem. See output
@@ -74,3 +77,9 @@ if __name__ == '__main__':
         for o in orderStatistics.collectAll():
             tsvWriter.writerow(o.toList(securitiesDictionary))
 
+
+if __name__ == '__main__':
+    sourceFile = r"https://aquis-public-files.s3.eu-west-2.amazonaws.com/market_data/current/pretrade_current.txt"
+    targetTsvFile = r".\pretrade_current_ac3.tsv"
+    timer, _, _ = useAsyncIo(sourceFile, targetTsvFile)
+    print("Time:", timer)

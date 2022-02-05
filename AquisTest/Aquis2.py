@@ -27,7 +27,7 @@ def fixAndSplitInputFile(sourceFile: str, messageEightFile: str, messageTwelveFi
                         message12writer.write(str(jsonObj) + "\n")
 
 @timing_val
-def main(sourceFile: str, targetMessage8File: str, targetMessage12File: str, targetTsvFile: str) -> None:
+def useSpark(sourceFile: str, targetMessage8File: str, targetMessage12File: str, targetTsvFile: str) -> None:
     # take the original source file and fix the json and split into 2 json files
     # one for each message type
     fixAndSplitInputFile(sourceFile, targetMessage8File, targetMessage12File)
@@ -112,6 +112,6 @@ if __name__ == '__main__':
     targetMessage8File = r".\m8.json"
     targetMessage12File = r".\m12.json"
     targetTsvFile = r".\pretrade_current.tsv"
-    timer, _, _ = main(sourceFile, targetMessage8File, targetMessage12File, targetTsvFile)
+    timer, _, _ = useSpark(sourceFile, targetMessage8File, targetMessage12File, targetTsvFile)
     print("Time:", timer)
 
