@@ -2,7 +2,7 @@ from pyspark.sql import SparkSession
 from Aquis1 import filterIn, fixJson
 import json
 from pyspark.sql.functions import sum as _sum, min as _min, max as _max
-from pyspark.sql.functions import count, col, avg
+from pyspark.sql.functions import count, col, avg, concat, lit
 
 
 def fixAndSplitInputFile(sourceFile: str, messageEightFile: str, messageTwelveFile: str) -> None:
@@ -69,40 +69,41 @@ if __name__ == '__main__':
 
     # now aggregate messageType12 by securityId_ and side_
     aggDfSells = messageType12Df.filter("bookEntry_.side_ == 'SELL'") \
-        .select("*", (col("bookEntry_.quantity_") * col("bookEntry_.price_")).alias("TotalSellAmount"))\
+        .select("*", (col("bookEntry_.quantity_") * col("bookEntry_.price_")).alias("TotalSellAmount")) \
         .groupby("bookEntry_.securityId_", "bookEntry_.side_") \
         .agg(count("bookEntry_.securityId_").alias("Total Sell Count"), \
              _sum("bookEntry_.quantity_").alias("Total Sell Quantity"), \
              _min("bookEntry_.price_").alias("Min Sell Price"), \
-             _sum("TotalSellAmount").alias("Weighted Average Sell Price")\
-             )\
-        .withColumn("Weighted Average Sell Price", col("Weighted Average Sell Price")/col("Total Sell Quantity"))
+             _sum("TotalSellAmount").alias("Weighted Average Sell Price") \
+             ) \
+        .withColumn("Weighted Average Sell Price", col("Weighted Average Sell Price") / col("Total Sell Quantity"))
 
     # aggDfSells.show()
 
     # now aggregate messageType12 by securityId_ and side_
     aggDfBuys = messageType12Df.filter("bookEntry_.side_ == 'BUY'") \
-        .select("*", (col("bookEntry_.quantity_") * col("bookEntry_.price_")).alias("TotalBuyAmount"))\
+        .select("*", (col("bookEntry_.quantity_") * col("bookEntry_.price_")).alias("TotalBuyAmount")) \
         .groupby("bookEntry_.securityId_", "bookEntry_.side_") \
         .agg(count("bookEntry_.securityId_").alias("Total Buy Count"), \
              _sum("bookEntry_.quantity_").alias("Total Buy Quantity"), \
              _max("bookEntry_.price_").alias("Max Buy Price"), \
-             _sum("TotalBuyAmount").alias("Weighted Average Buy Price")\
-             )\
-        .withColumn("Weighted Average Buy Price", col("Weighted Average Buy Price")/col("Total Buy Quantity"))
+             _sum("TotalBuyAmount").alias("Weighted Average Buy Price") \
+             ) \
+        .withColumn("Weighted Average Buy Price", col("Weighted Average Buy Price") / col("Total Buy Quantity"))
 
     # aggDfBuys.show()
 
     # bring it together with joins, use outer join with the security data due to missing ids
     # select columns in the following order..
-    outputColList = [col("isin_").alias("ISIN"), col("currency_").alias("Currency"), "Total Buy Count", "Total Sell Count", "Total Buy Quantity", "Total Sell Quantity",
-                "Weighted Average Buy Price", "Weighted Average Sell Price", "Max Buy Price", "Min Sell Price"]
+    outputColList = [col("isin_").alias("ISIN"), col("currency_").alias("Currency"), "Total Buy Count",
+                     "Total Sell Count", "Total Buy Quantity", "Total Sell Quantity",
+                     "Weighted Average Buy Price", "Weighted Average Sell Price", "Max Buy Price", "Min Sell Price"]
 
-    outputDf = aggDfBuys.join(aggDfSells, ["securityId_"])\
-    .join(messagesType8Df, ["securityId_"], "left_outer")\
-    .select(outputColList)
-
-    print(outputDf.count())
+    outputDf = aggDfBuys.join(aggDfSells, ["securityId_"], "full_outer") \
+        .join(messagesType8Df, ["securityId_"], "left_outer") \
+        .na.fill(0, outputColList[2:]) \
+        .na.fill("MISSING", ["isin_", "currency_"]) \
+        .select(outputColList)
 
     # collect into a single file
     outputDf.coalesce(1).write.option("sep", "\t").csv(r".\test.csv", header=True)
