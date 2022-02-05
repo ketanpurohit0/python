@@ -43,3 +43,4 @@ Comments
 * DocStrings
 * Tests
 * Spark streaming (if I have the time..)
+* Scale out using securityId modulus as partition key (may not get time, but mentioning here due to consideration I need to give it)
