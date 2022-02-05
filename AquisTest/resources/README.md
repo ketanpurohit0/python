@@ -25,7 +25,21 @@ AquisThread.py
 * Uses threads to process the streaming data
 * RUNTIME: ~140secs
 
+AquisCommon.py
+* A collection of common methods that are
+* in use across the different files
+
 Comments
+* The output only has records for security actually trade (message 12)
+* There is 'bad' json that is repaired during processing
+* Not all 'traded' securities have a corresponding security static data
+* record (msg#8). This is illustrated in the output.
+
 * Closest to the requirement use case is probably **AquisAsyncIO.py**
 * The **Spark** version is there to illustrate the possibility of its usage and its
 'power' - and would scale with the compute resource.
+
+**Still to do - (At time of writing Sat 17:37)**
+* DocStrings
+* Tests
+* Spark streaming (if I have the time..)
