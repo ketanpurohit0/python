@@ -1,11 +1,7 @@
 import json
-
 import requests
 import asyncio
-from Aquis1 import filterIn, fixJson, SecuritiesDict, OrderStatisticsAggregator
-from Aquis1 import OrderAggregate
-from AquisCommon import timing_val
-import csv
+from AquisCommon import timing_val, filterIn, fixJson, SecuritiesDict, OrderStatisticsAggregator, writeResult
 
 
 async def innerWorker(jsonStr: str, securitiesDictionary: SecuritiesDict, orderStatistics: OrderStatisticsAggregator):
@@ -74,11 +70,13 @@ def useAsyncIo(sourceFile: str, targetTsvFile: str) -> None:
     asyncio.run(main(sourceFile, securitiesDictionary, orderStatistics))
 
     # write final results
-    with open(targetTsvFile, "w", newline='') as filewriter:
-        filewriter.write(" | ".join(OrderAggregate.header()) + "\n")
-        tsvWriter = csv.writer(filewriter, delimiter="\t")
-        for o in orderStatistics.collectAll():
-            tsvWriter.writerow(o.toList(securitiesDictionary))
+    # with open(targetTsvFile, "w", newline='') as filewriter:
+    #     filewriter.write(" | ".join(OrderAggregate.header()) + "\n")
+    #     tsvWriter = csv.writer(filewriter, delimiter="\t")
+    #     for o in orderStatistics.collectAll():
+    #         tsvWriter.writerow(o.toList(securitiesDictionary))
+
+    writeResult(orderStatistics, securitiesDictionary, targetTsvFile)
 
 
 if __name__ == '__main__':

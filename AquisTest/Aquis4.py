@@ -3,9 +3,8 @@ import time
 from multiprocessing import JoinableQueue
 from queue import Empty
 from threading import Thread
-import csv
 import requests
-from Aquis1 import filterIn, fixJson, SecuritiesDict, OrderStatisticsAggregator, OrderAggregate
+from Aquis1 import filterIn, fixJson, SecuritiesDict, OrderStatisticsAggregator, writeResult
 from AquisCommon import timing_val
 
 
@@ -66,12 +65,7 @@ def useThreads(nThreads: int, sourceUrl: str, targetTsvFile: str) -> None:
     map(lambda wi: wi.join(), workers)
     inboundQueue.join()
 
-    # write final results
-    with open(targetTsvFile, "w", newline='') as filewriter:
-        filewriter.write(" | ".join(OrderAggregate.header()) + "\n")
-        tsvWriter = csv.writer(filewriter, delimiter="\t")
-        for o in orderStatistics.collectAll():
-            tsvWriter.writerow(o.toList(securitiesDictionary))
+    writeResult(orderStatistics, securitiesDictionary, targetTsvFile)
 
 
 if __name__ == '__main__':
