@@ -26,6 +26,6 @@ def useNaive(sourceFile: str, targetTsvFile: str) -> None:
 if __name__ == '__main__':
     # use argparse here
     sourceFile = r"C:\Users\ketan\Downloads\pretrade_current.txt"
-    targetTsvFile = r".\naive.tsv"
+    targetTsvFile = r".\useNaive.tsv"
     timer, _, _ = useNaive(sourceFile, targetTsvFile)
     print("Time:", timer)
