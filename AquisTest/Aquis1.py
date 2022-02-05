@@ -129,7 +129,7 @@ class OrderStatisticsAggregator:
             yield o
 
 @timing_val
-def main(sourceFile: str, targetTsvFile: str) -> None:
+def useNaive(sourceFile: str, targetTsvFile: str) -> None:
     # create a lookup for securities built from messages of type 8
     # it has been observed that not all 'traded' have a type 8
     # hence referential integrity problem. See output
@@ -168,7 +168,7 @@ def main(sourceFile: str, targetTsvFile: str) -> None:
 if __name__ == '__main__':
     # use argparse here
     sourceFile = r"C:\Users\ketan\Downloads\pretrade_current.txt"
-    targetTsvFile = r".\pretrade_current_ac1.tsv"
-    timer, _, _ = main(sourceFile, targetTsvFile)
+    targetTsvFile = r".\naive.tsv"
+    timer, _, _ = useNaive(sourceFile, targetTsvFile)
     print("Time:", timer)
 
