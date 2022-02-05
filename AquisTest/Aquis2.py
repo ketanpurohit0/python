@@ -79,7 +79,7 @@ def useSpark(sourceFile: str, targetMessage8File: str, targetMessage12File: str,
     # now aggregate messageType12 by securityId_ and side_
     aggDfSells = msg12Df.filter("value.bookEntry_.side_ == 'SELL'") \
         .select("*", (col("value.bookEntry_.quantity_") * col("value.bookEntry_.price_")).alias("TotalSellAmount")) \
-        .groupby("value.bookEntry_.securityId_", "value.bookEntry_.side_") \
+        .groupby("value.bookEntry_.securityId_") \
         .agg(count("value.bookEntry_.securityId_").alias("Total Sell Count"), \
              _sum("value.bookEntry_.quantity_").alias("Total Sell Quantity"), \
              _min("value.bookEntry_.price_").alias("Min Sell Price"), \
@@ -91,7 +91,7 @@ def useSpark(sourceFile: str, targetMessage8File: str, targetMessage12File: str,
     # now aggregate messageType12 by securityId_ and side_
     aggDfBuys = msg12Df.filter("value.bookEntry_.side_ == 'BUY'") \
         .select("*", (col("value.bookEntry_.quantity_") * col("value.bookEntry_.price_")).alias("TotalBuyAmount")) \
-        .groupby("value.bookEntry_.securityId_", "value.bookEntry_.side_") \
+        .groupby("value.bookEntry_.securityId_") \
         .agg(count("value.bookEntry_.securityId_").alias("Total Buy Count"), \
              _sum("value.bookEntry_.quantity_").alias("Total Buy Quantity"), \
              _max("value.bookEntry_.price_").alias("Max Buy Price"), \
