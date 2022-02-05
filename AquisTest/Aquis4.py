@@ -1,29 +1,15 @@
-import json
 import time
 from multiprocessing import JoinableQueue
 from queue import Empty
 from threading import Thread
 import requests
-from Aquis1 import filterIn, fixJson, SecuritiesDict, OrderStatisticsAggregator, writeResult
-from AquisCommon import timing_val
+from AquisCommon import timing_val, SecuritiesDict, OrderStatisticsAggregator, writeResult, innerProcessor
 
 
 def downloadFile(sourceUrl: str, inboundQueue: JoinableQueue):
     streamingReadFromURL = requests.get(sourceUrl, stream=True)
     for chunk in streamingReadFromURL.iter_lines(65536):
         inboundQueue.put_nowait(chunk)
-
-
-def innerWorker(jsonStr: str, securitiesDictionary: SecuritiesDict, orderStatistics: OrderStatisticsAggregator):
-    if filterIn(jsonStr):
-        fixedJson = fixJson(jsonStr[2:])
-        jsonObj = json.loads(fixedJson)
-        msgType = jsonObj["header"]["msgType_"]
-        # place the parsed json in relevant containers
-        if msgType == 8:
-            securitiesDictionary.add(jsonObj)
-        elif msgType == 12:
-            orderStatistics.aggregate(jsonObj)
 
 
 def worker(queue: JoinableQueue, securitiesDictionary: SecuritiesDict,
@@ -35,7 +21,7 @@ def worker(queue: JoinableQueue, securitiesDictionary: SecuritiesDict,
         try:
             jsonStr = queue.get(block=True, timeout=5.0)
             jsonStr = jsonStr.decode('ASCII')
-            innerWorker(jsonStr, securitiesDictionary, orderStatistics)
+            innerProcessor(jsonStr, securitiesDictionary, orderStatistics)
             queue.task_done()
             counter += 1
         except Empty:
@@ -72,5 +58,6 @@ if __name__ == '__main__':
     # use argparse here
     sourceFile = r"https://aquis-public-files.s3.eu-west-2.amazonaws.com/market_data/current/pretrade_current.txt"
     targetTsvFile = r".\useThreads.tsv"
-    timer, _, _ = useThreads(4, sourceFile, targetTsvFile)
+    nThreads = 2
+    timer, _, _ = useThreads(2, sourceFile, targetTsvFile)
     print("Time:", timer)

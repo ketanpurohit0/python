@@ -1,5 +1,4 @@
-import json
-from AquisCommon import timing_val, SecuritiesDict, OrderStatisticsAggregator, filterIn, writeResult, fixJson
+from AquisCommon import timing_val, SecuritiesDict, OrderStatisticsAggregator, filterIn, writeResult, innerProcessor
 
 
 @timing_val
@@ -18,18 +17,7 @@ def useNaive(sourceFile: str, targetTsvFile: str) -> None:
         # use filereader as iterator, only keep lines with msgType_ in them.
         # this is to avoid 'spurious' entries (at least as I understand it presently)
         for line in filter(lambda x: filterIn(x), filereader):
-            # remove the first two characters in source
-            jsonStr = line[2:]
-            # apply fixes for 'malformed' json
-            fixedJson = fixJson(jsonStr)
-            # parse the json
-            jsonObj = json.loads(fixedJson)
-            msgType = jsonObj["header"]["msgType_"]
-            # place the parsed json in relevant containers
-            if msgType == 8:
-                securitiesDictionary.add(jsonObj)
-            elif msgType == 12:
-                orderStatistics.aggregate(jsonObj)
+            innerProcessor(line, securitiesDictionary, orderStatistics)
 
     # Write to target
     writeResult(orderStatistics, securitiesDictionary, targetTsvFile)

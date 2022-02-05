@@ -1,19 +1,10 @@
-import json
 import requests
 import asyncio
-from AquisCommon import timing_val, filterIn, fixJson, SecuritiesDict, OrderStatisticsAggregator, writeResult
+from AquisCommon import timing_val, SecuritiesDict, OrderStatisticsAggregator, writeResult, innerProcessor
 
 
 async def innerWorker(jsonStr: str, securitiesDictionary: SecuritiesDict, orderStatistics: OrderStatisticsAggregator):
-    if filterIn(jsonStr):
-        fixedJson = fixJson(jsonStr[2:])
-        jsonObj = json.loads(fixedJson)
-        msgType = jsonObj["header"]["msgType_"]
-        # place the parsed json in relevant containers
-        if msgType == 8:
-            securitiesDictionary.add(jsonObj)
-        elif msgType == 12:
-            orderStatistics.aggregate(jsonObj)
+    innerProcessor(jsonStr, securitiesDictionary, orderStatistics)
 
 
 # worker on the queue, there would be multiple instances of these
@@ -25,12 +16,12 @@ async def worker(name, queue, securitiesDictionary: SecuritiesDict, orderStatist
         queue.task_done()
 
 
-async def main(sourceFile: str, securitiesDictionary: SecuritiesDict,
+async def main(nWorkers: int, sourceFile: str, securitiesDictionary: SecuritiesDict,
                orderStatistics: OrderStatisticsAggregator) -> None:
     # inboundQueue and associated workers
     inboundQueue = asyncio.Queue()
     tasks = []
-    for i in range(3):
+    for i in range(nWorkers):
         task = asyncio.create_task(worker(f"worker{i}", inboundQueue, securitiesDictionary, orderStatistics))
         tasks.append(task)
 
@@ -57,7 +48,7 @@ async def streamFileFromURL(inboundQueue, sourceFileURL):
 
 
 @timing_val
-def useAsyncIo(sourceFile: str, targetTsvFile: str) -> None:
+def useAsyncIo(nWorkers: int, sourceFile: str, targetTsvFile: str) -> None:
     # create a lookup for securities built from messages of type 8
     # it has been observed that not all 'traded' have a type 8
     # hence referential integrity problem. See output
@@ -67,14 +58,7 @@ def useAsyncIo(sourceFile: str, targetTsvFile: str) -> None:
     orderStatistics = OrderStatisticsAggregator()
 
     # launch
-    asyncio.run(main(sourceFile, securitiesDictionary, orderStatistics))
-
-    # write final results
-    # with open(targetTsvFile, "w", newline='') as filewriter:
-    #     filewriter.write(" | ".join(OrderAggregate.header()) + "\n")
-    #     tsvWriter = csv.writer(filewriter, delimiter="\t")
-    #     for o in orderStatistics.collectAll():
-    #         tsvWriter.writerow(o.toList(securitiesDictionary))
+    asyncio.run(main(nWorkers, sourceFile, securitiesDictionary, orderStatistics))
 
     writeResult(orderStatistics, securitiesDictionary, targetTsvFile)
 
@@ -83,5 +67,6 @@ if __name__ == '__main__':
     # use argparse here
     sourceFile = r"https://aquis-public-files.s3.eu-west-2.amazonaws.com/market_data/current/pretrade_current.txt"
     targetTsvFile = r".\useAsyncIO.tsv"
-    timer, _, _ = useAsyncIo(sourceFile, targetTsvFile)
+    nWorkers = 2
+    timer, _, _ = useAsyncIo(nWorkers, sourceFile, targetTsvFile)
     print("Time:", timer)
