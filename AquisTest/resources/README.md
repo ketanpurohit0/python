@@ -1,4 +1,5 @@
 
+
 AcquisNaive.py
 A first implementation (not really naive)
 * But called native because - just single threaded, and does not stream the file from the give URL (I captured a copy for repeatable testing)
@@ -30,7 +31,9 @@ AquisCommon.py
 * in use across the different files
 
 Comments
-* The output only has records for security actually trade (message 12)
+* Only uses std python libraries, with exception of **pyspark**
+to illustrate the use of Spark API
+* The output only has records for securities actually traded (ie have msg#12)
 * There is 'bad' json that is repaired during processing
 * Not all 'traded' securities have a corresponding security static data
 * record (msg#8). This is illustrated in the output.
