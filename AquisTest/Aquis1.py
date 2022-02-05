@@ -2,6 +2,7 @@ import csv
 import json
 from typing import Any, Dict, Generator, List
 import dataclasses
+from AquisCommon import timing_val
 
 
 # Utilities
@@ -36,6 +37,9 @@ class SecuritiesDict:
 
     def contains(self, securityId: int):
         return securityId in self.securitiesDictionary
+
+    def size(self):
+        return len(self.securitiesDictionary)
 
     def __repr__(self):
         return f"{self.__class__.__name__} records {len(self.securitiesDictionary)}"
@@ -124,12 +128,8 @@ class OrderStatisticsAggregator:
         for o in self.orders.values():
             yield o
 
-
-if __name__ == '__main__':
-    # use argparse here
-    sourceFile = r"C:\Users\ketan\Downloads\pretrade_current.txt"
-    targetTsvFile = r".\pretrade_current_ac1.tsv"
-
+@timing_val
+def main(sourceFile: str, targetTsvFile: str) -> None:
     # create a lookup for securities built from messages of type 8
     # it has been observed that not all 'traded' have a type 8
     # hence referential integrity problem. See output
@@ -163,3 +163,12 @@ if __name__ == '__main__':
         tsvWriter = csv.writer(filewriter, delimiter="\t")
         for o in orderStatistics.collectAll():
             tsvWriter.writerow(o.toList(securitiesDictionary))
+
+
+if __name__ == '__main__':
+    # use argparse here
+    sourceFile = r"C:\Users\ketan\Downloads\pretrade_current.txt"
+    targetTsvFile = r".\pretrade_current_ac1.tsv"
+    timer, _, _ = main(sourceFile, targetTsvFile)
+    print("Time:", timer)
+

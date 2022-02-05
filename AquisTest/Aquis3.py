@@ -3,6 +3,7 @@ import requests
 import asyncio
 from Aquis1 import filterIn, fixJson, SecuritiesDict, OrderStatisticsAggregator
 from Aquis1 import OrderAggregate
+from AquisCommon import timing_val, async_timing_val
 import csv
 
 
@@ -25,7 +26,6 @@ async def worker(name, queue, securitiesDictionary: SecuritiesDict, orderStatist
         await innerWorker(jsonStr, securitiesDictionary, orderStatistics)
         queue.task_done()
 
-
 async def main(sourceFile: str, securitiesDictionary: SecuritiesDict, orderStatistics: OrderStatisticsAggregator) -> None:
 
     # inboundQueue and associated workers
@@ -41,7 +41,7 @@ async def main(sourceFile: str, securitiesDictionary: SecuritiesDict, orderStati
         inboundQueue.put_nowait(chunk)
 
     # informational
-    print(inboundQueue.qsize())
+    # print(inboundQueue.qsize())
 
     # await inboundQueue to empty
     await inboundQueue.join()

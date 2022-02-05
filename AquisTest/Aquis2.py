@@ -1,5 +1,6 @@
 from pyspark.sql import SparkSession
 from Aquis1 import filterIn, fixJson
+from AquisCommon import timing_val
 import json
 from pyspark.sql.functions import sum as _sum, min as _min, max as _max
 from pyspark.sql.functions import count, col, avg, concat, lit
@@ -25,14 +26,8 @@ def fixAndSplitInputFile(sourceFile: str, messageEightFile: str, messageTwelveFi
                     elif msgType == 12:
                         message12writer.write(str(jsonObj) + "\n")
 
-
-if __name__ == '__main__':
-    # use argparse here
-    sourceFile = r"C:\Users\ketan\Downloads\pretrade_current.txt"
-    targetMessage8File = r".\m8.json"
-    targetMessage12File = r".\m12.json"
-    targetTsvFile = r".\pretrade_current.tsv"
-
+@timing_val
+def main(sourceFile: str, targetMessage8File: str, targetMessage12File: str, targetTsvFile: str) -> None:
     # take the original source file and fix the json and split into 2 json files
     # one for each message type
     fixAndSplitInputFile(sourceFile, targetMessage8File, targetMessage12File)
@@ -109,3 +104,14 @@ if __name__ == '__main__':
     outputDf.coalesce(1).write.option("sep", "\t").csv(r".\test.csv", header=True)
 
     spark.stop()
+
+
+if __name__ == '__main__':
+    # use argparse here
+    sourceFile = r"C:\Users\ketan\Downloads\pretrade_current.txt"
+    targetMessage8File = r".\m8.json"
+    targetMessage12File = r".\m12.json"
+    targetTsvFile = r".\pretrade_current.tsv"
+    timer, _, _ = main(sourceFile, targetMessage8File, targetMessage12File, targetTsvFile)
+    print("Time:", timer)
+

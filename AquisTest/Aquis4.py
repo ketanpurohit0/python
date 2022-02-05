@@ -1,75 +1,81 @@
 import json
 import time
-from multiprocessing import Process, JoinableQueue
+from multiprocessing import JoinableQueue
 from queue import Empty
 from threading import Thread
-
+import csv
 import requests
+from Aquis1 import filterIn, fixJson, SecuritiesDict, OrderStatisticsAggregator, OrderAggregate
+from AquisCommon import timing_val
 
-from Aquis1 import filterIn, fixJson
 
-
-def downloadFile(sourceFile: str, inboundQueue: JoinableQueue):
-    streamingReadFromURL = requests.get(sourceFile, stream=True)
+def downloadFile(sourceUrl: str, inboundQueue: JoinableQueue):
+    streamingReadFromURL = requests.get(sourceUrl, stream=True)
     for chunk in streamingReadFromURL.iter_lines(65536):
         inboundQueue.put_nowait(chunk)
 
 
-def worker(name, queue: JoinableQueue):
+def innerWorker(jsonStr: str, securitiesDictionary: SecuritiesDict, orderStatistics: OrderStatisticsAggregator):
+    if filterIn(jsonStr):
+        fixedJson = fixJson(jsonStr[2:])
+        jsonObj = json.loads(fixedJson)
+        msgType = jsonObj["header"]["msgType_"]
+        # place the parsed json in relevant containers
+        if msgType == 8:
+            securitiesDictionary.add(jsonObj)
+        elif msgType == 12:
+            orderStatistics.aggregate(jsonObj)
+
+
+def worker(queue: JoinableQueue, securitiesDictionary: SecuritiesDict,
+           orderStatistics: OrderStatisticsAggregator):
     counter: int = 0
-    msg8counter: int = 0
-    msg12counter: int = 0
-    msgOthercounter: int = 0
     notEmpty: bool = True
 
     while notEmpty and queue.qsize():
         try:
-            jsonStr = queue.get(block=True, timeout=2.0)
+            jsonStr = queue.get(block=True, timeout=5.0)
             jsonStr = jsonStr.decode('ASCII')
-            if filterIn(jsonStr):
-                fixedJson = fixJson(jsonStr[2:])
-                jsonObj = json.loads(fixedJson)
-                msgType = jsonObj["header"]["msgType_"]
-                # place the parsed json in relevant containers
-                if msgType == 8:
-                    msg8counter += 1
-                elif msgType == 12:
-                    msg12counter += 1
-                else:
-                    msgOthercounter += 1
+            innerWorker(jsonStr, securitiesDictionary, orderStatistics)
             queue.task_done()
             counter += 1
-            if counter % 10000 == 0:
-                print(name, counter, msg8counter, msg12counter, msgOthercounter)
         except Empty:
             notEmpty = False
 
-    print(f"{name} completed", counter, msg8counter, msg12counter, msgOthercounter)
 
-
-def useProcess():
-    sourceFile = r"https://aquis-public-files.s3.eu-west-2.amazonaws.com/market_data/current/pretrade_current.txt"
+@timing_val
+def useProcess(sourceUrl: str, targetTsvFile: str) -> None:
     inboundQueue = JoinableQueue()
-    reader = Thread(target=downloadFile, args=(sourceFile, inboundQueue,))
+    securitiesDictionary = SecuritiesDict()
+
+    # aggregate orders in a collection here
+    orderStatistics = OrderStatisticsAggregator()
+
+    reader = Thread(target=downloadFile, args=(sourceUrl, inboundQueue,))
     reader.start()
+    time.sleep(5)
 
     workers = []
-    for i in range(5):
-        w = Process(target=worker, args=(f"worker-{i}", inboundQueue,))
+    for i in range(4):
+        w = Thread(target=worker, args=(inboundQueue, securitiesDictionary, orderStatistics,))
         w.start()
         workers.append(w)
 
-    time.sleep(5)
-    print("*", inboundQueue.qsize())
-    time.sleep(5)
-    print("*", inboundQueue.qsize())
-
+    # wait for threads to complete
     reader.join()
-    print("*", inboundQueue.qsize())
-    inboundQueue.join()
-    print("**", inboundQueue.qsize())
     map(lambda wi: wi.join(), workers)
+    inboundQueue.join()
+
+    # write final results
+    with open(targetTsvFile, "w", newline='') as filewriter:
+        filewriter.write(" | ".join(OrderAggregate.header()) + "\n")
+        tsvWriter = csv.writer(filewriter, delimiter="\t")
+        for o in orderStatistics.collectAll():
+            tsvWriter.writerow(o.toList(securitiesDictionary))
 
 
 if __name__ == '__main__':
-    useProcess()
+    sourceFile = r"https://aquis-public-files.s3.eu-west-2.amazonaws.com/market_data/current/pretrade_current.txt"
+    targetTsvFile = r".\pretrade_current_ac4.tsv"
+    timer, _, _ = useProcess(sourceFile, targetTsvFile)
+    print("Time:", timer)
