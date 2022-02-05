@@ -3,7 +3,7 @@ from Aquis1 import filterIn, fixJson
 from AquisCommon import timing_val
 import json
 from pyspark.sql.functions import sum as _sum, min as _min, max as _max
-from pyspark.sql.functions import count, col, avg, concat, lit
+from pyspark.sql.functions import count, col, avg, concat, lit, expr, regexp_replace, from_json
 
 
 def fixAndSplitInputFile(sourceFile: str, messageEightFile: str, messageTwelveFile: str) -> None:
@@ -37,67 +37,95 @@ def useSpark(sourceFile: str, targetMessage8File: str, targetMessage12File: str,
         .master("local[2]") \
         .getOrCreate()
 
-    # collect messages of type 8, only keep the required fields
-    messagesType8Df = spark.read.json(targetMessage8File) \
-        .select("security_.securityId_", "security_.isin_", "security_.currency_")
+    # clean data from source file
+    cleanDf = spark.read.text(sourceFile) \
+        .filter(col("value").contains("msgType_") & ~col("value").contains('msgType_":11')) \
+        .withColumn("value", expr("substring(value,2)")) \
+        .withColumn("value", regexp_replace("value", '\{\{', r'\{"header":\{')) \
+        .withColumn("value", regexp_replace("value", 'SELL', '"SELL"')) \
+        .withColumn("value", regexp_replace("value", 'BUY', '"BUY"')) \
+        .withColumn("value", regexp_replace("value", '"flags_":"\{"', '"flags_":\{"'))
 
-    # messagesType8Df.printSchema()
+    # figure out schema on message 8
+    msg8Schema = spark.read.json(cleanDf.filter(col("value").contains('"msgType_":8'))\
+                                 .select(col("value").cast("string")).rdd.map(lambda r: r.value)).schema
+    msg8Df = cleanDf.filter(col("value").contains('"msgType_":8')).withColumn("value",from_json("value", msg8Schema))
+    # msg8Df.printSchema()
     # root
-    # | -- securityId_: long(nullable=true)
-    # | -- isin_: string(nullable=true)
-    # | -- currency_: string(nullable=true)
+    # | -- value: struct(nullable=true)
+    # | | -- header: struct(nullable=true)
+    # | | | -- length_: long(nullable=true)
+    # | | | -- msgType_: long(nullable=true)
+    # | | | -- seqNo_: long(nullable=true)
+    # | | -- security_: struct(nullable=true)
+    # | | | -- currency_: string(nullable=true)
+    # | | | -- flags_: struct(nullable=true)
+    # | | | | -- b_: struct(nullable=true)
+    # | | | | | -- aodEnabled_: long(nullable=true)
+    # | | | | | -- closingEnabled_: long(nullable=true)
+    # | | | | | -- illiquid: long(nullable=true)
+    # | | | | | -- live_: long(nullable=true)
+    # | | | | | -- testStock_: long(nullable=true)
+    # | | | | -- v_: long(nullable=true)
+    # | | | -- isin_: string(nullable=true)
+    # | | | -- mic_: string(nullable=true)
+    # | | | -- securityId_: long(nullable=true)
+    # | | | -- tickTableId_: long(nullable=true)
+    # | | | -- umtf_: string(nullable=true)
 
-    messageType12Df = spark.read.json(targetMessage12File)
-
-    # messageType12Df.printSchema()
+    # figure out schema on message 12
+    msg12Schema = spark.read.json(cleanDf.filter(col("value").contains('"msgType_":12'))\
+                                 .select(col("value").cast("string")).rdd.map(lambda r: r.value)).schema
+    msg12Df = cleanDf.filter(col("value").contains('"msgType_":12')).withColumn("value",from_json("value", msg12Schema))
+    # msg12Df.printSchema()
+    # msg12Df.select("value.bookEntry_.side_").show()
     # root
-    # | -- bookEntry_: struct(nullable=true)
-    # | | -- orderId_: long(nullable=true)
-    # | | -- price_: long(nullable=true)
-    # | | -- quantity_: long(nullable=true)
-    # | | -- securityId_: long(nullable=true)
-    # | | -- side_: string(nullable=true)
-    # | -- header: struct(nullable=true)
-    # | | -- length_: long(nullable=true)
-    # | | -- msgType_: long(nullable=true)
-    # | | -- seqNo_: long(nullable=true)
+    # | -- value: struct(nullable=true)
+    # | | -- bookEntry_: struct(nullable=true)
+    # | | | -- orderId_: long(nullable=true)
+    # | | | -- price_: long(nullable=true)
+    # | | | -- quantity_: long(nullable=true)
+    # | | | -- securityId_: long(nullable=true)
+    # | | | -- side_: string(nullable=true)
+    # | | -- header: struct(nullable=true)
+    # | | | -- length_: long(nullable=true)
+    # | | | -- msgType_: long(nullable=true)
+    # | | | -- seqNo_: long(nullable=true)
 
     # now aggregate messageType12 by securityId_ and side_
-    aggDfSells = messageType12Df.filter("bookEntry_.side_ == 'SELL'") \
-        .select("*", (col("bookEntry_.quantity_") * col("bookEntry_.price_")).alias("TotalSellAmount")) \
-        .groupby("bookEntry_.securityId_", "bookEntry_.side_") \
-        .agg(count("bookEntry_.securityId_").alias("Total Sell Count"), \
-             _sum("bookEntry_.quantity_").alias("Total Sell Quantity"), \
-             _min("bookEntry_.price_").alias("Min Sell Price"), \
+    aggDfSells = msg12Df.filter("value.bookEntry_.side_ == 'SELL'") \
+        .select("*", (col("value.bookEntry_.quantity_") * col("value.bookEntry_.price_")).alias("TotalSellAmount")) \
+        .groupby("value.bookEntry_.securityId_", "value.bookEntry_.side_") \
+        .agg(count("value.bookEntry_.securityId_").alias("Total Sell Count"), \
+             _sum("value.bookEntry_.quantity_").alias("Total Sell Quantity"), \
+             _min("value.bookEntry_.price_").alias("Min Sell Price"), \
              _sum("TotalSellAmount").alias("Weighted Average Sell Price") \
              ) \
         .withColumn("Weighted Average Sell Price", col("Weighted Average Sell Price") / col("Total Sell Quantity"))
 
-    # aggDfSells.show()
 
     # now aggregate messageType12 by securityId_ and side_
-    aggDfBuys = messageType12Df.filter("bookEntry_.side_ == 'BUY'") \
-        .select("*", (col("bookEntry_.quantity_") * col("bookEntry_.price_")).alias("TotalBuyAmount")) \
-        .groupby("bookEntry_.securityId_", "bookEntry_.side_") \
-        .agg(count("bookEntry_.securityId_").alias("Total Buy Count"), \
-             _sum("bookEntry_.quantity_").alias("Total Buy Quantity"), \
-             _max("bookEntry_.price_").alias("Max Buy Price"), \
+    aggDfBuys = msg12Df.filter("value.bookEntry_.side_ == 'BUY'") \
+        .select("*", (col("value.bookEntry_.quantity_") * col("value.bookEntry_.price_")).alias("TotalBuyAmount")) \
+        .groupby("value.bookEntry_.securityId_", "value.bookEntry_.side_") \
+        .agg(count("value.bookEntry_.securityId_").alias("Total Buy Count"), \
+             _sum("value.bookEntry_.quantity_").alias("Total Buy Quantity"), \
+             _max("value.bookEntry_.price_").alias("Max Buy Price"), \
              _sum("TotalBuyAmount").alias("Weighted Average Buy Price") \
              ) \
         .withColumn("Weighted Average Buy Price", col("Weighted Average Buy Price") / col("Total Buy Quantity"))
 
-    # aggDfBuys.show()
 
     # bring it together with joins, use outer join with the security data due to missing ids
     # select columns in the following order..
-    outputColList = [col("isin_").alias("ISIN"), col("currency_").alias("Currency"), "Total Buy Count",
+    outputColList = [col("value.security_.isin_").alias("ISIN"), col("value.security_.currency_").alias("Currency"), "Total Buy Count",
                      "Total Sell Count", "Total Buy Quantity", "Total Sell Quantity",
                      "Weighted Average Buy Price", "Weighted Average Sell Price", "Max Buy Price", "Min Sell Price"]
 
-    outputDf = aggDfBuys.join(aggDfSells, ["securityId_"], "full_outer") \
-        .join(messagesType8Df, ["securityId_"], "left_outer") \
+    outputDf = aggDfBuys.join(aggDfSells, ["securityId_"], "full_outer")
+    outputDf = outputDf.join(msg8Df, col("securityId_") == col("value.security_.securityId_") , "left_outer") \
         .na.fill(0, outputColList[2:]) \
-        .na.fill("MISSING", ["isin_", "currency_"]) \
+        .na.fill("MISSING", ["value.security_.isin_", "value.security_.currency_"]) \
         .select(outputColList)
 
     # collect into a single file
@@ -114,4 +142,3 @@ if __name__ == '__main__':
     targetTsvFile = r".\pretrade_current.tsv"
     timer, _, _ = useSpark(sourceFile, targetMessage8File, targetMessage12File, targetTsvFile)
     print("Time:", timer)
-
