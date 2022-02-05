@@ -3,7 +3,7 @@ from Aquis1 import filterIn, fixJson
 from AquisCommon import timing_val
 import json
 from pyspark.sql.functions import sum as _sum, min as _min, max as _max
-from pyspark.sql.functions import count, col, avg, concat, lit, expr, regexp_replace, from_json
+from pyspark.sql.functions import count, col, avg, lit, expr, regexp_replace, from_json
 
 
 def fixAndSplitInputFile(sourceFile: str, messageEightFile: str, messageTwelveFile: str) -> None:
@@ -49,29 +49,13 @@ def useSpark(sourceFile: str, targetMessage8File: str, targetMessage12File: str,
     # figure out schema on message 8
     msg8Schema = spark.read.json(cleanDf.filter(col("value").contains('"msgType_":8'))\
                                  .select(col("value").cast("string")).rdd.map(lambda r: r.value)).schema
-    msg8Df = cleanDf.filter(col("value").contains('"msgType_":8')).withColumn("value",from_json("value", msg8Schema))
+    msg8Df = cleanDf.filter(col("value").contains('"msgType_":8')).withColumn("value",from_json("value", msg8Schema))\
+                    .select("value.security_.securityId_", "value.security_.isin_", "value.security_.currency_")
     # msg8Df.printSchema()
     # root
-    # | -- value: struct(nullable=true)
-    # | | -- header: struct(nullable=true)
-    # | | | -- length_: long(nullable=true)
-    # | | | -- msgType_: long(nullable=true)
-    # | | | -- seqNo_: long(nullable=true)
-    # | | -- security_: struct(nullable=true)
-    # | | | -- currency_: string(nullable=true)
-    # | | | -- flags_: struct(nullable=true)
-    # | | | | -- b_: struct(nullable=true)
-    # | | | | | -- aodEnabled_: long(nullable=true)
-    # | | | | | -- closingEnabled_: long(nullable=true)
-    # | | | | | -- illiquid: long(nullable=true)
-    # | | | | | -- live_: long(nullable=true)
-    # | | | | | -- testStock_: long(nullable=true)
-    # | | | | -- v_: long(nullable=true)
-    # | | | -- isin_: string(nullable=true)
-    # | | | -- mic_: string(nullable=true)
-    # | | | -- securityId_: long(nullable=true)
-    # | | | -- tickTableId_: long(nullable=true)
-    # | | | -- umtf_: string(nullable=true)
+    # | -- securityId_: long(nullable=true)
+    # | -- isin_: string(nullable=true)
+    # | -- currency_: string(nullable=true)
 
     # figure out schema on message 12
     msg12Schema = spark.read.json(cleanDf.filter(col("value").contains('"msgType_":12'))\
@@ -118,15 +102,15 @@ def useSpark(sourceFile: str, targetMessage8File: str, targetMessage12File: str,
 
     # bring it together with joins, use outer join with the security data due to missing ids
     # select columns in the following order..
-    outputColList = [col("value.security_.isin_").alias("ISIN"), col("value.security_.currency_").alias("Currency"), "Total Buy Count",
+    outputColList = [col("isin_").alias("ISIN"), col("currency_").alias("Currency"), "Total Buy Count",
                      "Total Sell Count", "Total Buy Quantity", "Total Sell Quantity",
                      "Weighted Average Buy Price", "Weighted Average Sell Price", "Max Buy Price", "Min Sell Price"]
 
-    outputDf = aggDfBuys.join(aggDfSells, ["securityId_"], "full_outer")
-    outputDf = outputDf.join(msg8Df, col("securityId_") == col("value.security_.securityId_") , "left_outer") \
-        .na.fill(0, outputColList[2:]) \
-        .na.fill("MISSING", ["value.security_.isin_", "value.security_.currency_"]) \
-        .select(outputColList)
+    outputDf = aggDfBuys.join(aggDfSells, ["securityId_"], "full_outer")\
+            .join(msg8Df, ["securityId_"] , "left_outer") \
+            .na.fill(0, outputColList[2:]) \
+            .na.fill("MISSING", ["isin_", "currency_"]) \
+            .select(outputColList)
 
     # collect into a single file
     outputDf.coalesce(1).write.option("sep", "\t").csv(r".\test.csv", header=True)

@@ -10,5 +10,3 @@ def timing_val(func):
         return (t2 - t1), res, func.__name__
 
     return wrapper
-
-
