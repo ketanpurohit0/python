@@ -1,6 +1,6 @@
 import time
 
-
+# Decorator for timing
 def timing_val(func):
     def wrapper(*arg, **kw):
         """source: http://www.daniweb.com/code/snippet368.html"""

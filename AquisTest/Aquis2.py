@@ -1,7 +1,5 @@
 from pyspark.sql import SparkSession
-from Aquis1 import filterIn, fixJson
 from AquisCommon import timing_val
-import json
 from pyspark.sql.functions import sum as _sum, min as _min, max as _max
 from pyspark.sql.functions import count, col, avg, lit, expr, regexp_replace, from_json
 

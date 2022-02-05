@@ -1,5 +1,4 @@
 import json
-from datetime import time
 
 import requests
 import asyncio
@@ -7,7 +6,6 @@ from Aquis1 import filterIn, fixJson, SecuritiesDict, OrderStatisticsAggregator
 from Aquis1 import OrderAggregate
 from AquisCommon import timing_val
 import csv
-import time
 
 
 async def innerWorker(jsonStr: str, securitiesDictionary: SecuritiesDict, orderStatistics: OrderStatisticsAggregator):
@@ -41,9 +39,7 @@ async def main(sourceFile: str, securitiesDictionary: SecuritiesDict,
         tasks.append(task)
 
     # do a streaming read
-    streamingReadFromURL = requests.get(sourceFile, stream=True)
-    for chunk in streamingReadFromURL.iter_lines(65536):
-        inboundQueue.put_nowait(chunk)
+    await streamFileFromURL(inboundQueue, sourceFile)
 
     # informational
     # print(inboundQueue.qsize())
@@ -56,6 +52,13 @@ async def main(sourceFile: str, securitiesDictionary: SecuritiesDict,
         task.cancel()
     # Wait until all worker tasks are cancelled.
     await asyncio.gather(*tasks, return_exceptions=True)
+
+
+async def streamFileFromURL(inboundQueue, sourceFileURL):
+    streamingReadFromURL = requests.get(sourceFileURL, stream=True)
+    for chunk in streamingReadFromURL.iter_lines(65536):
+        inboundQueue.put_nowait(chunk)
+
 
 @timing_val
 def useAsyncIo(sourceFile: str, targetTsvFile: str) -> None:
@@ -79,6 +82,7 @@ def useAsyncIo(sourceFile: str, targetTsvFile: str) -> None:
 
 
 if __name__ == '__main__':
+    # use argparse here
     sourceFile = r"https://aquis-public-files.s3.eu-west-2.amazonaws.com/market_data/current/pretrade_current.txt"
     targetTsvFile = r".\useAsyncIO.tsv"
     timer, _, _ = useAsyncIo(sourceFile, targetTsvFile)

@@ -75,6 +75,7 @@ def useThreads(nThreads: int, sourceUrl: str, targetTsvFile: str) -> None:
 
 
 if __name__ == '__main__':
+    # use argparse here
     sourceFile = r"https://aquis-public-files.s3.eu-west-2.amazonaws.com/market_data/current/pretrade_current.txt"
     targetTsvFile = r".\useThreads.tsv"
     timer, _, _ = useThreads(4, sourceFile, targetTsvFile)
