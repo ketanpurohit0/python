@@ -31,12 +31,12 @@ AquisCommon.py
 * in use across the different files
 
 Comments
+* used Python 3.7 and PyCharm IDE
 * Only uses std python libraries, with exception of **pyspark**
 to illustrate the use of Spark API
 * The output only has records for securities actually traded (ie have msg#12)
-* There is 'bad' json that is repaired during processing
-* Not all 'traded' securities have a corresponding security static data
-* record (msg#8). This is illustrated in the output.
+* There is 'bad' json that is repaired on the fly during processing
+* Not all 'traded' securities have a corresponding security static data record (msg#8). This is illustrated in the output.
 
 * Closest to the requirement use case is probably **AquisAsyncIO.py**
 * The **Spark** version is there to illustrate the possibility of its usage and its
