@@ -7,6 +7,8 @@ import dataclasses
 import json
 
 logger = logging.getLogger(__name__)
+
+
 # Decorator for timing
 def timing_val(func):
     def wrapper(*arg, **kw):
