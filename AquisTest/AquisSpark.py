@@ -24,7 +24,8 @@ def useSpark(sourceFile: str, targetTsvFile: str) -> None:
     msg8Schema = spark.read.json(cleanDf.filter(col("value").contains('"msgType_":8'))
                                  .select(col("value").cast("string")).rdd.map(lambda r: r.value))._jdf.schema().toDDL()
     msg8Df = cleanDf.filter(col("value").contains('"msgType_":8')).withColumn("value", from_json("value", msg8Schema)) \
-        .select("value.security_.securityId_", "value.security_.isin_", "value.security_.currency_")
+        .select("value.security_.securityId_", "value.security_.isin_", "value.security_.currency_")\
+        .repartition(2,["securityId_"])
     # msg8Df.printSchema()
     # root
     # | -- securityId_: long(nullable=true)
@@ -34,8 +35,10 @@ def useSpark(sourceFile: str, targetTsvFile: str) -> None:
     # figure out schema on message 12, keep for re-use later as a technology demonstration
     msg12Schema = spark.read.json(cleanDf.filter(col("value").contains('"msgType_":12'))
                                   .select(col("value").cast("string")).rdd.map(lambda r: r.value))._jdf.schema().toDDL()
-    msg12Df = cleanDf.filter(col("value").contains('"msgType_":12')).withColumn("value",
-                                                                                from_json("value", msg12Schema))
+    msg12Df = cleanDf.filter(col("value").contains('"msgType_":12'))\
+        .withColumn("value", from_json("value", msg12Schema))\
+        .repartition(2, ["value.bookEntry_.securityId_"])
+
     # msg12Df.printSchema()
     # msg12Df.select("value.bookEntry_.side_").show()
     # root
