@@ -1,3 +1,4 @@
+import math
 import time
 import csv
 from typing import Any, Dict, Generator, List
@@ -20,8 +21,8 @@ def timing_val(func):
 # Utility for fixing bad json
 def fixJson(jsonStr: str) -> str:
     fixJson = jsonStr.replace('{{', '{"header":{')
-    fixJson = fixJson.replace('SELL', '"SELL"')
-    fixJson = fixJson.replace('BUY', '"BUY"')
+    fixJson = fixJson.replace('SELL,', '"SELL",')
+    fixJson = fixJson.replace('BUY,', '"BUY",')
     fixJson = fixJson.replace('"flags_":"{"', '"flags_":{"')
     return fixJson
 
@@ -123,7 +124,7 @@ class OrderStatisticsAggregator:
         quantity = jsonObj["bookEntry_"]["quantity_"]
         oa.totalSellOrders += 1
         oa.totalSellQty += quantity
-        oa.minSellPrice = min(oa.minSellPrice, price)
+        oa.minSellPrice = price if (oa.minSellPrice == 0) else min(oa.minSellPrice, price)
         oa.accumulateSells += quantity * price
         return oa
 
