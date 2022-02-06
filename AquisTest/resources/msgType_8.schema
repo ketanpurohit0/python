@@ -1,0 +1,1 @@
+`header` STRUCT<`length_`: BIGINT, `msgType_`: BIGINT, `seqNo_`: BIGINT>,`security_` STRUCT<`currency_`: STRING, `flags_`: STRUCT<`b_`: STRUCT<`aodEnabled_`: BIGINT, `closingEnabled_`: BIGINT, `illiquid`: BIGINT, `live_`: BIGINT, `testStock_`: BIGINT>, `v_`: BIGINT>, `isin_`: STRING, `mic_`: STRING, `securityId_`: BIGINT, `tickTableId_`: BIGINT, `umtf_`: STRING>

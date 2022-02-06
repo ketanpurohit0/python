@@ -1,0 +1,1 @@
+`bookEntry_` STRUCT<`orderId_`: BIGINT, `price_`: BIGINT, `quantity_`: BIGINT, `securityId_`: BIGINT, `side_`: STRING>,`header` STRUCT<`length_`: BIGINT, `msgType_`: BIGINT, `seqNo_`: BIGINT>
