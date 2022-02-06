@@ -1,14 +1,14 @@
-0 {{"msgType_":8,"length_":36,"seqNo_":893},"security_":{"securityId_":BUYS_ONLY,"umtf_":"ENERe","isin_":"ES0105548004","currency_":"EUR","mic_":"XMAD","tickTableId_":32,"flags_":"{"b_":{"closingEnabled_":0,"testStock_":0,"illiquid":0,"live_":1,"aodEnabled_":0},"v_":8}}}
-0 {{"msgType_":8,"length_":36,"seqNo_":894},"security_":{"securityId_":SELL_ONLY,"umtf_":"ATTl","isin_":"GB00BNG2M159","currency_":"GBX","mic_":"XLON","tickTableId_":32,"flags_":"{"b_":{"closingEnabled_":1,"testStock_":0,"illiquid":0,"live_":1,"aodEnabled_":1},"v_":25}}}
+0 {{"msgType_":8,"length_":36,"seqNo_":893},"security_":{"securityId_":"BUYS_ONLY","umtf_":"ENERe","isin_":"ES0105548004","currency_":"EUR","mic_":"XMAD","tickTableId_":32,"flags_":"{"b_":{"closingEnabled_":0,"testStock_":0,"illiquid":0,"live_":1,"aodEnabled_":0},"v_":8}}}
+0 {{"msgType_":8,"length_":36,"seqNo_":894},"security_":{"securityId_":"SELL_ONLY","umtf_":"ATTl","isin_":"GB00BNG2M159","currency_":"GBX","mic_":"XLON","tickTableId_":32,"flags_":"{"b_":{"closingEnabled_":1,"testStock_":0,"illiquid":0,"live_":1,"aodEnabled_":1},"v_":25}}}
 0 {{"msgType_":11,"length_":28,"seqNo_":215955},"bookStatus_":{"securityId_":2319,"tradingStatus_":1,"marketFlags_":17,"entries_":8,"closingBuyQty_":0,"closingSellQty_":0,"indicativePrice_":0}}
-0 {{"msgType_":8,"length_":36,"seqNo_":895},"security_":{"securityId_":BOTH_SIDES,"umtf_":"LDAe","isin_":"ES0105546008","currency_":"EUR","mic_":"XMAD","tickTableId_":34,"flags_":"{"b_":{"closingEnabled_":0,"testStock_":0,"illiquid":0,"live_":1,"aodEnabled_":0},"v_":8}}}
-0 {{"msgType_":8,"length_":36,"seqNo_":896},"security_":{"securityId_":OTHER,"umtf_":"SYABd","isin_":"DE000A2TSL71","currency_":"EUR","mic_":"XETR","tickTableId_":33,"flags_":"{"b_":{"closingEnabled_":0,"testStock_":0,"illiquid":0,"live_":1,"aodEnabled_":0},"v_":8}}}
+0 {{"msgType_":8,"length_":36,"seqNo_":895},"security_":{"securityId_":"BOTH_SIDES","umtf_":"LDAe","isin_":"ES0105546008","currency_":"EUR","mic_":"XMAD","tickTableId_":34,"flags_":"{"b_":{"closingEnabled_":0,"testStock_":0,"illiquid":0,"live_":1,"aodEnabled_":0},"v_":8}}}
+0 {{"msgType_":8,"length_":36,"seqNo_":896},"security_":{"securityId_":"OTHER","umtf_":"SYABd","isin_":"DE000A2TSL71","currency_":"EUR","mic_":"XETR","tickTableId_":33,"flags_":"{"b_":{"closingEnabled_":0,"testStock_":0,"illiquid":0,"live_":1,"aodEnabled_":0},"v_":8}}}
 1643885040281586000 (2022-02-03T10:44:00.281586) 33
-0 {{"msgType_":12,"length_":25,"seqNo_":45842},"bookEntry_":{"securityId_":NOSTATIC,"side_":BUY,"quantity_":660,"price_":40250000,"orderId_":749525}}
-0 {{"msgType_":12,"length_":25,"seqNo_":45843},"bookEntry_":{"securityId_":BUYS_ONLY,"side_":BUY,"quantity_":922,"price_":40250000,"orderId_":759226}}
-0 {{"msgType_":12,"length_":25,"seqNo_":45844},"bookEntry_":{"securityId_":SELL_ONLY,"side_":SELL,"quantity_":660,"price_":40255000,"orderId_":752416}}
-0 {{"msgType_":12,"length_":25,"seqNo_":45844},"bookEntry_":{"securityId_":BOTH_SIDES,"side_":BUY,"quantity_":660,"price_":40255000,"orderId_":752416}}
-0 {{"msgType_":12,"length_":25,"seqNo_":45844},"bookEntry_":{"securityId_":BOTH_SIDES,"side_":BUY,"quantity_":660,"price_":40250000,"orderId_":752416}}
-0 {{"msgType_":12,"length_":25,"seqNo_":45844},"bookEntry_":{"securityId_":BOTH_SIDES,"side_":SELL,"quantity_":660,"price_":40256000,"orderId_":752416}}
-0 {{"msgType_":12,"length_":25,"seqNo_":45844},"bookEntry_":{"securityId_":BOTH_SIDES,"side_":SELL,"quantity_":660,"price_":40257000,"orderId_":752416}}
+0 {{"msgType_":12,"length_":25,"seqNo_":45842},"bookEntry_":{"securityId_":"NOSTATIC","side_":BUY,"quantity_":660,"price_":40250000,"orderId_":749525}}
+0 {{"msgType_":12,"length_":25,"seqNo_":45843},"bookEntry_":{"securityId_":"BUYS_ONLY","side_":BUY,"quantity_":922,"price_":40250000,"orderId_":759226}}
+0 {{"msgType_":12,"length_":25,"seqNo_":45844},"bookEntry_":{"securityId_":"SELL_ONLY","side_":SELL,"quantity_":660,"price_":40255000,"orderId_":752416}}
+0 {{"msgType_":12,"length_":25,"seqNo_":45844},"bookEntry_":{"securityId_":"BOTH_SIDES","side_":BUY,"quantity_":660,"price_":40255000,"orderId_":752416}}
+0 {{"msgType_":12,"length_":25,"seqNo_":45844},"bookEntry_":{"securityId_":"BOTH_SIDES","side_":BUY,"quantity_":660,"price_":40250000,"orderId_":752416}}
+0 {{"msgType_":12,"length_":25,"seqNo_":45844},"bookEntry_":{"securityId_":"BOTH_SIDES","side_":SELL,"quantity_":660,"price_":40256000,"orderId_":752416}}
+0 {{"msgType_":12,"length_":25,"seqNo_":45844},"bookEntry_":{"securityId_":"BOTH_SIDES","side_":SELL,"quantity_":660,"price_":40257000,"orderId_":752416}}
 1643885040281735000 (2022-02-03T10:44:00.281735) 13
