@@ -65,7 +65,7 @@ class Tree:
 
         def max_zig_zag_node(node):
             if node:
-                return max_zig_zag(node)
+                return self.max_zig_zag(node)
 
         return max(max_zig_zag_node(self.right_child, "r"), max_zig_zag_node(self.left_child, "l"))
 
