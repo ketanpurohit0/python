@@ -14,6 +14,7 @@ AquisSpark.py
   * Separates out MSG#8 and MSG#12
   * Performs aggregations on MSG#12 data
   * Produces final out via a dataframe write
+  * Also captures the DDL for the schema (for later use, see resources/)
 * RUNTIME: ~60secs
 
 AquisAsyncIO.py
@@ -29,6 +30,10 @@ AquisThread.py
 AquisCommon.py
 * A collection of common methods that are
 * in use across the different files
+
+resources/msgType_8.schema,msgType_12.schema
+* Schema definitions of the data in above message types
+* Obtained via spark api (.toDDL())
 
 Comments
 * used Python 3.7 and PyCharm IDE
