@@ -35,6 +35,7 @@ AquisCommon.py
 resources/msgType_8.schema,msgType_12.schema
 * Schema definitions of the data in above message types
 * Obtained via spark api (.toDDL())
+* Intention is to use in a 'spark structured streaming' demo [_if I get the time_]
 
 output_sample/
 * One file per generating source file
