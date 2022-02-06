@@ -2,13 +2,45 @@ from pyspark.sql import SparkSession
 from AquisCommon import timing_val
 from pyspark.sql.functions import sum as _sum, min as _min, max as _max
 from pyspark.sql.functions import count, col, expr, regexp_replace, from_json
+import os
+from dotenv import load_dotenv
+from pyspark import SparkConf
+
+
+def getDbConnectionUrl(db, user, secret):
+    """[Connection URL for 'jdbc' and postgresql database]
+
+    Args:
+        db ([str]): [Database name]
+        user ([str]): [User Id]
+        secret ([str]): [Password]
+
+    Returns:
+        [str]: [jdbc url for postgresql]
+    """
+    return f"jdbc:postgresql://localhost/{db}?user={user}&password={secret}"
+
+
+def getJars():
+    return os.getenv("JARS")
+
+
+def getSparkConf(jars: str):
+    print(jars)
+    conf = SparkConf()
+    if jars is not None:
+        conf.set("spark.jars", jars)
+    return conf
 
 
 @timing_val
 def useSpark(sourceFile: str, targetTsvFile: str) -> None:
+    load_dotenv(verbose=True)
+
     spark = SparkSession.builder \
         .appName('Aquis2') \
         .master("local[2]") \
+        .config(conf=getSparkConf(getJars())) \
         .getOrCreate()
 
     # clean data from source file
@@ -24,7 +56,7 @@ def useSpark(sourceFile: str, targetTsvFile: str) -> None:
     msg8Schema = spark.read.json(cleanDf.filter(col("value").contains('"msgType_":8'))
                                  .select(col("value").cast("string")).rdd.map(lambda r: r.value))._jdf.schema().toDDL()
     msg8Df = cleanDf.filter(col("value").contains('"msgType_":8')).withColumn("value", from_json("value", msg8Schema)) \
-        .select("value.security_.securityId_", "value.security_.isin_", "value.security_.currency_")\
+        .select("value.security_.securityId_", "value.security_.isin_", "value.security_.currency_") \
         .repartition(2, ["securityId_"])
     # msg8Df.printSchema()
     # root
@@ -35,8 +67,8 @@ def useSpark(sourceFile: str, targetTsvFile: str) -> None:
     # figure out schema on message 12, keep for re-use later as a technology demonstration
     msg12Schema = spark.read.json(cleanDf.filter(col("value").contains('"msgType_":12'))
                                   .select(col("value").cast("string")).rdd.map(lambda r: r.value))._jdf.schema().toDDL()
-    msg12Df = cleanDf.filter(col("value").contains('"msgType_":12'))\
-        .withColumn("value", from_json("value", msg12Schema))\
+    msg12Df = cleanDf.filter(col("value").contains('"msgType_":12')) \
+        .withColumn("value", from_json("value", msg12Schema)) \
         .repartition(2, ["value.bookEntry_.securityId_"])
 
     # msg12Df.printSchema()
@@ -89,6 +121,15 @@ def useSpark(sourceFile: str, targetTsvFile: str) -> None:
 
     # collect into a single file
     outputDf.coalesce(1).write.option("sep", "\t").csv(targetTsvFile, header=True)
+
+    # Demo writing to postgresql (msg8 dataframe)
+    dburl = getDbConnectionUrl(db=os.getenv("POSTGRES_DB"), user=os.getenv("POSTGRES_USER"),
+                               secret=os.getenv("POSTGRES_SECRET"))
+    msg8Df.write.format("jdbc") \
+        .option("url", dburl) \
+        .option("dbtable", "AcquisExample") \
+        .option("driver", "org.postgresql.Driver") \
+        .save(mode="append")
 
     spark.stop()
 

@@ -15,6 +15,7 @@ AquisSpark.py
   * Performs aggregations on MSG#12 data
   * Performs join with MSG#8 data to produce final out via a dataframe write
   * Also captures the DDL for the schema (for later use, see resources/)
+  * Also (for demo) writes msg8 to a postgres db
 * RUNTIME: ~60secs
 
 AquisAsyncIO.py
@@ -41,7 +42,7 @@ output_sample/
 Comments
 * used Python 3.7 and PyCharm IDE
 * Linting/Formatting courtesy of "black"
-* Only uses std python libraries, with exception of **pyspark**
+* Only uses std python libraries, with exception of **pyspark** and **python-dotenv**
 to illustrate the use of Spark API
 * The output only has records for securities actually traded (ie have msg#12)
 * There is 'bad' json that is repaired on the fly during processing
@@ -49,10 +50,9 @@ to illustrate the use of Spark API
 
 * Closest to the requirement use case is probably **AquisAsyncIO.py**
 * The **Spark** version is there to illustrate the possibility of its usage and its
-'power' - and would scale with the compute resource.
+'power' - and would scale with compute resource.
 
-**Still to do - (At time of writing Sat 17:37)**
+**Still to do - (At time of writing Sunday 16:30)**
 * DocStrings
-* Tests
 * Spark streaming (if I have the time..)
 * Scale out using securityId modulus as partition key (may not get time, but mentioning here due to consideration I need to give it)
