@@ -35,6 +35,9 @@ resources/msgType_8.schema,msgType_12.schema
 * Schema definitions of the data in above message types
 * Obtained via spark api (.toDDL())
 
+output_sample/
+* One file per generating source file
+
 Comments
 * used Python 3.7 and PyCharm IDE
 * Linting/Formatting courtesy of "black"
