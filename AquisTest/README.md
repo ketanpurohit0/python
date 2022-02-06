@@ -2,7 +2,7 @@
 
 AcquisNaive.py
 A first implementation (not really naive)
-* But called native because - just single threaded, and does not stream the file from the give URL (I captured a copy for repeatable testing)
+* But called naive because - just single threaded, and does not stream the file from the give URL (I captured a copy for repeatable testing)
 * It does read the local file in a 'streaming' way
 * Most early learnings out of the way here - such as fixing bad json
 * RUNTIME: ~2secs
@@ -13,7 +13,7 @@ AquisSpark.py
   * Fixes the json string
   * Separates out MSG#8 and MSG#12
   * Performs aggregations on MSG#12 data
-  * Produces final out via a dataframe write
+  * Performs join with MSG#8 data to produce final out via a dataframe write
   * Also captures the DDL for the schema (for later use, see resources/)
 * RUNTIME: ~60secs
 
