@@ -1,7 +1,7 @@
 from pyspark.sql import SparkSession
 from AquisCommon import timing_val
 from pyspark.sql.functions import sum as _sum, min as _min, max as _max
-from pyspark.sql.functions import count, col, avg, lit, expr, regexp_replace, from_json, DataType
+from pyspark.sql.functions import count, col, expr, regexp_replace, from_json
 
 
 @timing_val
@@ -25,7 +25,7 @@ def useSpark(sourceFile: str, targetTsvFile: str) -> None:
                                  .select(col("value").cast("string")).rdd.map(lambda r: r.value))._jdf.schema().toDDL()
     msg8Df = cleanDf.filter(col("value").contains('"msgType_":8')).withColumn("value", from_json("value", msg8Schema)) \
         .select("value.security_.securityId_", "value.security_.isin_", "value.security_.currency_")\
-        .repartition(2,["securityId_"])
+        .repartition(2, ["securityId_"])
     # msg8Df.printSchema()
     # root
     # | -- securityId_: long(nullable=true)

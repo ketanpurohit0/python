@@ -37,6 +37,7 @@ resources/msgType_8.schema,msgType_12.schema
 
 Comments
 * used Python 3.7 and PyCharm IDE
+* Linting/Formatting courtesy of "black"
 * Only uses std python libraries, with exception of **pyspark**
 to illustrate the use of Spark API
 * The output only has records for securities actually traded (ie have msg#12)

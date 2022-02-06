@@ -80,6 +80,6 @@ def test_ml_dd_dd(spark: SparkSession) -> None:
     from pyspark.ml.feature import StringIndexer
     
 
-    data = [("A","B"),("C","D")]
+    data = [("A", "B"),("C", "D")]
     spark.createDataFrame(data).show()
     assert(True)

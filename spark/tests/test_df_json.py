@@ -20,6 +20,16 @@ def test_json(spark: SparkSession) -> None:
     df = spark.read.json(spark.sparkContext.parallelize([json]))
     assert (df.count() == 1)
 
+def test_ac(spark: SparkSession) -> None:
+    data = [('James','Smith','M',3000),
+      ('Anna','Rose','F',4100),
+      ('Robert','Williams','M',6200),
+    ]
+
+    columns = ["firstname","lastname","gender","salary"]
+    df = spark.createDataFrame(data=data, schema = columns)
+    df.show()
+
 
 def test_json_in_column(spark: SparkSession) -> None:
     """
@@ -91,5 +101,6 @@ def test_json_risers(spark: SparkSession) -> None:
     """
     json = '{"ConstantRiser" : {"2 days" : 12, "3 days" : -15, "4 days" : 18, "5 days" : 67.1}}'
     df = spark.read.json(spark.sparkContext.parallelize([json]))
+    assert(1==0)
     assert(df.count() == 1)
-    assert(df.filter("ConstantRiser['3 days']> 0").count(), 1)
+    assert(df.filter("ConstantRiser['3 days']> 0").count() == 1)
