@@ -1,6 +1,7 @@
-import math
+import logging
 import time
 import csv
+from json import JSONDecodeError
 from typing import Any, Dict, Generator, List
 import dataclasses
 import json
@@ -146,13 +147,17 @@ class OrderStatisticsAggregator:
 def innerProcessor(jsonStr: str, securitiesDictionary: SecuritiesDict, orderStatistics: OrderStatisticsAggregator):
     if filterIn(jsonStr):
         fixedJson = fixJson(jsonStr[2:])
-        jsonObj = json.loads(fixedJson)
-        msgType = jsonObj["header"]["msgType_"]
-        # place the parsed json in relevant containers
-        if msgType == 8:
-            securitiesDictionary.add(jsonObj)
-        elif msgType == 12:
-            orderStatistics.aggregate(jsonObj)
+        try:
+            jsonObj = json.loads(fixedJson)
+            msgType = jsonObj["header"]["msgType_"]
+            # place the parsed json in relevant containers
+            if msgType == 8:
+                securitiesDictionary.add(jsonObj)
+            elif msgType == 12:
+                orderStatistics.aggregate(jsonObj)
+
+        except JSONDecodeError as jsonError:
+            logging.error(f"JSONDecodeError {jsonError.msg}")
 
 
 def writeResult(orderStatistics: OrderStatisticsAggregator, securitiesDictionary: SecuritiesDict, targetTsvFile):
