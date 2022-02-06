@@ -6,7 +6,7 @@ from typing import Any, Dict, Generator, List
 import dataclasses
 import json
 
-
+logger = logging.getLogger(__name__)
 # Decorator for timing
 def timing_val(func):
     def wrapper(*arg, **kw):
@@ -157,7 +157,7 @@ def innerProcessor(jsonStr: str, securitiesDictionary: SecuritiesDict, orderStat
                 orderStatistics.aggregate(jsonObj)
 
         except JSONDecodeError as jsonError:
-            logging.error(f"JSONDecodeError {jsonError.msg}")
+            logger.error(f"JSONDecodeError {jsonError.msg}")
 
 
 def writeResult(orderStatistics: OrderStatisticsAggregator, securitiesDictionary: SecuritiesDict, targetTsvFile):

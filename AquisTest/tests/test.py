@@ -1,3 +1,5 @@
+import logging
+
 import pytest
 from AquisCommon import SecuritiesDict, OrderStatisticsAggregator, innerProcessor, filterIn
 
@@ -5,7 +7,7 @@ from AquisCommon import SecuritiesDict, OrderStatisticsAggregator, innerProcesso
 def test_logic():
     # Test consists of two files, one containing the test input in the manner
     # matching the sample file (changed ids, names) and with a csv file consisting
-    # of expected values.
+    # of expected values. There is also 'bad' json, which will be skipped over
 
     testInputFile = r"../resources/testInput.txt"
     expectedResultFile = r"../resources/expectedTestOutput.csv"
