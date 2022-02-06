@@ -1,7 +1,61 @@
-import logging
-
-import pytest
+import json
 from AquisCommon import SecuritiesDict, OrderStatisticsAggregator, innerProcessor, filterIn
+
+
+def test_aggregator_buy_order():
+    orderStatistics = OrderStatisticsAggregator()
+
+    jsonStr = r'{"bookEntry_":{"securityId_":123,"side_":"BUY","quantity_":100,"price_":100,"orderId_":123}}'
+    jsonObj = json.loads(jsonStr)
+    orderStatistics.aggregate(jsonObj)
+    o = orderStatistics.getAggregatedOrderForId(jsonObj["bookEntry_"]["securityId_"])
+    assert o.totalBuyQty == 100
+    assert o.totalSellQty == 0
+    assert o.maxBuyPrice == 100
+    assert o.minSellPrice == 0
+    assert o.totalBuyOrders == 1
+    assert o.totalSellOrders == 0
+    assert o.weightedAverageBuyPrice() == 100
+    assert o.weightedAverageSellPrice() == 0
+
+
+def test_aggregator_sell_order():
+    orderStatistics = OrderStatisticsAggregator()
+
+    jsonStr = r'{"bookEntry_":{"securityId_":123,"side_":"SELL","quantity_":200,"price_":200,"orderId_":123}}'
+    jsonObj = json.loads(jsonStr)
+    orderStatistics.aggregate(jsonObj)
+    o = orderStatistics.getAggregatedOrderForId(jsonObj["bookEntry_"]["securityId_"])
+    assert o.totalBuyQty == 0
+    assert o.totalSellQty == 200
+    assert o.maxBuyPrice == 0
+    assert o.minSellPrice == 200
+    assert o.totalBuyOrders == 0
+    assert o.totalSellOrders == 1
+    assert o.weightedAverageBuyPrice() == 0
+    assert o.weightedAverageSellPrice() == 200
+
+
+def test_aggregator_mixed_orders():
+    orderStatistics = OrderStatisticsAggregator()
+
+    orders = [r'{"bookEntry_":{"securityId_":123,"side_":"BUY","quantity_":100,"price_":100,"orderId_":123}}',
+              r'{"bookEntry_":{"securityId_":123,"side_":"SELL","quantity_":200,"price_":200,"orderId_":123}}'
+              ]
+
+    for order in orders:
+        jsonObj = json.loads(order)
+        orderStatistics.aggregate(jsonObj)
+
+    o = orderStatistics.getAggregatedOrderForId(123)
+    assert o.totalBuyQty == 100
+    assert o.totalSellQty == 200
+    assert o.maxBuyPrice == 100
+    assert o.minSellPrice == 200
+    assert o.totalBuyOrders == 1
+    assert o.totalSellOrders == 1
+    assert o.weightedAverageBuyPrice() == 100
+    assert o.weightedAverageSellPrice() == 200
 
 
 def test_logic():
@@ -39,7 +93,7 @@ def test_logic():
 
     for k, ev in expectedResultsDict.items():
         if k in resultsDict:
-            # compare e-xpected v with a-ctual v
+            # compare expected v with actual v
             av = resultsDict[k]
             assert len(ev) == len(av), "Different lengths of expected values and actual values"
             outcome = [str(ev[i]) == str(av[i]) for i in range(len(ev))]
