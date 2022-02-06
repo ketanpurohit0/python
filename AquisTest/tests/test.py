@@ -41,6 +41,6 @@ def test_logic():
             av = resultsDict[k]
             assert len(ev) == len(av), "Different lengths of expected values and actual values"
             outcome = [str(ev[i]) == str(av[i]) for i in range(len(ev))]
-            assert all(outcome), f"{k} has a difference in one of the outcomes"
+            assert all(outcome), f"{k} has a difference in one of the outcomes\n{ev}\n{av}"
         else:
             assert False, f"{k} is in expected result but not in actual result"
