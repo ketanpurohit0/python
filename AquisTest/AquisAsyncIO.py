@@ -37,13 +37,18 @@ async def main(nWorkers: int, sourceFile: str, securitiesDictionary: SecuritiesD
     """
     # inboundQueue and associated workers
     inboundQueue = asyncio.Queue()
-    tasks = []
+
+    producerTasks = [asyncio.create_task(streamFileFromURL(inboundQueue, sourceFile))]
+
+    consumerTasks = []
     for i in range(nWorkers):
         task = asyncio.create_task(worker(f"worker{i}", inboundQueue, securitiesDictionary, orderStatistics))
-        tasks.append(task)
+        consumerTasks.append(task)
 
-    # do a streaming read
-    await streamFileFromURL(inboundQueue, sourceFile)
+    # at this point both producer and consumers are running
+
+    # wait for producers to finish
+    await asyncio.gather(*producerTasks)
 
     # informational
     # print(inboundQueue.qsize())
@@ -52,10 +57,10 @@ async def main(nWorkers: int, sourceFile: str, securitiesDictionary: SecuritiesD
     await inboundQueue.join()
 
     # cancel tasks as there will not be any more entries
-    for task in tasks:
+    for task in consumerTasks:
         task.cancel()
     # Wait until all worker tasks are cancelled.
-    await asyncio.gather(*tasks, return_exceptions=True)
+    await asyncio.gather(*consumerTasks, return_exceptions=True)
 
 
 async def streamFileFromURL(inboundQueue: asyncio.Queue, sourceFileURL):
