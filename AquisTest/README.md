@@ -1,14 +1,22 @@
+Submission Notes:
 
+I decide to do this 4 ways (I was enjoying it and wanted to try different approaches). So each of 
+the following 4 approaches are independent applications that can be run in the 'same' way.
 
+Acquis{..}.py --sourceFile "URL_or_PATH" --targetTsvFile "PATH"
+
+folder: output_sample/ has samples of output generated.
+
+---
 AcquisNaive.py
 A first implementation (not really naive)
-* But called naive because - just single threaded, and does not stream the file from the give URL (I captured a copy for repeatable testing)
+* But called naive because - just single threaded, and **does not stream** the file from the give URL (I captured a copy for repeatable testing)
 * It does read the local file in a 'streaming' way
 * Most early learnings out of the way here - such as fixing bad json
-* RUNTIME: ~2secs
+* RUNTIME: ~2secs (explained by the fact it was a "small" 34Mb file at time of capture and no network io.)
 
 AquisSpark.py
-* Uses the same above capture file and using pure Spark APIS
+* Uses the same above captured file and using pure Spark APIS
 * Reads into a dataframe
   * Fixes the json string
   * Separates out MSG#8 and MSG#12
@@ -19,12 +27,12 @@ AquisSpark.py
 * RUNTIME: ~60secs
 
 AquisAsyncIO.py
-* Actually does a streaming read from the URL
+* Actually does a streaming read from the URL - so does look at the latest version of the file
 * uses asyncio tasks to process the streaming data
 * RUNTIME: ~45secs
 
 AquisThread.py
-* Also does a streaming read from the URL
+* Also does a streaming read from the URL - so does look at the latest version of the file
 * Uses threads to process the streaming data
 * RUNTIME: ~140secs
 
@@ -56,6 +64,6 @@ to illustrate the use of Spark API
 * The **Spark** version is there to illustrate the possibility of its usage and its
 'power' - and would scale with compute resource.
 
-**Still to do - (At time of writing Monday 12:00)**
+**Still to do - (At time of writing Monday 16:00)**
 * Spark streaming (if I have the time..)
 * Scale out using securityId modulus as partition key (may not get time, but mentioning here due to consideration I need to give it)
