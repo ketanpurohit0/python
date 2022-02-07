@@ -23,10 +23,23 @@ def getDbConnectionUrl(db, user, secret):
 
 
 def getJars():
+    """[The list of paths for JAR resolution]
+
+    Returns:
+        [str]: [The path list for the location of JARS to be used spark executors]
+    """
     return os.getenv("JARS")
 
 
-def getSparkConf(jars: str):
+def getSparkConf(jars: str) -> SparkConf:
+    """[Spark configuration object for spark jar]
+
+    Args:
+        jars (str): [List of paths for JAR resolution]
+
+    Returns:
+        [SparkConf]: [The configuration object for spark]
+    """
     # print(jars)
     conf = SparkConf()
     if jars is not None:
@@ -36,6 +49,15 @@ def getSparkConf(jars: str):
 
 @timing_val
 def useSpark(sourceFile: str, targetTsvFile: str) -> None:
+    """[Process the input source files using Spark to transform to target data]
+
+    Args:
+        sourceFile (str): [Path to the location of the input data]
+        targetTsvFile (str): [Path to the location of the target data]
+    """
+
+    # secrets for access to postgres database are held in .env file
+    # this loads that into the application environment
     load_dotenv(verbose=True)
 
     spark = SparkSession.builder \
@@ -124,6 +146,8 @@ def useSpark(sourceFile: str, targetTsvFile: str) -> None:
     outputDf.coalesce(1).write.option("sep", "\t").csv(targetTsvFile, header=True)
 
     # Demo writing to postgresql (msg8 dataframe)
+    # will append records to table AcquisExample. Table will
+    # be created on the fly it it does not exist.
     dburl = getDbConnectionUrl(db=os.getenv("POSTGRES_DB"), user=os.getenv("POSTGRES_USER"),
                                secret=os.getenv("POSTGRES_SECRET"))
     msg8Df.write.format("jdbc") \
@@ -151,6 +175,5 @@ if __name__ == '__main__':
         timer, _, _ = useSpark(args.sourceFile, args.targetTsvFile)
         print("Time:", timer)
     else:
-        import os
         fname = os.path.split(__file__)[-1]
         print(f'Missing arguments - usage: {fname} --sourceFile "path" --targetTsvFile  "path"')

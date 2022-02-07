@@ -4,6 +4,12 @@ from AquisCommon import timing_val, SecuritiesDict, OrderStatisticsAggregator, f
 
 @timing_val
 def useNaive(sourceFile: str, targetTsvFile: str) -> None:
+    """[Process the input source files]
+
+    Args:
+        sourceFile (str): [Path to the location of the input data]
+        targetTsvFile (str): [Path to the location of the target data]
+    """
     # create a lookup for securities built from messages of type 8
     # it has been observed that not all 'traded' have a type 8
     # hence referential integrity problem. See output
@@ -25,6 +31,8 @@ def useNaive(sourceFile: str, targetTsvFile: str) -> None:
 
 
 if __name__ == '__main__':
+    """[Entry point for processing the files, sources the data and aggregates it]
+    """
     # use argparse here
 
     parser = argparse.ArgumentParser()

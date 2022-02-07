@@ -9,7 +9,15 @@ async def innerWorker(jsonStr: str, securitiesDictionary: SecuritiesDict, orderS
 
 
 # worker on the queue, there would be multiple instances of these
-async def worker(name, queue, securitiesDictionary: SecuritiesDict, orderStatistics: OrderStatisticsAggregator):
+async def worker(name: str, queue: asyncio.Queue, securitiesDictionary: SecuritiesDict, orderStatistics: OrderStatisticsAggregator):
+    """[Worker for consuming the queue]
+
+    Args:
+        name ([str]): [Worker name]
+        queue ([asyncio.Queue]): [Queue that will be processed]
+        securitiesDictionary (SecuritiesDict): [Contains securities data keyed by securityId]
+        orderStatistics (OrderStatisticsAggregator): [Contains aggregated order data]
+    """
     while True:
         jsonStr = await queue.get()
         jsonStr = jsonStr.decode('ASCII')
@@ -19,6 +27,14 @@ async def worker(name, queue, securitiesDictionary: SecuritiesDict, orderStatist
 
 async def main(nWorkers: int, sourceFile: str, securitiesDictionary: SecuritiesDict,
                orderStatistics: OrderStatisticsAggregator) -> None:
+    """[The main co-routine for processing the file]
+
+    Args:
+        nWorkers (int): [number of worker tasks]
+        sourceFile (str): [The url of the source data]
+        securitiesDictionary (SecuritiesDict): [Contains securities data keyed by securityId]
+        orderStatistics (OrderStatisticsAggregator): [Contains aggregated order data]
+    """
     # inboundQueue and associated workers
     inboundQueue = asyncio.Queue()
     tasks = []
@@ -42,7 +58,13 @@ async def main(nWorkers: int, sourceFile: str, securitiesDictionary: SecuritiesD
     await asyncio.gather(*tasks, return_exceptions=True)
 
 
-async def streamFileFromURL(inboundQueue, sourceFileURL):
+async def streamFileFromURL(inboundQueue :asyncio.Queue, sourceFileURL):
+    """[Will stream data from the given URL and place each line in a queue]
+
+    Args:
+        inboundQueue ([asyncio.Queue]): [A queue from the asyncio package]
+        sourceFileURL ([str]): [The url of the source data]
+    """
     streamingReadFromURL = requests.get(sourceFileURL, stream=True)
     for chunk in streamingReadFromURL.iter_lines(65536):
         inboundQueue.put_nowait(chunk)
@@ -50,6 +72,13 @@ async def streamFileFromURL(inboundQueue, sourceFileURL):
 
 @timing_val
 def useAsyncIo(nWorkers: int, sourceFile: str, targetTsvFile: str) -> None:
+    """[Stream process sourceFile into target using asyncio worker]
+
+    Args:
+        nWorkers (int): [Number of worker (tasks)]
+        sourceFile (str): [URL of the source, this file will be streamed.]
+        targetTsvFile (str): [Target path of the output file]
+    """
     # create a lookup for securities built from messages of type 8
     # it has been observed that not all 'traded' have a type 8
     # hence referential integrity problem. See output

@@ -8,6 +8,12 @@ import argparse
 
 
 def downloadFile(sourceUrl: str, inboundQueue: JoinableQueue):
+    """[Stream file from sourceUrl and place into queue for consumption]
+
+    Args:
+        sourceUrl (str): [The url of the source data]
+        inboundQueue (JoinableQueue): [A queue from the multiprocessing module]
+    """
     streamingReadFromURL = requests.get(sourceUrl, stream=True)
     for chunk in streamingReadFromURL.iter_lines(65536):
         inboundQueue.put_nowait(chunk)
@@ -15,6 +21,13 @@ def downloadFile(sourceUrl: str, inboundQueue: JoinableQueue):
 
 def worker(queue: JoinableQueue, securitiesDictionary: SecuritiesDict,
            orderStatistics: OrderStatisticsAggregator):
+    """[The worker that will run in a thread]
+
+    Args:
+        queue (JoinableQueue): [The queue from which items will be taken]
+        securitiesDictionary (SecuritiesDict): [Contains securities data keyed by securityId]
+        orderStatistics (OrderStatisticsAggregator): [Contains aggregated order data]
+    """
     counter: int = 0
     notEmpty: bool = True
 
@@ -31,6 +44,13 @@ def worker(queue: JoinableQueue, securitiesDictionary: SecuritiesDict,
 
 @timing_val
 def useThreads(nThreads: int, sourceUrl: str, targetTsvFile: str) -> None:
+    """[Stream process sourceFile into target using threads]
+
+    Args:
+        nThreads (int): [Number of worker threads to use]
+        sourceUrl (str): [The url of the source data]
+        targetTsvFile (str): [Target path of the output file]
+    """
     inboundQueue = JoinableQueue()
     securitiesDictionary = SecuritiesDict()
 
@@ -42,7 +62,7 @@ def useThreads(nThreads: int, sourceUrl: str, targetTsvFile: str) -> None:
     time.sleep(5)
 
     workers = []
-    for i in range(nThreads):
+    for _ in range(nThreads):
         w = Thread(target=worker, args=(inboundQueue, securitiesDictionary, orderStatistics,))
         w.start()
         workers.append(w)
@@ -75,4 +95,3 @@ if __name__ == '__main__':
         import os
         fname = os.path.split(__file__)[-1]
         print(f'Missing arguments - usage: {fname} --sourceFile "path" --targetTsvFile  "path"')
-
