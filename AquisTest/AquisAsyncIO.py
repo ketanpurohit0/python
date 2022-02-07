@@ -58,7 +58,7 @@ async def main(nWorkers: int, sourceFile: str, securitiesDictionary: SecuritiesD
     await asyncio.gather(*tasks, return_exceptions=True)
 
 
-async def streamFileFromURL(inboundQueue :asyncio.Queue, sourceFileURL):
+async def streamFileFromURL(inboundQueue: asyncio.Queue, sourceFileURL):
     """[Will stream data from the given URL and place each line in a queue]
 
     Args:

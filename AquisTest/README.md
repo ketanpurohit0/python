@@ -56,7 +56,6 @@ to illustrate the use of Spark API
 * The **Spark** version is there to illustrate the possibility of its usage and its
 'power' - and would scale with compute resource.
 
-**Still to do - (At time of writing Sunday 16:30)**
-* DocStrings
+**Still to do - (At time of writing Monday 12:00)**
 * Spark streaming (if I have the time..)
 * Scale out using securityId modulus as partition key (may not get time, but mentioning here due to consideration I need to give it)
