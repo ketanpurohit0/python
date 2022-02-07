@@ -4,6 +4,7 @@ from queue import Empty
 from threading import Thread
 import requests
 from AquisCommon import timing_val, SecuritiesDict, OrderStatisticsAggregator, writeResult, innerProcessor
+import argparse
 
 
 def downloadFile(sourceUrl: str, inboundQueue: JoinableQueue):
@@ -56,8 +57,22 @@ def useThreads(nThreads: int, sourceUrl: str, targetTsvFile: str) -> None:
 
 if __name__ == '__main__':
     # use argparse here
-    sourceFile = r"https://aquis-public-files.s3.eu-west-2.amazonaws.com/market_data/current/pretrade_current.txt"
-    targetTsvFile = r".\useThreads.tsv"
-    nThreads = 2
-    timer, _, _ = useThreads(2, sourceFile, targetTsvFile)
-    print("Time:", timer)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--sourceFile", type=str, help="path to source input file")
+    parser.add_argument("--targetTsvFile", type=str, help="path to target tsv file")
+
+    args = parser.parse_args()
+
+    # sourceFile = r"https://aquis-public-files.s3.eu-west-2.amazonaws.com/market_data/current/pretrade_current.txt"
+    # targetTsvFile = r".\useThreads.tsv"
+
+    if args.sourceFile and args.targetTsvFile:
+        nThreads = 2
+        timer, _, _ = useThreads(nThreads, args.sourceFile, args.targetTsvFile)
+        print("Time:", timer)
+    else:
+        import os
+        fname = os.path.split(__file__)[-1]
+        print(f'Missing arguments - usage: {fname} --sourceFile "path" --targetTsvFile  "path"')
+

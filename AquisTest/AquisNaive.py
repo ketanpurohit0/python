@@ -1,3 +1,4 @@
+import argparse
 from AquisCommon import timing_val, SecuritiesDict, OrderStatisticsAggregator, filterIn, writeResult, innerProcessor
 
 
@@ -25,7 +26,20 @@ def useNaive(sourceFile: str, targetTsvFile: str) -> None:
 
 if __name__ == '__main__':
     # use argparse here
-    sourceFile = r"C:\Users\ketan\Downloads\pretrade_current.txt"
-    targetTsvFile = r".\useNaive.tsv"
-    timer, _, _ = useNaive(sourceFile, targetTsvFile)
-    print("Time:", timer)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--sourceFile", type=str, help="path to source input file")
+    parser.add_argument("--targetTsvFile", type=str, help="path to target tsv file")
+
+    args = parser.parse_args()
+
+    # sourceFile = r"C:\Users\ketan\Downloads\pretrade_current.txt"
+    # targetTsvFile = r".\useNaive.tsv"
+
+    if args.sourceFile and args.targetTsvFile:
+        timer, _, _ = useNaive(args.sourceFile, args.targetTsvFile)
+        print("Time:", timer)
+    else:
+        import os
+        fname = os.path.split(__file__)[-1]
+        print(f'Missing arguments - usage: {fname} --sourceFile "path" --targetTsvFile  "path"')

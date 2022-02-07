@@ -40,6 +40,9 @@ resources/msgType_8.schema,msgType_12.schema
 output_sample/
 * One file per generating source file
 
+requirements.txt
+* For the additional dependencies in GITAction
+
 Comments
 * used Python 3.7 and PyCharm IDE
 * Linting/Formatting courtesy of "black"
@@ -55,6 +58,5 @@ to illustrate the use of Spark API
 
 **Still to do - (At time of writing Sunday 16:30)**
 * DocStrings
-* GitActions
 * Spark streaming (if I have the time..)
 * Scale out using securityId modulus as partition key (may not get time, but mentioning here due to consideration I need to give it)

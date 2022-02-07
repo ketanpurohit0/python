@@ -5,6 +5,7 @@ from pyspark.sql.functions import count, col, expr, regexp_replace, from_json
 import os
 from dotenv import load_dotenv
 from pyspark import SparkConf
+import argparse
 
 
 def getDbConnectionUrl(db, user, secret):
@@ -26,7 +27,7 @@ def getJars():
 
 
 def getSparkConf(jars: str):
-    print(jars)
+    # print(jars)
     conf = SparkConf()
     if jars is not None:
         conf.set("spark.jars", jars)
@@ -48,8 +49,8 @@ def useSpark(sourceFile: str, targetTsvFile: str) -> None:
         .filter(col("value").contains("msgType_") & ~col("value").contains('msgType_":11')) \
         .withColumn("value", expr("substring(value,2)")) \
         .withColumn("value", regexp_replace("value", '\{\{', r'\{"header":\{')) \
-        .withColumn("value", regexp_replace("value", 'SELL', '"SELL"')) \
-        .withColumn("value", regexp_replace("value", 'BUY', '"BUY"')) \
+        .withColumn("value", regexp_replace("value", 'SELL,', '"SELL",')) \
+        .withColumn("value", regexp_replace("value", 'BUY,', '"BUY",')) \
         .withColumn("value", regexp_replace("value", '"flags_":"\{"', '"flags_":\{"'))
 
     # figure out schema on message 8, keep for re-use later as a technology demonstration
@@ -136,7 +137,20 @@ def useSpark(sourceFile: str, targetTsvFile: str) -> None:
 
 if __name__ == '__main__':
     # use argparse here
-    sourceFile = r"C:\Users\ketan\Downloads\pretrade_current.txt"
-    targetTsvFile = r".\useSpark.tsv"
-    timer, _, _ = useSpark(sourceFile, targetTsvFile)
-    print("Time:", timer)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--sourceFile", type=str, help="path to source input file")
+    parser.add_argument("--targetTsvFile", type=str, help="path to target tsv file")
+
+    args = parser.parse_args()
+
+    # sourceFile = r"C:\Users\ketan\Downloads\pretrade_current.txt"
+    # targetTsvFile = r".\useSpark.tsv"
+
+    if args.sourceFile and args.targetTsvFile:
+        timer, _, _ = useSpark(args.sourceFile, args.targetTsvFile)
+        print("Time:", timer)
+    else:
+        import os
+        fname = os.path.split(__file__)[-1]
+        print(f'Missing arguments - usage: {fname} --sourceFile "path" --targetTsvFile  "path"')

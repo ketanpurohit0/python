@@ -1,6 +1,7 @@
 import requests
 import asyncio
 from AquisCommon import timing_val, SecuritiesDict, OrderStatisticsAggregator, writeResult, innerProcessor
+import argparse
 
 
 async def innerWorker(jsonStr: str, securitiesDictionary: SecuritiesDict, orderStatistics: OrderStatisticsAggregator):
@@ -65,8 +66,21 @@ def useAsyncIo(nWorkers: int, sourceFile: str, targetTsvFile: str) -> None:
 
 if __name__ == '__main__':
     # use argparse here
-    sourceFile = r"https://aquis-public-files.s3.eu-west-2.amazonaws.com/market_data/current/pretrade_current.txt"
-    targetTsvFile = r".\useAsyncIO.tsv"
-    nWorkers = 2
-    timer, _, _ = useAsyncIo(nWorkers, sourceFile, targetTsvFile)
-    print("Time:", timer)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--sourceFile", type=str, help="path to source input file")
+    parser.add_argument("--targetTsvFile", type=str, help="path to target tsv file")
+
+    args = parser.parse_args()
+
+    # sourceFile = r"https://aquis-public-files.s3.eu-west-2.amazonaws.com/market_data/current/pretrade_current.txt"
+    # targetTsvFile = r".\useAsyncIO.tsv"
+
+    if args.sourceFile and args.targetTsvFile:
+        nWorkers = 2
+        timer, _, _ = useAsyncIo(nWorkers, args.sourceFile, args.targetTsvFile)
+        print("Time:", timer)
+    else:
+        import os
+        fname = os.path.split(__file__)[-1]
+        print(f'Missing arguments - usage: {fname} --sourceFile "path" --targetTsvFile  "path"')
