@@ -47,8 +47,42 @@ def solution2(a, b):
 
 
 
+def solution3(a,b):
+
+    d = {0: ['A']*a, 1: ['B']*b}
+    where = {'tail': 0, 'head' : 0}
+
+    pick_from = 0
+    itemsAvailable = True
+    attach_at = 'tail'
+    result = deque([])
+    while itemsAvailable:
+        if len(d[pick_from]) == 0:
+            pick_from = (pick_from + 1) % 2
+            if len(d[pick_from]) == 0:
+                itemsAvailable = False
+
+        if itemsAvailable:
+            if where[attach_at] < 2:
+                pass
+            else:
+                attach_at =
+            item = d[pick_from].pop()
+            if len(result):
+                if result[-1] == item:
+                    result.appendleft(item)
+                else:
+                    result.append(item)
+            else:
+                result.append(item)
+
+    print(result)
+
+
+
+
 if __name__ == '__main__':
 
     inputs = [(1, 1), (2, 2), (5, 3), (3, 3), (1, 4)]
     for a,b in inputs:
-        solution(a,b)
+        solution3(a,b)

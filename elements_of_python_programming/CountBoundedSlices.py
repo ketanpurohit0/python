@@ -1,15 +1,19 @@
-def solution(K, A):
-    from itertools import accumulate
 
-    result = 0
+
+def solution(K, A):
+
+    max_mins = {}
     for i in range(0, len(A)):
-        max_accumulator = accumulate(A[i:], max)
-        min_accumulator = accumulate(A[i:], min)
-        result += len([1 for m_ax, m_in in zip(max_accumulator, min_accumulator) if m_ax - m_in <= K])
-        if result > 1_000_000_000:
-            result = 1_000_000_000
-            break
-    return result
+        for j in range(i, len(A)):
+            if i == j:
+                max_mins[f"{i},{j}"] = (A[i],A[i])
+            else:
+                max_mins[f"{i},{j}"] = max(A[j], max_mins[f"{i},{j - 1}"][0]),  min(A[j], max_mins[f"{i},{j - 1}"][1])
+            # print(i, j)
+    # print(max_mins)
+    return len(list(filter(lambda y: y[1][0]-y[1][1] <= K, max_mins.items())))
+    # return result
+
 
 if __name__ == '__main__':
     inputs = [
@@ -21,4 +25,4 @@ if __name__ == '__main__':
     ]
 
     for i in inputs:
-        print(i, "->", solution(2,i))
+        print(i, "->", solution(2, i))
