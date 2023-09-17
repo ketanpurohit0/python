@@ -5,6 +5,8 @@ import pandas as pd
 import pickle
 import hashlib
 
+from TreeStruct import AccountTree
+
 tree_data = {
     "PARENT": ["root","root","1", "1", "1.2"],
     "CHILD": ["1","2","1.1", "1.2", "1.2.1"],
@@ -32,24 +34,11 @@ class TestTreePandas(unittest.TestCase):
         print(sha256sum("group_df.pickle"))
 
     def test_tree(self):
-        def tree(): return defaultdict(tree)
+        tree_df = pd.DataFrame(tree_data)[["PARENT", "CHILD"]]
+        tree = AccountTree("root")
+        tree_df.apply(lambda r: tree.insert(r.PARENT, r.CHILD), axis=1)
+        self.assertEqual(tree.node_count() - 1, len(tree_df))
 
-        def add(t: tree(), path):
-            for node in path:
-                t = t[node]
-
-        def get_node(t: tree(), path):
-            for node in path:
-                t = t[node]
-            return t
-
-
-        root = tree()
-        add(root, "A>B".split('>'))
-
-        node = get_node(root, "A>B".split('>'))
-
-        pass
 
 
 if __name__ == '__main__':
