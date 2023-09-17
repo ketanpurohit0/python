@@ -1,3 +1,5 @@
+import unittest
+
 import pytest
 from hypothesis import given, example, settings
 from hypothesis.strategies import text, integers, lists, tuples

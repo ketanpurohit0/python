@@ -82,7 +82,6 @@ def heappop(heap):
 
 
 def heapmerge(x, y):
-    1/0
     x, y = sorted((x, y))
     return x + y
 
@@ -145,7 +144,7 @@ class DatabaseComparison(RuleBasedStateMachine):
 
 
 
-TestTrees = DatabaseComparison.TestCase
+TestTrees = HeapMachine.TestCase
 
 # Or just run with pytest's unittest support
 if __name__ == "__main__":

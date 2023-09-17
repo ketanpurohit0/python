@@ -22,3 +22,5 @@ create_tag_template_field_result
 --
 airflow webserver -p 8080&
 airflow scheduler&
+
+\\wsl$\Ubuntu-20.04

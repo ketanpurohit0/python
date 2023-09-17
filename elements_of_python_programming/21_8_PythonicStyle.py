@@ -3,7 +3,10 @@ from typing import List
 from collections import defaultdict
 from functools import reduce
 from heapq import nlargest
+from line_profiler_pycharm import profile
 
+
+@profile
 def variance_calc_top_k(studentslist: List[str], scoreslist:List[int], k: int):
 
     # collect scores per student
@@ -26,7 +29,7 @@ def variance_calc_top_k(studentslist: List[str], scoreslist:List[int], k: int):
 
 
 if __name__ == '__main__':
-    students = ["A", "A" , "A", "B", "B", "B", "C"]
-    scores = [66, 23, 88, 90, 55, 66, 5]
+    students = ["A", "A" , "A", "B", "B", "B", "C", "A","Z"]
+    scores = [66, 23, 88, 90, 55, 66, 5, 77,88]
     k = 3
     print(variance_calc_top_k(students, scores, k))

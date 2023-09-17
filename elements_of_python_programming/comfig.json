@@ -1,0 +1,15 @@
+{
+  "site-packages": [],
+  "module": "a.b.c.d.e.f",
+  "log_file": "",
+  "dotenv_file": "",
+  "config_file": "",
+  "PRD": {
+    "env": "PRD",
+    "site-packages": [],
+    "module": "a.b.c.d.e.f",
+    "log_file": "",
+    "dotenv_file": "",
+    "config_file": ""
+    }
+}
