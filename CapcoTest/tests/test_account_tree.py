@@ -27,6 +27,16 @@ class TestAccountTree(unittest.TestCase):
         self.assertTrue(pa.children_accounts)
         self.assertTrue(ca.parent_account, child_account)
 
+    def test_insert_where_parent_does_not_exist(self):
+        tree = AccountTree(account_code=None)
+        parent_account, child_account = (None, "123")
+        was_added = tree.insert(parent_account, child_account=child_account)
+        self.assertTrue(was_added)
+        parent_account, child_account = ("123f", "123/1")
+        was_added = tree.insert(parent_code=parent_account, child_account=child_account)
+        self.assertFalse(was_added)
+
+
     def test_insert_generally(self):
         tree = AccountTree(account_code=None)
         parent_account, child_account = (None, "123")
@@ -54,14 +64,22 @@ class TestAccountTree(unittest.TestCase):
             (None, "r1"),
             (None, "r2"),
             (None, "r3"),
+            (None, "r4"),
             ("r1", "r1/r1.1"),
             ("r1", "r1/r1.2"),
-            ("r2", "r2/r2.1")
+            ("r2", "r2/r2.1"),
+            ("r2/r2.1", "r2/r2.1/r.2.1.1"),
+            ("r2/r2.1", "r2/r2.1/r.2.1.2"),
+            ("r2/r2.1", "r2/r2.1/r.2.1.3"),
+            ("r2/r2.1", "r2/r2.1/r.2.1.4"),
+            ("r2/r2.1", "r2/r2.1/r.2.1.5"),
         ]
 
         for e in elements:
             tree.insert(*e)
 
+        nodes = tree.node_count() - 1
+        self.assertEqual(len(elements), nodes)
 
 
 

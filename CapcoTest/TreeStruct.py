@@ -32,3 +32,8 @@ class AccountTree:
 
     def contains_child(self, child_account: str) -> bool:
         return self.children_accounts and any(ca.parent_account == child_account for ca in self.children_accounts)
+
+    def node_count(self):
+        count = 1
+        child_counts = sum(ca.node_count() for ca in self.children_accounts)
+        return count + child_counts
