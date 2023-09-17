@@ -47,6 +47,25 @@ class TestAccountTree(unittest.TestCase):
         self.assertTrue(was_added)
         self.assertIsNone(tree.find("does_not_exist"))
 
+    def test_create_arbitrary_tree(self):
+        tree = AccountTree(None)
+
+        elements = [
+            (None, "r1"),
+            (None, "r2"),
+            (None, "r3"),
+            ("r1", "r1/r1.1"),
+            ("r1", "r1/r1.2"),
+            ("r2", "r2/r2.1")
+        ]
+
+        for e in elements:
+            tree.insert(*e)
+
+
+
+
+
 
 
 if __name__ == '__main__':

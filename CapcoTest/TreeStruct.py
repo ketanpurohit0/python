@@ -4,9 +4,9 @@ from typing_extensions import Self
 
 
 class AccountTree:
-
     parent_account: Optional[str]
     children_accounts: List[Self]
+
     def __init__(self, account_code: Optional[str]):
         self.parent_account: Optional[str] = account_code
         self.children_accounts: List[AccountTree] = []
