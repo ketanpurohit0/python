@@ -84,11 +84,17 @@ class AccountTree:
         child_counts = sum(ca.node_count() for ca in self.children_accounts)
         return count + child_counts
 
-    def sum_of_immediate_child_allocations(self):
+    def sum_of_immediate_child_allocations_rate(self):
         """Either sum of child allocations or the rate on the object"""
         if self.children_accounts:
             return sum(ca.allocation_rate for ca in self.children_accounts)
         return self.allocation_rate
+
+    def sum_of_immediate_child_allocations_amount(self):
+        """Either sum of child allocations or the rate on the object"""
+        if self.children_accounts:
+            return sum(ca.allocation_amount for ca in self.children_accounts)
+        return self.allocation_amount
 
     def allocate_amount(self, amount: float) -> Self:
         """Allocate 'amount to node, and also distribute to children according to node allocation rate"""
@@ -96,3 +102,14 @@ class AccountTree:
         if self.children_accounts:
             _ = [ca.allocate_amount(ca.allocation_rate*self.allocation_amount / 100) for ca in self.children_accounts]
         return self
+
+    def verify_sum_of_child_allocations(self) -> bool:
+        """Verify that each nodes allocation amount is equal to sum of its child allocation amount"""
+        this_node = self.sum_of_immediate_child_allocations_amount() == self.allocation_amount
+        return this_node and all(ca.verify_sum_of_child_allocations() for ca in self.children_accounts)
+
+    def dump(self, level: int = 0) -> None:
+        print("\t"*level, self.allocation_rate, self.allocation_amount)
+        _ = [ca.dump(level+1) for ca in self.children_accounts]
+
+
