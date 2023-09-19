@@ -51,6 +51,7 @@ class UBO(BaseModel):
 
 
 class AccountTree:
+    """Model for representing UBO tree structure"""
     parent_account: Optional[str]
     allocation_rate: float  # 2dp, must add to 100.00 for all children
     children_accounts: List[Self]
