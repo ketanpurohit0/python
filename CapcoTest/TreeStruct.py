@@ -2,7 +2,7 @@ import datetime
 from enum import Enum
 from typing import Optional, List
 
-from pydantic import BaseModel, confloat
+from pydantic import BaseModel, confloat, Field
 from typing_extensions import Self
 
 
@@ -36,10 +36,14 @@ class Transaction(BaseModel):
 
 class UBO(BaseModel):
     parent_code: Optional[str] = None
-    code: str
+    code: str = Field(min_length=1)
     uboType: UBOTypes
     fromDate: datetime.date
     toDate: datetime.date
+
+    def is_valid_for_allocation(self, valueDate: datetime.date) -> bool:
+        """'transaction.valueDate must be within the 'self.fromDate and 'self.toDate"""
+        return self.fromDate <= valueDate <= self.toDate
 
 
 class AccountTree:

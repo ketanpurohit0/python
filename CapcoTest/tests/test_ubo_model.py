@@ -3,7 +3,7 @@ import unittest
 
 from pydantic import ValidationError
 
-from TreeStruct import TransactionTypes, UBOTypes, Transaction
+from TreeStruct import TransactionTypes, UBOTypes, Transaction, UBO
 
 
 class TestUboModels(unittest.TestCase):
@@ -33,13 +33,30 @@ class TestUboModels(unittest.TestCase):
     def test_bad_transaction_model(self):
         # amount, transaction type
         values = [
-            (0, "NOTVALID"),    # Not a valid transaction type
+            (0, "NOTVALID"),  # Not a valid transaction type
             (-1, TransactionTypes.INT),  # Negative value not allowed
         ]
 
         for amount_, transactionType_ in values:
             with self.subTest(f"{amount_}, {transactionType_}"):
                 with self.assertRaises(ValidationError) as context:
-                    _ = Transaction(amount=amount_, valueDate=datetime.date(2022, 12, 1), transactionType=transactionType_)
+                    _ = Transaction(amount=amount_, valueDate=datetime.date(2022, 12, 1),
+                                    transactionType=transactionType_)
 
+    def test_validity_for_dates(self):
+        ubo = UBO(parent_code=None, code="C1", uboType=UBOTypes.W9,
+                  fromDate=datetime.date(2022, 1, 1),
+                  toDate=datetime.date(2022, 12, 31))
 
+        self.assertTrue(all(ubo.is_valid_for_allocation(vd) for vd in [datetime.date(2022, 12, 1),
+                                                                       datetime.date(2022, 1, 1),
+                                                                       datetime.date(2022, 12, 31)]))
+
+    def test_not_validity_for_dates(self):
+        ubo = UBO(parent_code=None, code="C1", uboType=UBOTypes.W9,
+                  fromDate=datetime.date(2022, 1, 1),
+                  toDate=datetime.date(2022, 12, 31))
+
+        self.assertTrue(all(not ubo.is_valid_for_allocation(vd) for vd in [datetime.date(2021, 12, 1),
+                                                                           datetime.date(2023, 1, 1),
+                                                                           datetime.date(2025, 12, 31)]))
