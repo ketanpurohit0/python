@@ -1,11 +1,50 @@
+import datetime
+from enum import Enum
 from typing import Optional, List
 
+from pydantic import BaseModel, confloat
 from typing_extensions import Self
+
+
+class TransactionTypes(Enum):
+    INT = 'INT'
+    DIV = 'DIV'
+
+
+class UBOTypes(Enum):
+    W9 = 'W-9'
+    W8_BEN = 'W-8BEN'
+    W8_BENE = 'W-8BEN-E'
+    W8_ECI = 'W-8ECI'
+    W8_EXP = 'W-8EXP'
+    W8_IMY = 'W-8IMY'
+
+    @classmethod
+    def is_W8(cls, uboType: Self) -> bool:
+        return str(uboType.value).startswith("W-8")
+
+    @classmethod
+    def is_W9(cls, uboType: Self) -> bool:
+        return str(uboType.value).startswith("W-9")
+
+
+class Transaction(BaseModel):
+    amount: confloat(strict=False, ge=0.00)
+    valueDate: datetime.date
+    transactionType: TransactionTypes
+
+
+class UBO(BaseModel):
+    parent_code: Optional[str] = None
+    code: str
+    uboType: UBOTypes
+    fromDate: datetime.date
+    toDate: datetime.date
 
 
 class AccountTree:
     parent_account: Optional[str]
-    allocation_rate: float   # 2dp, must add to 100.00 for all children
+    allocation_rate: float  # 2dp, must add to 100.00 for all children
     children_accounts: List[Self]
 
     def __init__(self, account_code: Optional[str], allocation_rate: float):
