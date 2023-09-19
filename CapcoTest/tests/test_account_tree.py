@@ -1,4 +1,5 @@
 import unittest
+from typing import Tuple, List, Any
 
 import numpy as np
 
@@ -59,8 +60,33 @@ class TestAccountTree(unittest.TestCase):
         self.assertIsNone(tree.find("does_not_exist"))
 
     def test_create_arbitrary_tree(self):
-        tree = AccountTree(None, 1)
+        elements, tree = self.build_test_tree()
+        nodes = tree.node_count() - 1
+        self.assertEqual(len(elements), nodes)
 
+        tree_node = tree.find("r2/r2.1")
+        self.assertIsNotNone(tree_node)
+        total_allocation_rate = tree_node.sum_of_immediate_child_allocations()
+        self.assertTrue(np.isclose(100, total_allocation_rate))
+
+        for parent_account, _, _ in elements:
+            with self.subTest(parent_account):
+                tree_node = tree.find(account_code=parent_account)
+                total_allocation_rate = tree_node.sum_of_immediate_child_allocations()
+                self.assertTrue(np.isclose(100, total_allocation_rate), msg=parent_account)
+
+    def test_allocated_amount(self):
+        _, tree = self.build_test_tree()
+        tree.allocate_amount(100.00)
+        test_expected_allocations = [(None, 100.00), ("r2", 25.00), ("r2/r2.1", 25.00), ("r2/r2.1/r.2.1.5", 1.41)]
+        for e in test_expected_allocations:
+            account_code, expected_allocation = e
+            tree_node = tree.find(account_code=account_code)
+            self.assertEqual(expected_allocation, tree_node.allocation_amount)
+
+    @staticmethod
+    def build_test_tree() -> Tuple[List[Any], AccountTree]:
+        tree = AccountTree(None, 1)
         elements = [
             (None, "r1", 25),
             (None, "r2", 25),
@@ -75,23 +101,9 @@ class TestAccountTree(unittest.TestCase):
             ("r2/r2.1", "r2/r2.1/r.2.1.4", 6.40),
             ("r2/r2.1", "r2/r2.1/r.2.1.5", 5.64),
         ]
-
         for e in elements:
             tree.insert(*e)
-
-        nodes = tree.node_count() - 1
-        self.assertEqual(len(elements), nodes)
-
-        tree_node = tree.find("r2/r2.1")
-        self.assertIsNotNone(tree_node)
-        total_allocation_rate = tree_node.sum_of_immediate_child_allocations()
-        self.assertTrue(np.isclose(100, total_allocation_rate))
-
-        for parent_account, _, _ in elements:
-            with self.subTest(parent_account):
-                tree_node = tree.find(account_code=parent_account)
-                total_allocation_rate = tree_node.sum_of_immediate_child_allocations()
-                self.assertTrue(np.isclose(100, total_allocation_rate), msg=parent_account)
+        return elements, tree
 
 
 if __name__ == '__main__':

@@ -53,7 +53,8 @@ class AccountTree:
 
     def __init__(self, account_code: Optional[str], allocation_rate: float):
         self.parent_account: Optional[str] = account_code
-        self.allocation_rate: float = allocation_rate
+        self.allocation_rate: float = allocation_rate   # pct
+        self.allocation_amount: float = 0.0
         self.children_accounts: List[AccountTree] = []
 
     def insert(self, parent_code: Optional[str], child_account: Optional[str], allocation_rate: float) -> bool:
@@ -88,3 +89,10 @@ class AccountTree:
         if self.children_accounts:
             return sum(ca.allocation_rate for ca in self.children_accounts)
         return self.allocation_rate
+
+    def allocate_amount(self, amount: float) -> Self:
+        """Allocate 'amount to node, and also distribute to children according to node allocation rate"""
+        self.allocation_amount = amount
+        if self.children_accounts:
+            _ = [ca.allocate_amount(ca.allocation_rate*self.allocation_amount / 100) for ca in self.children_accounts]
+        return self
