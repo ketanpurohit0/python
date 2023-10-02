@@ -80,7 +80,7 @@ class TestAccountTree(unittest.TestCase):
 
         test_dict = {
             100: [(None, 100.00), ("r2", 25.00), ("r2/r2.1", 25.00), ("r2/r2.1/r.2.1.5", 1.41)],
-            111: [(None, 111.00), ("r2", 27.75), ("r2/r2.1", 27.75), ("r2/r2.1/r.2.1.5", 1.5651)]
+            111: [(None, 111.00), ("r2", 27.75), ("r2/r2.1", 27.75), ("r2/r2.1/r.2.1.5", 1.57)]
         }
         for allocate_amount,expect_result in test_dict.items():
             tree.allocate_amount(allocate_amount)
@@ -91,7 +91,7 @@ class TestAccountTree(unittest.TestCase):
 
         tree.dump()
 
-        # self.assertTrue(tree.verify_sum_of_child_allocations())
+        self.assertTrue(tree.verify_sum_of_child_allocations())
 
     @staticmethod
     def build_test_tree() -> Tuple[List[Any], AccountTree]:
