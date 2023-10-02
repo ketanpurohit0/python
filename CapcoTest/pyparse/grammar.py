@@ -34,10 +34,22 @@ def grammar_two():
 
 
 def grammar_three():
-    return grammar_two()[1,3]
+    return pp.Group(grammar_two())[1,3]
 
 def grammar_four():
     return pp.Group(grammar_two())[...]
+
+def grammar_five():
+    """Sender's Message Reference"""
+    """:20C::SEME//345678"""
+
+    return pp.Literal(":20C::SEME") + "//" + pp.Word(pp.alphanums)
+
+def grammar_six():
+    """Sender's Message Reference"""
+    """:20C::SEME//345678"""
+
+    return pp.Literal(":20C::SEME//").suppress() + pp.Word(pp.alphanums).setResultsName("ID")
 
 
 if __name__ == "__main__":
@@ -51,3 +63,9 @@ if __name__ == "__main__":
         print(grammar_three().parseString(text*r))
 
     print(grammar_four().parseString(text*2))
+
+    text2 = ":20C::SEME//345678"
+    print(grammar_five().parseString(text2))
+    rr = grammar_six().parseString(text2)
+    print(rr)
+
