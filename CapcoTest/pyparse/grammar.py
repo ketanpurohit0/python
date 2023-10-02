@@ -51,6 +51,12 @@ def grammar_six():
 
     return pp.Literal(":20C::SEME//").suppress() + pp.Word(pp.alphanums).setResultsName("ID")
 
+def grammar_seven():
+    """Sender's Message Reference"""
+    """:20C:A"""
+
+    return pp.Literal(":20C:").suppress() + pp.oneOf("A B")
+
 
 if __name__ == "__main__":
 
@@ -68,4 +74,8 @@ if __name__ == "__main__":
     print(grammar_five().parseString(text2))
     rr = grammar_six().parseString(text2)
     print(rr)
+
+    text3 = [":20C:A", ":20C:B",":20C:C"]
+    for t in text3:
+        print(grammar_seven().parseString(t))
 
