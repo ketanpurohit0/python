@@ -72,7 +72,7 @@ def grammar_50h():
 
     return (pp.Literal(":50H:") +
             pp.Literal("/") + pp.Word(pp.alphanums + string.punctuation + " ", min=1, max=34).setResultsName("Account") + pp.lineEnd +
-        pp.Group(pp.Word(pp.alphanums + string.punctuation + " "))[1, 4].setResultsName("NameAndAddress")).setResultsName("50H")
+        pp.Group(pp.Word(pp.alphanums + string.punctuation + " "))[1, 4].setResultsName("NameAndAddress")).setResultsName("OrderingCustomer")
 
 
 if __name__ == "__main__":
@@ -112,5 +112,10 @@ ORDERING CUST ADDR LINE 3
     for sample_50h in samples_50h:
         r_50h = f_50h.parseString(sample_50h)
         print(r_50h)
+        print(r_50h.OrderingCustomer)
+        print(r_50h.Account)
+        print(r_50h.NameAndAddress)
+
+
     pass
 
