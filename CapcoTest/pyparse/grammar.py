@@ -74,6 +74,9 @@ def grammar_50h():
             pp.Literal("/") + pp.Word(pp.alphanums + string.punctuation + " ", min=1, max=34).setResultsName("Account") + pp.lineEnd +
         pp.Group(pp.Word(pp.alphanums + string.punctuation + " "))[1, 4].setResultsName("NameAndAddress")).setResultsName("OrderingCustomer")
 
+def grammar_bic():
+    return pp.Combine(pp.Word(pp.alphanums, min=11, max=11) ^ pp.Word(pp.alphanums, min=8, max=8))
+
 
 if __name__ == "__main__":
 
@@ -116,6 +119,8 @@ ORDERING CUST ADDR LINE 3
         print(r_50h.Account)
         print(r_50h.NameAndAddress)
 
+    g_bic  = grammar_bic()
+    for bic in ["01234567890", "01234567"]:
+        print(g_bic.parseString(bic))
 
-    pass
 
