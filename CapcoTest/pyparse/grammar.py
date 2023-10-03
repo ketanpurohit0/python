@@ -71,8 +71,8 @@ def grammar_50h():
     """
 
     return (pp.Literal(":50H:") +
-            pp.Literal("/") + pp.Word(pp.alphanums, min=1, max=34).setResultsName("Account") + pp.lineEnd +
-        pp.Group(pp.Word(pp.alphanums))[1, 4].setResultsName("NameAndAddress")).setResultsName("50H")
+            pp.Literal("/") + pp.Word(pp.alphanums + string.punctuation + " ", min=1, max=34).setResultsName("Account") + pp.lineEnd +
+        pp.Group(pp.Word(pp.alphanums + string.punctuation + " "))[1, 4].setResultsName("NameAndAddress")).setResultsName("50H")
 
 
 if __name__ == "__main__":
@@ -97,10 +97,20 @@ if __name__ == "__main__":
         print(grammar_seven().parseString(t))
 
     f_50h = grammar_50h()
-    sample_50h = """:50H:/344110001637
+    samples_50h = [""":50H:/344110001637
 TESTAR00AXXX
 Utrecht
 Netherlands
-"""
-    f_50h.parseString(sample_50h)
+""",
+                   """:50H:/GB12SEPA12341234123412
+ORDERING CUST NAME
+ORDERING CUST ADDR LINE 1
+ORDERING CUST ADDR LINE 2
+ORDERING CUST ADDR LINE 3
+"""]
+
+    for sample_50h in samples_50h:
+        r_50h = f_50h.parseString(sample_50h)
+        print(r_50h)
+    pass
 
