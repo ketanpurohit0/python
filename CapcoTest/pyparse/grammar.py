@@ -72,7 +72,7 @@ def grammar_50h():
 
     return (pp.Literal(":50H:") +
             pp.Literal("/") + pp.Word(pp.alphanums, min=1, max=34).setResultsName("Account") + pp.lineEnd +
-        pp.Group(pp.Word(pp.alphanums))[1, 4])
+        pp.Group(pp.Word(pp.alphanums))[1, 4].setResultsName("NameAndAddress")).setResultsName("50H")
 
 
 if __name__ == "__main__":
