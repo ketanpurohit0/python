@@ -57,6 +57,23 @@ def grammar_seven():
 
     return pp.Literal(":20C:").suppress() + pp.oneOf("A B")
 
+def grammar_50h():
+    """
+    sample=
+    :50H:/344110001637
+    TESTAR00AXXX
+    Utrecht
+    Netherlands
+    format=
+    Option H	/34x     (Account)
+                4*35x    (Name and Address)
+
+    """
+
+    return (pp.Literal(":50H:") +
+            pp.Literal("/") + pp.Word(pp.alphanums, min=1, max=34).setResultsName("Account") + pp.lineEnd +
+        pp.Group(pp.Word(pp.alphanums))[1, 4])
+
 
 if __name__ == "__main__":
 
@@ -75,7 +92,15 @@ if __name__ == "__main__":
     rr = grammar_six().parseString(text2)
     print(rr)
 
-    text3 = [":20C:A", ":20C:B",":20C:C"]
+    text3 = [":20C:A", ":20C:B", ":20C:A"]
     for t in text3:
         print(grammar_seven().parseString(t))
+
+    f_50h = grammar_50h()
+    sample_50h = """:50H:/344110001637
+TESTAR00AXXX
+Utrecht
+Netherlands
+"""
+    f_50h.parseString(sample_50h)
 
