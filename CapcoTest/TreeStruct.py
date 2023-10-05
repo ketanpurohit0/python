@@ -7,11 +7,13 @@ from typing_extensions import Self
 
 
 class TransactionTypes(Enum):
+    """Enum to represent possible transaction types."""
     INT = 'INT'
     DIV = 'DIV'
 
 
 class UBOTypes(Enum):
+    """Enum to represent possible W8 or W9 form types."""
     W9 = 'W-9'
     W8_BEN = 'W-8BEN'
     W8_BENE = 'W-8BEN-E'
@@ -29,12 +31,14 @@ class UBOTypes(Enum):
 
 
 class Transaction(BaseModel):
+    """Pydantic model to represent a transaction"""
     amount: confloat(strict=False, ge=0.00)
     valueDate: datetime.date
     transactionType: TransactionTypes
 
 
 class UBO(BaseModel):
+    """Pydantic model to represent a UBO static"""
     parent_code: Optional[str] = None
     code: str = Field(min_length=1)
     uboType: UBOTypes
@@ -108,8 +112,11 @@ class AccountTree:
         this_node = self.sum_of_immediate_child_allocations_amount() == self.allocation_amount
         return this_node and all(ca.verify_sum_of_child_allocations() for ca in self.children_accounts)
 
+    def root_account(self) -> str:
+        return self.parent_account
+
     def dump(self, level: int = 0) -> None:
-        print("\t"*level, self.allocation_rate, self.allocation_amount)
+        print("\t"*level, f"{level}>", self.parent_account, self.allocation_rate, self.allocation_amount)
         _ = [ca.dump(level+1) for ca in self.children_accounts]
 
 
