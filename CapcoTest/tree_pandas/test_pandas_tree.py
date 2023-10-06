@@ -49,9 +49,9 @@ class TestTreePandas(unittest.TestCase):
         tree_df.apply(lambda r: tree.insert(r.PARENT, r.CHILD, r.ALLOCATE_PCT), axis=1)
         self.assertEqual(len(tree_df), tree.node_count() - 1)
         tree.dump()
-        print("1.2", tree.inner_path_of("1.2"))
-        print("1.2.1", tree.inner_path_of("1.2.1"))
-        print("root",tree.inner_path_of("root"))
+        print("1.2", tree.path_of("1.2"))
+        print("1.2.1", tree.path_of("1.2.1"))
+        print("root",tree.path_of("root"))
 
 
     def test_df_second_tree(self):
@@ -61,11 +61,11 @@ class TestTreePandas(unittest.TestCase):
         tree.dump()
         self.assertEqual(len(tree_df), tree.node_count() - 1)
         print(tree.root_account())
-        print("C3", tree.inner_path_of("C3"))
-        print("D3", tree.inner_path_of("D3"))
-        print("D3.1", tree.inner_path_of("D3.1"))
-        print("C3", tree.inner_path_of("C2"))
-        print("Dxx", tree.inner_path_of("Dxx"))
+        print("C3", tree.path_of("C3"))
+        print("D3", tree.path_of("D3"))
+        print("D3.1", tree.path_of("D3.1"))
+        print("C2", tree.path_of("C2"))
+        print("Dxx", tree.path_of("Dxx"))
 
 
 
