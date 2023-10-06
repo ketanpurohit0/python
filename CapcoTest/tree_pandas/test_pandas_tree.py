@@ -14,18 +14,11 @@ tree_data = {
 }
 
 more_tree_data = {
-    "PARENT": ["root", "33717", "33717", "33717", "33717", "33717", "33717H", "33717E"],
+    "PARENT": ["root","root","B2","root","B3","C3", "D3"],
     "CHILD": [
-        "33717",
-        "33717A",
-        "33717D",
-        "33717C",
-        "33717F",
-        "33717B",
-        "33717G",
-        "33717F"
+        "B1", "B2", "C2", "B3", "C3", "D3", "D3.1"
     ],
-    "ALLOCATE_PCT": [50] * 8,
+    "ALLOCATE_PCT": [50] * 7,
 }
 
 
@@ -56,6 +49,10 @@ class TestTreePandas(unittest.TestCase):
         tree_df.apply(lambda r: tree.insert(r.PARENT, r.CHILD, r.ALLOCATE_PCT), axis=1)
         self.assertEqual(len(tree_df), tree.node_count() - 1)
         tree.dump()
+        print("1.2", tree.inner_path_of("1.2"))
+        print("1.2.1", tree.inner_path_of("1.2.1"))
+        print("root",tree.inner_path_of("root"))
+
 
     def test_df_second_tree(self):
         tree_df = pd.DataFrame(more_tree_data)
@@ -64,6 +61,13 @@ class TestTreePandas(unittest.TestCase):
         tree.dump()
         self.assertEqual(len(tree_df), tree.node_count() - 1)
         print(tree.root_account())
+        print("C3", tree.inner_path_of("C3"))
+        print("D3", tree.inner_path_of("D3"))
+        print("D3.1", tree.inner_path_of("D3.1"))
+        print("C3", tree.inner_path_of("C2"))
+        print("Dxx", tree.inner_path_of("Dxx"))
+
+
 
 
 if __name__ == "__main__":

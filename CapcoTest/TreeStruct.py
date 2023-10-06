@@ -58,7 +58,7 @@ class AccountTree:
 
     def __init__(self, account_code: Optional[str], allocation_rate: float):
         self.parent_account: Optional[str] = account_code
-        self.allocation_rate: float = allocation_rate   # pct
+        self.allocation_rate: float = allocation_rate  # pct
         self.allocation_amount: float = 0.0
         self.children_accounts: List[AccountTree] = []
 
@@ -81,8 +81,79 @@ class AccountTree:
                 return account_sub_tree
         return None
 
+    # def path_of(self, account_code:str, path: List[str] = None) -> List[str]:
+    #     if path is None:
+    #         path = []
+    #     if self.parent_account == account_code:
+    #         path.append(self.parent_account)
+    #         return path
+    #
+    #     for ca in self.children_accounts:
+    #         account_sub_tree = ca.find(account_code)
+    #         if account_sub_tree:
+    #             path.append(account_sub_tree.parent_code)
+
+    # def path_of(self, account_code: str, path: List[str] = None) -> List[str]:
+    #     if path is None:
+    #         path = []
+    #     if self.parent_account == account_code:
+    #         print('found')
+    #         path.append(account_code)
+    #         return path
+    #     if not self.children_accounts:
+    #         print('no children')
+    #         return path
+    #
+    #     path_ = path.copy()
+    #     path_.append(self.parent_account)
+    #     print(f'add parent {self.parent_account}')
+    #     for ca in self.children_accounts:
+    #         path_ = ca.path_of(account_code, path_)
+    #
+    #     return path_
+
+    # def path_of(self, account_code: str, path: List[str] = None) -> List[str]:
+    #     if path is None:
+    #         path = []
+    #     if self.contains_child(account_code):
+    #         path.append(self.parent_account)
+    #         path.append(account_code)
+    #         return path
+    #
+    #     path.append(self.parent_account)
+    #     path_ = path.copy()
+    #     if self.children_accounts:
+    #         for ca in self.children_accounts:
+    #             path_ = ca.path_of(account_code, path_)
+    #             if path_ == path:
+    #                 #  No change
+    #                 path_.pop()
+    #     return path_
+
+    def inner_path_of(self, account_code: str, path: List[str] = None) -> List[str]:
+        if path is None:
+            path = []
+        if self.contains_child_arbitrary_depth(account_code):
+            path.append(self.parent_account)
+            if self.parent_account == account_code:
+                return path
+            else:
+                for ca in self.children_accounts:
+                    path = ca.inner_path_of(account_code, path)
+
+        return path
+
+    def path_of(self, account_code: str) -> List[str]:
+        path = self.inner_path_of(account_code)
+        path.append(account_code)
+        return path
+
     def contains_child(self, child_account: str) -> bool:
         return self.children_accounts and any(ca.parent_account == child_account for ca in self.children_accounts)
+
+    def contains_child_arbitrary_depth(self, child_account: str) -> bool:
+        return self.contains_child(child_account) or any(
+            ca.contains_child_arbitrary_depth(child_account) for ca in self.children_accounts)
 
     def node_count(self):
         count = 1
@@ -105,7 +176,8 @@ class AccountTree:
         """Allocate 'amount to node, and also distribute to children according to node allocation rate"""
         self.allocation_amount = amount
         if self.children_accounts:
-            _ = [ca.allocate_amount(round(ca.allocation_rate*self.allocation_amount / 100,2)) for ca in self.children_accounts]
+            _ = [ca.allocate_amount(round(ca.allocation_rate * self.allocation_amount / 100, 2)) for ca in
+                 self.children_accounts]
         return self
 
     def verify_sum_of_child_allocations(self) -> bool:
@@ -117,7 +189,5 @@ class AccountTree:
         return self.parent_account
 
     def dump(self, level: int = 0) -> None:
-        print("\t"*level, f"{level}>", self.parent_account, self.allocation_rate, self.allocation_amount)
-        _ = [ca.dump(level+1) for ca in self.children_accounts]
-
-
+        print("\t" * level, f"{level}>", self.parent_account, self.allocation_rate, self.allocation_amount)
+        _ = [ca.dump(level + 1) for ca in self.children_accounts]
