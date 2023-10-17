@@ -149,13 +149,13 @@ class AccountTree:
             return sum(ca.allocation_amount for ca in self.children_accounts)
         return self.allocation_amount
 
-    def allocate_amount(self, amount: float) -> Self:
+    def allocate_amount(self, amount: float, ndp: int=3) -> Self:
         """Allocate 'amount to node, and also distribute to children according to node allocation rate"""
         self.allocation_amount = amount
         if self.children_accounts:
             _ = [
                 ca.allocate_amount(
-                    round(ca.allocation_rate * self.allocation_amount / 100, 2)
+                    round(ca.allocation_rate * self.allocation_amount / 100, ndp)
                 )
                 for ca in self.children_accounts
             ]
