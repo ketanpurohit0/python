@@ -21,6 +21,12 @@ more_tree_data = {
     "ALLOCATE_PCT": [50] * 7,
 }
 
+real_sample_tree_data= {
+    "PRNT ACNT NO": [None, "12330", "12330", "12330", "46460", "46460", "46460", "46460", None, "33717", "33717", "33717", "33717", "33717", "33717", "33717E", "33717E", None, "48506", "48506","48506", "48506"],
+    "ACNT NO": ["12330", "12330A", "12330B", "12330C", "46460", "46460A", "46460B", "46460C", "33717","33717A", "33717D", "33717C", "33717F", "33717B", "33717E", "33717G","33717F", "48506","48506A", "48506B", "48506C", "48506D"],
+    "ALLOC PERC": [100.0,18.27, 81.71,0.02, None, 18.27, 81.71, 0.02,None, 33.97, 5.04, 1.14, 0.01, 6.24, 53.60, 98.49, 1.51, None, 21.05, 0.0, 21.85, 57.10]
+}
+
 
 def sha256sum(filename):
     # https: // stackoverflow.com / questions / 22058048 / hashing - a - file - in -python
@@ -67,6 +73,24 @@ class TestTreePandas(unittest.TestCase):
         print("C2", tree.path_of("C2"))
         print("Dxx", tree.path_of("Dxx"))
 
+    def test_real_sample_data(self):
+        tree_df = pd.DataFrame(real_sample_tree_data)
+        # clean
+        # None in PRNT ACNT NO implies 'root'
+        # If PRNT ACNT NO and ACNT NO are same, then PRNT ACNT NO is set to 'root' (implied it is a parent)
+        tree_df['PRNT ACNT NO'] = tree_df['PRNT ACNT NO'].apply(lambda r: r or "root")
+        tree_df['PRNT ACNT NO'] = tree_df.apply(lambda r: 'root' if r['PRNT ACNT NO'] == r['ACNT NO'] else r['PRNT ACNT NO'], axis=1)
+        tree_df['ALLOC PERC'] = tree_df['ALLOC PERC'].fillna(100.0)
+        tree_root = AccountTree(account_code="root", allocation_rate=100.0)
+        tree_df.apply(lambda r: tree_root.insert(r["PRNT ACNT NO"], r["ACNT NO"], r["ALLOC PERC"]), axis=1)
+
+        # make assertions
+        tree_root.dump()
+        self.assertTrue(tree_root.verify_sum_of_all_child_allocation_rates(reveal_node=True))
+        self.assertTrue(tree_root.verify_sum_of_child_allocations())
+        tree_root.allocate_amount(1000)
+        tree_root.dump()
+        self.assertTrue(tree_root.verify_sum_of_child_allocations())
 
 
 
