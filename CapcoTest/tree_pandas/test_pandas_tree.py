@@ -89,10 +89,10 @@ class TestTreePandas(unittest.TestCase):
         # make assertions
         tree_root.dump()
         self.assertTrue(tree_root.verify_sum_of_all_child_allocation_rates(reveal_node=True))
-        self.assertTrue(tree_root.verify_sum_of_child_allocations())
-        tree_root.allocate_amount(1000)
+        self.assertTrue(tree_root.verify_sum_of_child_allocations(reveal_node=True))
+        tree_root.allocate_amount(313)
         tree_root.dump()
-        self.assertTrue(tree_root.verify_sum_of_child_allocations())
+        self.assertTrue(tree_root.verify_sum_of_child_allocations(reveal_node=True))
 
 
 

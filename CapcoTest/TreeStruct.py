@@ -161,15 +161,30 @@ class AccountTree:
             ]
         return self
 
-    def verify_sum_of_child_allocations(self) -> bool:
+    def verify_sum_of_child_allocations(self, reveal_node=False) -> bool:
         """Verify that each nodes allocation amount is equal to sum of its child allocation amount and all
         sub_nodes also"""
-        this_node = np.isclose(
-            self.sum_of_immediate_child_allocations_amount(), self.allocation_amount
+
+        if self.parent_account == "root":
+            """The overall root is a dummy placeholder, its parent_name will be 'root'"""
+            this_node = True
+        else:
+            this_node = np.isclose(
+                self.sum_of_immediate_child_allocations_amount(), self.allocation_amount
+            )
+
+        all_sub_nodes = all(
+            ca.verify_sum_of_child_allocations(reveal_node) for ca in self.children_accounts
         )
-        return this_node and all(
-            ca.verify_sum_of_child_allocations() for ca in self.children_accounts
-        )
+
+        overall_sub_tree = this_node and all_sub_nodes
+
+        if not overall_sub_tree and reveal_node:
+            print(f"Failing (verify_sum_of_child_allocations) with parent_account={self.parent_account}")
+
+        return overall_sub_tree
+
+
 
     def verify_sum_of_immediate_child_allocations_rate(
         self,
@@ -197,7 +212,7 @@ class AccountTree:
 
         overall_sub_tree = this_node and all_sub_nodes
         if not overall_sub_tree and reveal_node:
-            print(f"Failing with parent_account={self.parent_account}")
+            print(f"Failing (verify_sum_of_all_child_allocation_rates) with parent_account={self.parent_account}")
 
         return overall_sub_tree
 
