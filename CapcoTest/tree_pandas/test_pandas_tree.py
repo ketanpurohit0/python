@@ -43,11 +43,13 @@ class TestTreePandas(unittest.TestCase):
     def test_df_with_parent_child_link(self):
         tree_df = pd.DataFrame(tree_data)
         group_df = tree_df.groupby(by="PARENT").agg({"ALLOCATE_PCT": sum})
-        with open("group_df.pickle", "wb") as f:
-            pickle.dump(group_df, f)
-            # print(hashlib.file_digest(f, 'sha256').hexdigest())
-
-        print(sha256sum("group_df.pickle"))
+        mask = group_df['ALLOCATE_PCT'] == 100
+        self.assertTrue(all(mask))
+        # with open("group_df.pickle", "wb") as f:
+        #     pickle.dump(group_df, f)
+        #     # print(hashlib.file_digest(f, 'sha256').hexdigest())
+        #
+        # print(sha256sum("group_df.pickle"))
 
     def test_tree(self):
         tree_df = pd.DataFrame(tree_data)[["PARENT", "CHILD", "ALLOCATE_PCT"]]
