@@ -90,13 +90,15 @@ class TestTreePandas(unittest.TestCase):
         tree_root.dump()
         self.assertTrue(tree_root.verify_sum_of_all_child_allocation_rates(reveal_node=True))
         self.assertTrue(tree_root.verify_sum_of_child_allocations(reveal_node=True))
-        for amount in [7]:
+        for amount in [313]:
             with self.subTest(amount):
                 tree_root.allocate_amount(amount, ndp=11)
                 tree_root.dump()
                 flatten_tree = tree_root.flatten()
                 self.assertTrue(tree_root.verify_sum_of_child_allocations(reveal_node=True))
-
+                # +1 because of the dummy root
+                self.assertEqual( len(tree_df) + 1, len(flatten_tree))
+                pass
 
 
 

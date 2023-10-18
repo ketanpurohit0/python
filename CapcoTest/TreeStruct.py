@@ -233,7 +233,8 @@ class AccountTree:
 
     def flatten(self, level: int = 0) -> List[Any]:
         r = [(level, self.parent_account, self.allocation_rate, self.allocation_amount)]
-        r.extend([ca.flatten(level+1) for ca in self.children_accounts])
+        for ca in self.children_accounts:
+            r.extend(ca.flatten(level+1))
         return r
 
 
