@@ -1,7 +1,7 @@
 """Model the UBO accounts hierarchy as a Tree structure"""
 import datetime
 from enum import Enum
-from typing import Optional, List, Iterable
+from typing import Optional, List, Iterable, Any
 
 import numpy as np
 from numpy import ndarray
@@ -230,3 +230,10 @@ class AccountTree:
             self.allocation_amount,
         )
         _ = [ca.dump(level + 1) for ca in self.children_accounts]
+
+    def flatten(self, level: int = 0) -> List[Any]:
+        r = [(level, self.parent_account, self.allocation_rate, self.allocation_amount)]
+        r.extend([ca.flatten(level+1) for ca in self.children_accounts])
+        return r
+
+
