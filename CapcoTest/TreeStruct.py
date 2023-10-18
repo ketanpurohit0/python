@@ -71,6 +71,7 @@ class AccountTree:
         self.parent_account: Optional[str] = account_code
         self.allocation_rate: float = allocation_rate  # pct
         self.allocation_amount: float = 0.0
+        self.overall_allocation_rate: float = 0.0
         self.children_accounts: List[AccountTree] = []
 
     def insert(
@@ -161,6 +162,13 @@ class AccountTree:
             ]
         return self
 
+    def allocated_rate_calculation(self, parents_allocation_rate: float = 100.00) -> None:
+        """Chain down the allocation rate"""
+        self.overall_allocation_rate = (self.allocation_rate * parents_allocation_rate)/100
+
+        for ca in self.children_accounts:
+            ca.allocated_rate_calculation(parents_allocation_rate=self.overall_allocation_rate)
+
     def verify_sum_of_child_allocations(self, reveal_node=False) -> bool:
         """Verify that each nodes allocation amount is equal to sum of its child allocation amount and all
         sub_nodes also"""
@@ -227,12 +235,13 @@ class AccountTree:
             f"{level}>",
             self.parent_account,
             self.allocation_rate,
+            self.overall_allocation_rate,
             self.allocation_amount,
         )
         _ = [ca.dump(level + 1) for ca in self.children_accounts]
 
     def flatten(self, level: int = 0) -> List[Any]:
-        r = [(level, self.parent_account, self.allocation_rate, self.allocation_amount)]
+        r = [(level, self.parent_account, self.allocation_rate, self.overall_allocation_rate, self.allocation_amount)]
         for ca in self.children_accounts:
             r.extend(ca.flatten(level+1))
         return r

@@ -164,6 +164,8 @@ class TestTreePandas(unittest.TestCase):
 
         # make assertions
         tree_root.dump()
+        tree_root.allocated_rate_calculation()
+        tree_root.dump()
         self.assertTrue(
             tree_root.verify_sum_of_all_child_allocation_rates(reveal_node=True)
         )
@@ -178,7 +180,7 @@ class TestTreePandas(unittest.TestCase):
                 )
                 # +1 because of the dummy root
                 self.assertEqual(len(tree_df) + 1, len(flatten_tree))
-                post_alloc_df= pd.DataFrame(flatten_tree, columns=["Level", "PRNT ACNT NO", "ALLOC RATE", "ALLOC_AMT"])
+                post_alloc_df = pd.DataFrame(flatten_tree, columns=["Level", "PRNT ACNT NO", "ALLOC RATE", "OVERALL ALLOC RATE", "ALLOC_AMT"])
 
 
 if __name__ == "__main__":
