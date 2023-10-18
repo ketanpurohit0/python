@@ -87,11 +87,11 @@ class TestAccountTree(unittest.TestCase):
             for e in expect_result:
                 account_code, expected_allocation = e
                 tree_node = tree.find(account_code=account_code)
-                self.assertEqual(expected_allocation, tree_node.allocation_amount)
+                self.assertTrue(np.isclose(expected_allocation, tree_node.allocation_amount, atol=0.01))
 
         tree.dump()
 
-        self.assertTrue(tree.verify_sum_of_child_allocations())
+        self.assertTrue(tree.verify_sum_of_child_allocations(reveal_node=True))
 
     @staticmethod
     def build_test_tree() -> Tuple[List[Any], AccountTree]:

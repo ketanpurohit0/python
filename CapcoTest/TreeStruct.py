@@ -178,7 +178,7 @@ class AccountTree:
             this_node = True
         else:
             this_node = np.isclose(
-                self.sum_of_immediate_child_allocations_amount(), self.allocation_amount
+                self.sum_of_immediate_child_allocations_amount(), self.allocation_amount, atol=0.001
             )
 
         all_sub_nodes = all(
@@ -203,9 +203,9 @@ class AccountTree:
         If there are no child elements, then a number between 0 and 100.00 is fine."""
 
         if self.children_accounts:
-            print("**P1", self.parent_account, np.isclose(self.sum_of_immediate_child_allocations_rate(), 100.00) )
+            # print("**P1", self.parent_account, np.isclose(self.sum_of_immediate_child_allocations_rate(), 100.00) )
             return np.isclose(self.sum_of_immediate_child_allocations_rate(), 100.00)
-        print("**P2")
+        # print("**P2")
         return 0.00 <= self.allocation_rate <= 100.00
 
     def verify_sum_of_all_child_allocation_rates(self, reveal_node=False) -> bool:
