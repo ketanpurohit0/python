@@ -9,15 +9,18 @@ from TreeStruct import AccountTree
 class TestAccountTree(unittest.TestCase):
 
     def test_create_root(self):
+        """Create a node"""
         tree = AccountTree(account_code=None, allocation_rate=1)
         self.assertIsNone(tree.parent_account)
 
     def test_create_non_root(self):
+        """Create a node with a non-None value"""
         account_code = "123"
         tree = AccountTree(account_code=account_code, allocation_rate=1)
         self.assertEqual(tree.parent_account, account_code)
 
     def test_insert_at_root(self):
+        """Create a tree and insert nodes"""
         tree = AccountTree(account_code=None, allocation_rate=1)
         parent_account, child_account = (None, "123")
         was_added = tree.insert(parent_account, child_account=child_account, allocation_rate=1)
@@ -31,6 +34,7 @@ class TestAccountTree(unittest.TestCase):
         self.assertTrue(ca.parent_account, child_account)
 
     def test_insert_where_parent_does_not_exist(self):
+        """Attempt to add an account such that the parent does not exist in the first place"""
         tree = AccountTree(account_code=None, allocation_rate=1)
         parent_account, child_account = (None, "123")
         was_added = tree.insert(parent_account, child_account=child_account, allocation_rate=1)
@@ -40,6 +44,7 @@ class TestAccountTree(unittest.TestCase):
         self.assertFalse(was_added)
 
     def test_insert_generally(self):
+        """Attempt different inserts"""
         tree = AccountTree(account_code=None, allocation_rate=1)
         parent_account, child_account = (None, "123")
         _ = tree.insert(parent_account, child_account=child_account, allocation_rate=1)
@@ -89,7 +94,7 @@ class TestAccountTree(unittest.TestCase):
                 tree_node = tree.find(account_code=account_code)
                 self.assertTrue(np.isclose(expected_allocation, tree_node.allocation_amount, atol=0.01))
 
-        tree.dump()
+        # tree.dump()
 
         self.assertTrue(tree.verify_sum_of_child_allocations(reveal_node=True))
 
@@ -107,9 +112,33 @@ class TestAccountTree(unittest.TestCase):
         tree_node = tree.find(account_code=account_code)
         self.assertTrue(np.isclose(expected_allocation, tree_node.allocation_amount, atol=0.01))
 
-        tree.dump()
+        # tree.dump()
 
         self.assertTrue(tree.verify_sum_of_child_allocations(reveal_node=True))
+
+
+    def test_amount_reset_whole_tree(self):
+        _, tree = self.build_test_tree()
+        tree.allocate_amount(1_000_000)
+        # tree.dump()
+        self.assertEqual(1_000_000, tree.sum_of_immediate_child_allocations_amount())
+        tree.reset_amount()
+        # tree.dump()
+        self.assertEqual(0, tree.sum_of_immediate_child_allocations_amount())
+
+    def test_amount_reset_sub_node(self):
+        """Allocate amount to parent, and then reset_amount on a child.
+        Ensure child becomes 0 and root is unchanged."""
+        _, tree = self.build_test_tree()
+        tree.allocate_amount(1_000_000)
+        self.assertTrue(tree.verify_sum_of_child_allocations())
+        sub_node = tree.find("r2/r2.1/r.2.1.1")
+        self.assertEqual(1_000_000, tree.sum_of_immediate_child_allocations_amount())
+        sub_node.reset_amount()
+        # tree.dump()
+        self.assertEqual(0, sub_node.sum_of_immediate_child_allocations_amount())
+        self.assertNotEqual(0, tree.sum_of_immediate_child_allocations_amount())
+        self.assertFalse(tree.verify_sum_of_child_allocations())
 
     @staticmethod
     def build_test_tree() -> Tuple[List[Any], AccountTree]:

@@ -150,7 +150,8 @@ class AccountTree:
         return self.allocation_amount
 
     def allocate_amount(self, amount: float, ndp: int = 3) -> Self:
-        """Allocate 'amount to node, and also distribute to children according to node allocation rate"""
+        """Allocate 'amount to node, and also distribute to children according to node allocation rate
+        Will overrite value"""
         self.allocation_amount = amount
         if self.children_accounts:
             _ = [
@@ -162,6 +163,8 @@ class AccountTree:
         return self
 
     def increment_amount(self, amount: float, ndp: int = 3) -> Self:
+        """Allocate an extra amount to the sub-tree. This will NOT overwrite
+        value, but increment it"""
         self.allocation_amount += amount
         if self.children_accounts:
             _ = [
@@ -171,6 +174,10 @@ class AccountTree:
                 for ca in self.children_accounts
             ]
             return self
+
+    def reset_amount(self) -> Self:
+        """Set the whole sub-tree to 0"""
+        self.allocate_amount(amount=0)
 
     def allocated_rate_calculation(
         self, parents_allocation_rate: float = 100.00
