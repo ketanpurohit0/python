@@ -1,5 +1,6 @@
 import itertools
 import unittest
+from functools import reduce
 
 import pandas as pd
 import hashlib
@@ -181,6 +182,50 @@ class TestTreePandas(unittest.TestCase):
                 self.assertEqual(len(tree_df) + 1, len(flatten_tree))
                 post_alloc_df = pd.DataFrame(flatten_tree, columns=["Level", "PRNT ACNT NO", "ALLOC RATE", "OVERALL ALLOC RATE", "ALLOC_AMT"])
 
+    def test_increment_amount(self):
+        tree_df = pd.DataFrame(real_sample_tree_data)
+        # clean
+        # None in PRNT ACNT NO implies 'root'
+        # If PRNT ACNT NO and ACNT NO are same, then PRNT ACNT NO is set to 'root' (implied it is a parent)
+        tree_df["PRNT ACNT NO"] = tree_df["PRNT ACNT NO"].apply(lambda r: r or "root")
+        tree_df["PRNT ACNT NO"] = tree_df.apply(
+            lambda r: "root"
+            if r["PRNT ACNT NO"] == r["ACNT NO"]
+            else r["PRNT ACNT NO"],
+            axis=1,
+        )
+        tree_df["ALLOC PERC"] = tree_df["ALLOC PERC"].fillna(100.0)
+        tree_root = AccountTree(account_code="root", allocation_rate=100.0)
+        tree_df.apply(
+            lambda r: tree_root.insert(
+                r["PRNT ACNT NO"], r["ACNT NO"], r["ALLOC PERC"]
+            ),
+            axis=1,
+        )
+
+        # make assertions
+        # tree_root.dump()
+        tree_root.allocated_rate_calculation()
+        # tree_root.dump()
+        self.assertTrue(
+            tree_root.verify_sum_of_all_child_allocation_rates(reveal_node=True)
+        )
+        self.assertTrue(tree_root.verify_sum_of_child_allocations(reveal_node=True))
+        total_increment = 0
+        for amount, multiplier in itertools.product([7, 313, 13, 31, 1], [1, 3, 5, 7, 11]):
+            with self.subTest(amount*multiplier):
+                tree_root.increment_amount(amount*multiplier, ndp=2)
+                total_increment+= amount*multiplier
+                # tree_root.dump()
+                flatten_tree = tree_root.flatten()
+                self.assertTrue(
+                    tree_root.verify_sum_of_child_allocations(reveal_node=True)
+                )
+                # +1 because of the dummy root
+                self.assertEqual(len(tree_df) + 1, len(flatten_tree))
+                post_alloc_df = pd.DataFrame(flatten_tree, columns=["Level", "PRNT ACNT NO", "ALLOC RATE", "OVERALL ALLOC RATE", "ALLOC_AMT"])
+
+        self.assertEqual(total_increment, tree_root.allocation_amount)
 
 if __name__ == "__main__":
     unittest.main()

@@ -149,7 +149,7 @@ class AccountTree:
             return sum(ca.allocation_amount for ca in self.children_accounts)
         return self.allocation_amount
 
-    def allocate_amount(self, amount: float, ndp: int=3) -> Self:
+    def allocate_amount(self, amount: float, ndp: int = 3) -> Self:
         """Allocate 'amount to node, and also distribute to children according to node allocation rate"""
         self.allocation_amount = amount
         if self.children_accounts:
@@ -161,7 +161,7 @@ class AccountTree:
             ]
         return self
 
-    def increment_amount(self, amount: float, ndp: int=3) -> Self:
+    def increment_amount(self, amount: float, ndp: int = 3) -> Self:
         self.allocation_amount += amount
         if self.children_accounts:
             _ = [
@@ -172,13 +172,18 @@ class AccountTree:
             ]
             return self
 
-
-    def allocated_rate_calculation(self, parents_allocation_rate: float = 100.00) -> None:
+    def allocated_rate_calculation(
+        self, parents_allocation_rate: float = 100.00
+    ) -> None:
         """Chain down the allocation rate"""
-        self.overall_allocation_rate = (self.allocation_rate * parents_allocation_rate)/100
+        self.overall_allocation_rate = (
+            self.allocation_rate * parents_allocation_rate
+        ) / 100
 
         for ca in self.children_accounts:
-            ca.allocated_rate_calculation(parents_allocation_rate=self.overall_allocation_rate)
+            ca.allocated_rate_calculation(
+                parents_allocation_rate=self.overall_allocation_rate
+            )
 
     def verify_sum_of_child_allocations(self, reveal_node=False) -> bool:
         """Verify that each nodes allocation amount is equal to sum of its child allocation amount and all
@@ -189,21 +194,24 @@ class AccountTree:
             this_node = True
         else:
             this_node = np.isclose(
-                self.sum_of_immediate_child_allocations_amount(), self.allocation_amount, atol=0.001
+                self.sum_of_immediate_child_allocations_amount(),
+                self.allocation_amount,
+                atol=0.001,
             )
 
         all_sub_nodes = all(
-            ca.verify_sum_of_child_allocations(reveal_node) for ca in self.children_accounts
+            ca.verify_sum_of_child_allocations(reveal_node)
+            for ca in self.children_accounts
         )
 
         overall_sub_tree = this_node and all_sub_nodes
 
         if not overall_sub_tree and reveal_node:
-            print(f"Failing (verify_sum_of_child_allocations) with parent_account={self.parent_account}")
+            print(
+                f"Failing (verify_sum_of_child_allocations) with parent_account={self.parent_account}"
+            )
 
         return overall_sub_tree
-
-
 
     def verify_sum_of_immediate_child_allocations_rate(
         self,
@@ -227,11 +235,16 @@ class AccountTree:
         else:
             this_node = self.verify_sum_of_immediate_child_allocations_rate()
 
-        all_sub_nodes = all(ca.verify_sum_of_immediate_child_allocations_rate() for ca in self.children_accounts)
+        all_sub_nodes = all(
+            ca.verify_sum_of_immediate_child_allocations_rate()
+            for ca in self.children_accounts
+        )
 
         overall_sub_tree = this_node and all_sub_nodes
         if not overall_sub_tree and reveal_node:
-            print(f"Failing (verify_sum_of_all_child_allocation_rates) with parent_account={self.parent_account}")
+            print(
+                f"Failing (verify_sum_of_all_child_allocation_rates) with parent_account={self.parent_account}"
+            )
 
         return overall_sub_tree
 
@@ -252,9 +265,15 @@ class AccountTree:
         _ = [ca.dump(level + 1) for ca in self.children_accounts]
 
     def flatten(self, level: int = 0) -> List[Any]:
-        r = [(level, self.parent_account, self.allocation_rate, self.overall_allocation_rate, self.allocation_amount)]
+        r = [
+            (
+                level,
+                self.parent_account,
+                self.allocation_rate,
+                self.overall_allocation_rate,
+                self.allocation_amount,
+            )
+        ]
         for ca in self.children_accounts:
-            r.extend(ca.flatten(level+1))
+            r.extend(ca.flatten(level + 1))
         return r
-
-
