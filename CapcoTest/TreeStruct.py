@@ -1,10 +1,9 @@
 """Model the UBO accounts hierarchy as a Tree structure"""
 import datetime
 from enum import Enum
-from typing import Optional, List, Iterable, Any
+from typing import Optional, List, Any
 
 import numpy as np
-from numpy import ndarray
 from pydantic import BaseModel, confloat, Field
 from typing_extensions import Self
 
@@ -161,6 +160,18 @@ class AccountTree:
                 for ca in self.children_accounts
             ]
         return self
+
+    def increment_amount(self, amount: float, ndp: int=3) -> Self:
+        self.allocation_amount += amount
+        if self.children_accounts:
+            _ = [
+                ca.allocate_amount(
+                    round(ca.allocation_rate * self.allocation_amount / 100, ndp)
+                )
+                for ca in self.children_accounts
+            ]
+            return self
+
 
     def allocated_rate_calculation(self, parents_allocation_rate: float = 100.00) -> None:
         """Chain down the allocation rate"""

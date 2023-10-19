@@ -79,8 +79,8 @@ class TestAccountTree(unittest.TestCase):
         _, tree = self.build_test_tree()
 
         test_dict = {
-            100: [(None, 100.00), ("r2", 25.00), ("r2/r2.1", 25.00), ("r2/r2.1/r.2.1.5", 1.41)],
-            111: [(None, 111.00), ("r2", 27.75), ("r2/r2.1", 27.75), ("r2/r2.1/r.2.1.5", 1.57)]
+            100: [("root", 100.00), ("r2", 25.00), ("r2/r2.1", 25.00), ("r2/r2.1/r.2.1.5", 1.41)],
+            111: [("root", 111.00), ("r2", 27.75), ("r2/r2.1", 27.75), ("r2/r2.1/r.2.1.5", 1.57)]
         }
         for allocate_amount,expect_result in test_dict.items():
             tree.allocate_amount(allocate_amount)
@@ -93,14 +93,32 @@ class TestAccountTree(unittest.TestCase):
 
         self.assertTrue(tree.verify_sum_of_child_allocations(reveal_node=True))
 
+    def test_increment_amount(self):
+        _, tree = self.build_test_tree()
+
+        allocations = [("r2", 27.75), ("r2", 11.25), ("r2", 1.00)]
+        expected_result = ("r2", 40.00)
+
+        for node_value_,amount_ in allocations:
+            node_ = tree.find(node_value_)
+            node_.increment_amount(amount_)
+
+        account_code, expected_allocation = expected_result
+        tree_node = tree.find(account_code=account_code)
+        self.assertTrue(np.isclose(expected_allocation, tree_node.allocation_amount, atol=0.01))
+
+        tree.dump()
+
+        self.assertTrue(tree.verify_sum_of_child_allocations(reveal_node=True))
+
     @staticmethod
     def build_test_tree() -> Tuple[List[Any], AccountTree]:
-        tree = AccountTree(None, 1)
+        tree = AccountTree("root", 1)
         elements = [
-            (None, "r1", 25),
-            (None, "r2", 25),
-            (None, "r3", 25),
-            (None, "r4", 25),
+            ("root", "r1", 25),
+            ("root", "r2", 25),
+            ("root", "r3", 25),
+            ("root", "r4", 25),
             ("r1", "r1/r1.1", 30),
             ("r1", "r1/r1.2", 70),
             ("r2", "r2/r2.1", 100),
