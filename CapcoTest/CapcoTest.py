@@ -40,19 +40,32 @@ if __name__ == "__main__":
     files = [Path(f"rem{i}.txt") for i in range(30)]
 
     ts = time.perf_counter()
+    t_ = 0
     for f in files:
-        asyncio.run(write_to_file({"A": 2}, f))
-    print(time.perf_counter() - ts)
+        T = timeit.timeit('asyncio.run(write_to_file({"A": 2}, f))', number=100, globals=globals())
+        t_ += T
+    print(time.perf_counter() - ts, t_)
 
     ts = time.perf_counter()
+    t_ = 0
     for f in files:
-        asyncio.run(write_to_file_aiofiles({"A": 2}, f))
-    print(time.perf_counter() - ts)
+        T = timeit.timeit('asyncio.run(write_to_file_aiofiles({"A": 2}, f))', number=100, globals=globals())
+        t_ += T
+    print(time.perf_counter() - ts, t_)
 
     ts = time.perf_counter()
-    asyncio.run(slow_method_wrapper(files))
-    print(time.perf_counter() - ts)
+    t_ = 0
+    T = timeit.timeit('asyncio.run(slow_method_wrapper(files))',number=100, globals=globals())
+    t_ += T
+    print(time.perf_counter() - ts, t_)
 
     ts = time.perf_counter()
-    asyncio.run(slow_method_wrapper2(files))
-    print(time.perf_counter() - ts)
+    t_ = 0
+    T = timeit.timeit('asyncio.run(slow_method_wrapper2(files))', number=100, globals=globals())
+    t_ += T
+    print(time.perf_counter() - ts, t_)
+
+# 6.8296649 6.814284999999998
+# 12.7765823 12.762742999999999
+# 1.9098098000000014 1.9093440000000008
+# 1.892768499999999 1.8770220999999978
