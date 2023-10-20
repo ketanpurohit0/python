@@ -4,6 +4,7 @@ import time
 from pathlib import Path
 from typing import Dict, Any
 import timeit
+import heapq
 
 import aiofiles
 
@@ -37,35 +38,50 @@ async def write_to_file_aiofiles(a: Dict[str, Any], file: Path):
 
 
 if __name__ == "__main__":
+
+    track = []
+    n_tests = 100
+
     files = [Path(f"rem{i}.txt") for i in range(30)]
 
     ts = time.perf_counter()
     t_ = 0
     for f in files:
-        T = timeit.timeit('asyncio.run(write_to_file({"A": 2}, f))', number=100, globals=globals())
+        T = timeit.timeit('asyncio.run(write_to_file({"A": 2}, f))', number=n_tests, globals=globals())
         t_ += T
     print(time.perf_counter() - ts, t_)
+    track.append(t_)
 
     ts = time.perf_counter()
     t_ = 0
     for f in files:
-        T = timeit.timeit('asyncio.run(write_to_file_aiofiles({"A": 2}, f))', number=100, globals=globals())
+        T = timeit.timeit('asyncio.run(write_to_file_aiofiles({"A": 2}, f))', number=n_tests, globals=globals())
         t_ += T
     print(time.perf_counter() - ts, t_)
+    track.append(t_)
 
     ts = time.perf_counter()
     t_ = 0
-    T = timeit.timeit('asyncio.run(slow_method_wrapper(files))',number=100, globals=globals())
+    T = timeit.timeit('asyncio.run(slow_method_wrapper(files))',number=n_tests, globals=globals())
     t_ += T
     print(time.perf_counter() - ts, t_)
+    track.append(t_)
+
 
     ts = time.perf_counter()
     t_ = 0
-    T = timeit.timeit('asyncio.run(slow_method_wrapper2(files))', number=100, globals=globals())
+    T = timeit.timeit('asyncio.run(slow_method_wrapper2(files))', number=n_tests, globals=globals())
     t_ += T
     print(time.perf_counter() - ts, t_)
+    track.append(t_)
 
-# 6.8296649 6.814284999999998
-# 12.7765823 12.762742999999999
-# 1.9098098000000014 1.9093440000000008
-# 1.892768499999999 1.8770220999999978
+    h = heapq.heapify(track)
+    print(track)
+
+
+# 127.629272 127.52956860000002
+# 157.28519150000002 157.18686030000015
+# 18.23259059999998 18.229185400000006
+# 18.10036980000001 17.953597000000002
+# [17.953597000000002, 127.52956860000002, 18.229185400000006, 157.18686030000015]
+
