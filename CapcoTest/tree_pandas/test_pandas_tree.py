@@ -1,4 +1,5 @@
 import itertools
+import time
 import unittest
 from functools import reduce
 
@@ -226,6 +227,44 @@ class TestTreePandas(unittest.TestCase):
                 post_alloc_df = pd.DataFrame(flatten_tree, columns=["Level", "PRNT ACNT NO", "ALLOC RATE", "OVERALL ALLOC RATE", "ALLOC_AMT"])
 
         self.assertEqual(total_increment, tree_root.allocation_amount)
+
+    def test_vectorized_ops(self):
+        size = 10_000
+        df = pd.DataFrame({"A": [5]*size})
+
+        ts = time.perf_counter()
+        df['AC'] = df.A.map(lambda r: r * 5)
+        print(time.perf_counter() - ts)
+
+        def multBy(s: pd.Series, n: int) -> pd.Series:
+            return s * n
+
+        def multBy2(pd_dataframe: pd.DataFrame, col:str, n: int) -> pd.Series:
+            return pd_dataframe[col]  * n
+
+        ts = time.perf_counter()
+        df['AC1'] = multBy(df.A, 5)
+        print(time.perf_counter() - ts)
+
+
+        ts = time.perf_counter()
+        df['AC2'] = df.apply(lambda r: r['A'] * 5, axis=1)
+        print(time.perf_counter() - ts)
+
+        ts = time.perf_counter()
+        df['AC3'] = multBy2(df, 'A', 5)
+        print(time.perf_counter() - ts)
+
+        self.assertTrue(all(df['AC'] == df['AC1']))
+        self.assertTrue(all(df['AC'] == df['AC2']))
+        self.assertTrue(all(df['AC'] == df['AC3']))
+
+        # AC: 3.0196176
+        # AC1: 0.06376220000000021 fastest multBy
+        # AC2: 76.0665882 - slowest apply
+        # AC3: 0.07285819999999887 - 2nd fastest multBy2
+
+
 
 if __name__ == "__main__":
     unittest.main()
