@@ -1,10 +1,15 @@
 import itertools
+import string
 import time
 import unittest
 from functools import reduce
 
 import pandas as pd
 import hashlib
+
+from hypothesis.strategies import integers, text
+from pydantic import BaseModel, Field
+from hypothesis import given, strategies
 
 from TreeStruct import AccountTree
 
@@ -107,6 +112,11 @@ def sha256sum(filename):
     return h.hexdigest()
 
 
+class User(BaseModel):
+    name: str = Field(min_length=3)
+    age: int = Field(gt=72)
+
+
 class TestTreePandas(unittest.TestCase):
     def test_df_with_parent_child_link(self):
         tree_df = pd.DataFrame(tree_data)
@@ -172,8 +182,8 @@ class TestTreePandas(unittest.TestCase):
         )
         self.assertTrue(tree_root.verify_sum_of_child_allocations(reveal_node=True))
         for amount, multiplier in itertools.product([7, 313, 13, 31, 1], [1, 3, 5, 7, 11]):
-            with self.subTest(amount*multiplier):
-                tree_root.allocate_amount(amount*multiplier, ndp=2)
+            with self.subTest(amount * multiplier):
+                tree_root.allocate_amount(amount * multiplier, ndp=2)
                 # tree_root.dump()
                 flatten_tree = tree_root.flatten()
                 self.assertTrue(
@@ -181,7 +191,9 @@ class TestTreePandas(unittest.TestCase):
                 )
                 # +1 because of the dummy root
                 self.assertEqual(len(tree_df) + 1, len(flatten_tree))
-                post_alloc_df = pd.DataFrame(flatten_tree, columns=["Level", "PRNT ACNT NO", "ALLOC RATE", "OVERALL ALLOC RATE", "ALLOC_AMT"])
+                post_alloc_df = pd.DataFrame(flatten_tree,
+                                             columns=["Level", "PRNT ACNT NO", "ALLOC RATE", "OVERALL ALLOC RATE",
+                                                      "ALLOC_AMT"])
 
     def test_increment_amount(self):
         tree_df = pd.DataFrame(real_sample_tree_data)
@@ -214,9 +226,9 @@ class TestTreePandas(unittest.TestCase):
         self.assertTrue(tree_root.verify_sum_of_child_allocations(reveal_node=True))
         total_increment = 0
         for amount, multiplier in itertools.product([7, 313, 13, 31, 1], [1, 3, 5, 7, 11]):
-            with self.subTest(amount*multiplier):
-                tree_root.increment_amount(amount*multiplier, ndp=2)
-                total_increment+= amount*multiplier
+            with self.subTest(amount * multiplier):
+                tree_root.increment_amount(amount * multiplier, ndp=2)
+                total_increment += amount * multiplier
                 # tree_root.dump()
                 flatten_tree = tree_root.flatten()
                 self.assertTrue(
@@ -224,13 +236,15 @@ class TestTreePandas(unittest.TestCase):
                 )
                 # +1 because of the dummy root
                 self.assertEqual(len(tree_df) + 1, len(flatten_tree))
-                post_alloc_df = pd.DataFrame(flatten_tree, columns=["Level", "PRNT ACNT NO", "ALLOC RATE", "OVERALL ALLOC RATE", "ALLOC_AMT"])
+                post_alloc_df = pd.DataFrame(flatten_tree,
+                                             columns=["Level", "PRNT ACNT NO", "ALLOC RATE", "OVERALL ALLOC RATE",
+                                                      "ALLOC_AMT"])
 
         self.assertEqual(total_increment, tree_root.allocation_amount)
 
     def test_vectorized_ops(self):
         size = 10_000
-        df = pd.DataFrame({"A": [5]*size})
+        df = pd.DataFrame({"A": [5] * size})
 
         ts = time.perf_counter()
         df['AC'] = df.A.map(lambda r: r * 5)
@@ -239,13 +253,12 @@ class TestTreePandas(unittest.TestCase):
         def multBy(s: pd.Series, n: int) -> pd.Series:
             return s * n
 
-        def multBy2(pd_dataframe: pd.DataFrame, col:str, n: int) -> pd.Series:
-            return pd_dataframe[col]  * n
+        def multBy2(pd_dataframe: pd.DataFrame, col: str, n: int) -> pd.Series:
+            return pd_dataframe[col] * n
 
         ts = time.perf_counter()
         df['AC1'] = multBy(df.A, 5)
         print(time.perf_counter() - ts)
-
 
         ts = time.perf_counter()
         df['AC2'] = df.apply(lambda r: r['A'] * 5, axis=1)
@@ -264,7 +277,14 @@ class TestTreePandas(unittest.TestCase):
         # AC2: 76.0665882 - slowest apply
         # AC3: 0.07285819999999887 - 2nd fastest multBy2
 
+    @given(age=integers(), name=text())
+    def test_hyp_pydantic(self, age: int, name: str):
+        self.assertTrue(isinstance(age, int))
 
+    @given(py=strategies.builds(User, name=text(min_size=3, alphabet=string.ascii_uppercase), age=integers(min_value=73)))
+    def test_hyp_pydantic2(self, py: User):
+        print(py)
+        self.assertTrue(isinstance(py, User))
 
 if __name__ == "__main__":
     unittest.main()
