@@ -4,33 +4,27 @@ import pyparsing as pp
 
 
 def grammar_one():
-    """
-    Start of Block
+    """Start of Block
     :KeyWord::Mnemonic
     KeyWord = nnA
     Mnemonic = A...
     """
-
     keyword = pp.nums + string.ascii_uppercase
     mnemonic = string.ascii_uppercase
-    grammar = ":" + pp.Word(keyword) + ":" + pp.Word(mnemonic)
-    return grammar
+    return ":" + pp.Word(keyword) + ":" + pp.Word(mnemonic)
 
 
 def grammar_two():
-    """
-    Start of Block
+    """Start of Block
     :KeyWord:Mnemonic
     KeyWord = nnA
     Mnemonic = A...
     """
-
     keyword = pp.Combine(
-        pp.Word(pp.nums, min=2, max=2) + pp.Word(string.ascii_uppercase, min=1, max=1)
+        pp.Word(pp.nums, min=2, max=2) + pp.Word(string.ascii_uppercase, min=1, max=1),
     )
     mnemonic = pp.Word(string.ascii_uppercase)
-    grammar = ":" + keyword + ":" + mnemonic
-    return grammar
+    return ":" + keyword + ":" + mnemonic
 
 
 def grammar_three():
@@ -40,36 +34,34 @@ def grammar_four():
     return pp.Group(grammar_two())[...]
 
 def grammar_five():
-    """Sender's Message Reference"""
+    """Sender's Message Reference."""
     """:20C::SEME//345678"""
 
     return pp.Literal(":20C::SEME") + "//" + pp.Word(pp.alphanums)
 
 def grammar_six():
-    """Sender's Message Reference"""
+    """Sender's Message Reference."""
     """:20C::SEME//345678"""
 
     return pp.Literal(":20C::SEME//").suppress() + pp.Word(pp.alphanums).setResultsName("ID")
 
 def grammar_seven():
-    """Sender's Message Reference"""
+    """Sender's Message Reference."""
     """:20C:A"""
 
     return pp.Literal(":20C:").suppress() + pp.oneOf("A B")
 
 def grammar_50h():
-    """
-    sample=
+    """sample=
     :50H:/344110001637
     TESTAR00AXXX
     Utrecht
     Netherlands
     format=
     Option H	/34x     (Account)
-                4*35x    (Name and Address)
+                4*35x    (Name and Address).
 
     """
-
     return (pp.Literal(":50H:") +
             pp.Literal("/") + pp.Word(pp.alphanums + string.punctuation + " ", min=1, max=34).setResultsName("Account") + pp.lineEnd +
         pp.Group(pp.Word(pp.alphanums + string.punctuation + " "))[1, 4].setResultsName("NameAndAddress")).setResultsName("OrderingCustomer")

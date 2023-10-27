@@ -1,0 +1,10 @@
+[lint]
+
+# Never enforce `E501` (line length violations).
+ignore = ["E501","PT", "T20", "ANN101"]
+
+# select = ["PL", "PD", "PERF", "NPY","RUF", "ERA", "I", "C90", "F", "E", "W"]
+select = ["ALL"]
+
+[per-file-ignores]
+"test*.py" = ["ANN201"]
