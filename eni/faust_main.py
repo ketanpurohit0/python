@@ -24,6 +24,16 @@ async def greet(greetings):
         # print(greeting, counter)
 
 
+# @app.timer(interval=1.0)
+async def example_sender(app):
+    await greet.send(
+        value='ping'
+    )
+
+
+app.timer(4)(example_sender)
+app.timer(3)(example_sender)
+
 @app.agent(reset_counter_topic)
 async def reset_counter(messages):
     global counter
