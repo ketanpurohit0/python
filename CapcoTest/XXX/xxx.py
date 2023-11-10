@@ -26,19 +26,22 @@ def assign_ch3_ch4_as_trans_type(trans_df: pd.DataFrame, ubo_alloc: pd.DataFrame
 
     mask_in_alloc_range1 = trans_df_m1['FROM_DT'] <= trans_df_m1['EntryDate']
     mask_in_alloc_range2 = trans_df_m1['EntryDate'] <= trans_df_m1['TO_DT']
-    mask_in_alloc_range = mask_in_alloc_range1 & mask_in_alloc_range2
+    trans_df_m1['IN_ALLOC_RANGE'] = mask_in_alloc_range1 & mask_in_alloc_range2
 
     mask_in_with_range1 = trans_df_m1['FROM_DT_WITHOLD'] <= trans_df_m1['EntryDate']
     mask_in_with_range2 = trans_df_m1['EntryDate'] <= trans_df_m1['TO_DT_WITHOLD']
-    mask_in_with_range = mask_in_with_range1 & mask_in_with_range2
+    trans_df_m1['IN_WITHOLD_RANGE'] = mask_in_with_range1 & mask_in_with_range2
 
 
-    trans_df_m1['IN_ALLOC_RANGE'] = mask_in_alloc_range
-    trans_df_m1['IN_WITHOLD_RANGE'] = mask_in_with_range
 
     trans_df_m1 = trans_df_m1.assign(TRANS_TYPE=lambda df: np.where(df.IN_ALLOC_RANGE & df.IN_WITHOLD_RANGE, "CH4", None))
     trans_df_m1 = trans_df_m1.assign(TRANS_TYPE=lambda df: np.where( ~df.IN_ALLOC_RANGE &  ~df.IN_WITHOLD_RANGE, "CH3", df.TRANS_TYPE))
     trans_df_m1['TRANS_TYPE'] =  trans_df_m1['TRANS_TYPE'].replace({None: 'ERROR'})
+
+    columns_to_return = list(trans_df.columns)
+    columns_to_return.append("TRANS_TYPE")
+
+    return trans_df_m1[columns_to_return]
 
 
 
@@ -47,3 +50,4 @@ if __name__ == "__main__":
     file = Path(r"C:\MyWork\GIT\python\test0\Example_UBO.xlsx")
     trans_df, ubo_alloc, ubo_with = read_ubo_xlsx(file)
     trans_df = assign_ch3_ch4_as_trans_type(trans_df, ubo_alloc, ubo_with)
+    pass
