@@ -21,6 +21,7 @@ def read_ubo_xlsx(file: Path) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]
 
 
 def assign_ch3_ch4_as_trans_type(trans_df: pd.DataFrame, ubo_alloc: pd.DataFrame, ubo_with:pd.DataFrame) -> pd.DataFrame:
+    """Given 'trans_df:' assign a new column 'TRANS_TYPE' with values 'CH3', 'CH4' or 'ERROR'."""
     trans_df_m1 = (trans_df.merge(ubo_alloc, left_on=['AccountNo'], right_on=['ICY_NO'], suffixes=['','_ALLOC'])
                    .merge(ubo_with, left_on=['AccountNo'], right_on=['ICY_NO'], suffixes=['', '_WITHOLD']))
 
