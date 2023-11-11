@@ -23,7 +23,7 @@ def read_ubo_xlsx(xlsx_ubo_file_path: Path) -> Tuple[pd.DataFrame, pd.DataFrame,
 def assign_ch3_ch4_as_trans_type(ubo_trans_df: pd.DataFrame, ubo_alloc_df: pd.DataFrame, ubo_with_df:pd.DataFrame) -> pd.DataFrame:
     """Given 'trans_df:' assign a new column 'TRANS_TYPE' with values 'CH3', 'CH4' or 'ERROR'.
     Only records that are 'CH3' or 'CH4' would be candidates for further processing.
-    'ERROR' transactions cannot be processed.  These would need to be reported separately
+    'ERROR' transactions cannot be processed.  These would need to be reported separately.
     """
     trans_df_m1 = (ubo_trans_df.merge(ubo_alloc_df, left_on=["AccountNo"], right_on=["ICY_NO"], suffixes=["", "_ALLOC"])
                    .merge(ubo_with_df, left_on=["AccountNo"], right_on=["ICY_NO"], suffixes=["", "_WITHOLD"]))
@@ -46,6 +46,26 @@ def assign_ch3_ch4_as_trans_type(ubo_trans_df: pd.DataFrame, ubo_alloc_df: pd.Da
 
     return trans_df_m1[columns_to_return]
 
+
+def validate_shah256_checksum(ubo_xlsx_file: Path) -> None:
+    """Verify that 'ubo_xlsx_file:' contents match the shah256 checksum. The checksum
+    should be in the name
+    
+    Throws exception on error."""
+    pass
+
+
+def validate_gdm_imy_inputs(ubo_xlsx_file: Path, trans_file: Path, strict:bool=False) -> None:
+    """Ensure that the 'ubo_xlsx_file:' exists and 'trans_file:' exists.
+    If 'strict:' is True, also verify that 'ubo_xlsx_file: is a checksum matching file.
+    'strict:' is False by default.  During testing we may not have a file matching this criteria.
+    Throws exception on error."""
+    assert ubo_xlsx_file.exists() and ubo_xlsx_file.is_file(), f"UBO file {ubo_xlsx_file!s} does not exist."
+    assert trans_file.exists() and trans_file.is_file(), f"Transaction file {trans_file!s} must be a file."
+    
+    if strict:
+        validate_shah256_checksum(ubo_xlsx_file)
+        
 
 
 
