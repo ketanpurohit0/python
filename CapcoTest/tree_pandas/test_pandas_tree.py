@@ -1,15 +1,13 @@
+import hashlib
 import itertools
 import string
 import time
 import unittest
-from functools import reduce
 
 import pandas as pd
-import hashlib
-
+from hypothesis import given, strategies
 from hypothesis.strategies import integers, text
 from pydantic import BaseModel, Field
-from hypothesis import given, strategies
 
 from TreeStruct import AccountTree
 
@@ -124,10 +122,7 @@ class TestTreePandas(unittest.TestCase):
         mask = group_df["ALLOCATE_PCT"] == 100
         self.assertTrue(all(mask))
         # with open("group_df.pickle", "wb") as f:
-        #     pickle.dump(group_df, f)
-        #     # print(hashlib.file_digest(f, 'sha256').hexdigest())
         #
-        # print(sha256sum("group_df.pickle"))
 
     def test_tree(self):
         tree_df = pd.DataFrame(tree_data)[["PARENT", "CHILD", "ALLOCATE_PCT"]]
@@ -168,30 +163,27 @@ class TestTreePandas(unittest.TestCase):
         tree_root = AccountTree(account_code="root", allocation_rate=100.0)
         tree_df.apply(
             lambda r: tree_root.insert(
-                r["PRNT ACNT NO"], r["ACNT NO"], r["ALLOC PERC"]
+                r["PRNT ACNT NO"], r["ACNT NO"], r["ALLOC PERC"],
             ),
             axis=1,
         )
 
         # make assertions
-        # tree_root.dump()
         tree_root.allocated_rate_calculation()
-        # tree_root.dump()
         self.assertTrue(
-            tree_root.verify_sum_of_all_child_allocation_rates(reveal_node=True)
+            tree_root.verify_sum_of_all_child_allocation_rates(reveal_node=True),
         )
         self.assertTrue(tree_root.verify_sum_of_child_allocations(reveal_node=True))
         for amount, multiplier in itertools.product([7, 313, 13, 31, 1], [1, 3, 5, 7, 11]):
             with self.subTest(amount * multiplier):
                 tree_root.allocate_amount(amount * multiplier, ndp=2)
-                # tree_root.dump()
                 flatten_tree = tree_root.flatten()
                 self.assertTrue(
-                    tree_root.verify_sum_of_child_allocations(reveal_node=True)
+                    tree_root.verify_sum_of_child_allocations(reveal_node=True),
                 )
                 # +1 because of the dummy root
                 self.assertEqual(len(tree_df) + 1, len(flatten_tree))
-                post_alloc_df = pd.DataFrame(flatten_tree,
+                pd.DataFrame(flatten_tree,
                                              columns=["Level", "PRNT ACNT NO", "ALLOC RATE", "OVERALL ALLOC RATE",
                                                       "ALLOC_AMT"])
 
@@ -211,17 +203,15 @@ class TestTreePandas(unittest.TestCase):
         tree_root = AccountTree(account_code="root", allocation_rate=100.0)
         tree_df.apply(
             lambda r: tree_root.insert(
-                r["PRNT ACNT NO"], r["ACNT NO"], r["ALLOC PERC"]
+                r["PRNT ACNT NO"], r["ACNT NO"], r["ALLOC PERC"],
             ),
             axis=1,
         )
 
         # make assertions
-        # tree_root.dump()
         tree_root.allocated_rate_calculation()
-        # tree_root.dump()
         self.assertTrue(
-            tree_root.verify_sum_of_all_child_allocation_rates(reveal_node=True)
+            tree_root.verify_sum_of_all_child_allocation_rates(reveal_node=True),
         )
         self.assertTrue(tree_root.verify_sum_of_child_allocations(reveal_node=True))
         total_increment = 0
@@ -229,14 +219,13 @@ class TestTreePandas(unittest.TestCase):
             with self.subTest(amount * multiplier):
                 tree_root.increment_amount(amount * multiplier, ndp=2)
                 total_increment += amount * multiplier
-                # tree_root.dump()
                 flatten_tree = tree_root.flatten()
                 self.assertTrue(
-                    tree_root.verify_sum_of_child_allocations(reveal_node=True)
+                    tree_root.verify_sum_of_child_allocations(reveal_node=True),
                 )
                 # +1 because of the dummy root
                 self.assertEqual(len(tree_df) + 1, len(flatten_tree))
-                post_alloc_df = pd.DataFrame(flatten_tree,
+                pd.DataFrame(flatten_tree,
                                              columns=["Level", "PRNT ACNT NO", "ALLOC RATE", "OVERALL ALLOC RATE",
                                                       "ALLOC_AMT"])
 
@@ -247,7 +236,7 @@ class TestTreePandas(unittest.TestCase):
         df = pd.DataFrame({"A": [5] * size})
 
         ts = time.perf_counter()
-        df['AC'] = df.A.map(lambda r: r * 5)
+        df["AC"] = df.A.map(lambda r: r * 5)
         print(time.perf_counter() - ts)
 
         def multBy(s: pd.Series, n: int) -> pd.Series:
@@ -257,22 +246,21 @@ class TestTreePandas(unittest.TestCase):
             return pd_dataframe[col] * n
 
         ts = time.perf_counter()
-        df['AC1'] = multBy(df.A, 5)
+        df["AC1"] = multBy(df.A, 5)
         print(time.perf_counter() - ts)
 
         ts = time.perf_counter()
-        df['AC2'] = df.apply(lambda r: r['A'] * 5, axis=1)
+        df["AC2"] = df.apply(lambda r: r["A"] * 5, axis=1)
         print(time.perf_counter() - ts)
 
         ts = time.perf_counter()
-        df['AC3'] = multBy2(df, 'A', 5)
+        df["AC3"] = multBy2(df, "A", 5)
         print(time.perf_counter() - ts)
 
-        self.assertTrue(all(df['AC'] == df['AC1']))
-        self.assertTrue(all(df['AC'] == df['AC2']))
-        self.assertTrue(all(df['AC'] == df['AC3']))
+        self.assertTrue(all(df["AC"] == df["AC1"]))
+        self.assertTrue(all(df["AC"] == df["AC2"]))
+        self.assertTrue(all(df["AC"] == df["AC3"]))
 
-        # AC: 3.0196176
         # AC1: 0.06376220000000021 fastest multBy
         # AC2: 76.0665882 - slowest apply
         # AC3: 0.07285819999999887 - 2nd fastest multBy2

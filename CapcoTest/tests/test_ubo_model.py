@@ -3,7 +3,7 @@ import unittest
 
 from pydantic import ValidationError
 
-from TreeStruct import TransactionTypes, UBOTypes, Transaction, UBO
+from TreeStruct import UBO, Transaction, TransactionTypes, UBOTypes
 
 
 class TestUboModels(unittest.TestCase):
@@ -27,8 +27,8 @@ class TestUboModels(unittest.TestCase):
         self.assertFalse(UBOTypes.is_W9(ubo_w8))
 
     def test_good_transaction_model(self):
-        t0 = Transaction(amount=0, valueDate=datetime.date(2022, 12, 1), transactionType=TransactionTypes.INT)
-        t1 = Transaction(amount=40, valueDate=datetime.date(2022, 12, 1), transactionType="INT")
+        Transaction(amount=0, valueDate=datetime.date(2022, 12, 1), transactionType=TransactionTypes.INT)
+        Transaction(amount=40, valueDate=datetime.date(2022, 12, 1), transactionType="INT")
 
     def test_bad_transaction_model(self):
         # amount, transaction type
@@ -39,7 +39,7 @@ class TestUboModels(unittest.TestCase):
 
         for amount_, transactionType_ in values:
             with self.subTest(f"{amount_}, {transactionType_}"):
-                with self.assertRaises(ValidationError) as context:
+                with self.assertRaises(ValidationError):
                     _ = Transaction(amount=amount_, valueDate=datetime.date(2022, 12, 1),
                                     transactionType=transactionType_)
 

@@ -1,4 +1,3 @@
-import CapcoTest
 
 
 def test_me():
