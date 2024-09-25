@@ -1,4 +1,5 @@
 """Model the UBO accounts hierarchy as a Tree structure"""
+
 import datetime
 from enum import Enum
 from typing import Optional, List, Any
