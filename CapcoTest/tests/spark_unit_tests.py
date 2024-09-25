@@ -64,7 +64,12 @@ class MySparkTests(unittest.TestCase):
         result = validator.expect_column_values_to_match_regex("c", regex="^string.*", condition_parser="spark", row_condition='a > 2')
         print(result["success"])
         result = validator.expect_column_values_to_match_regex("c", regex="^foo.*", condition_parser="spark", row_condition='a <= 2')
-        print(result["success"])
+        print("L",result["success"])
+        # result = validator.expect_column_values_to_be_dateutil_parseable("d")
+        # print("date", result["success"])
+        # result = validator.expect_column_values_to_be_dateutil_parseable("e")
+        # print("datetime", result["success"])
+
 
         validator.save_expectation_suite("mytests.json")
         with open("mytests.json") as fp:
