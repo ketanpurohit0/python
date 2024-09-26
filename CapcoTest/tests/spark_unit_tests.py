@@ -92,7 +92,18 @@ class MySparkTests(unittest.TestCase):
         # result = validator.expect_column_values_to_be_dateutil_parseable("e")
         # print("datetime", result["success"])
 
+        expectation_suite = validator.get_expectation_suite()
         validator.save_expectation_suite("mytests.json")
+
+        # use pickle
+        import pickle
+        with open("mytests.pickle", "wb") as fp:
+            pickle.dump(expectation_suite, fp)
+
+        with open("mytests.pickle", "rb") as fp:
+            loaded_suite = pickle.load(fp)
+            load_suite_results = validator.validate(expectation_suite=loaded_suite)
+
         with open("mytests.json") as fp:
             s = json.load(fp)
             suite_result = validator.validate(expectation_suite=s)
