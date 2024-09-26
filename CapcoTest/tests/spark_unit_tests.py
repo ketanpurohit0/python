@@ -67,13 +67,13 @@ class MySparkTests(unittest.TestCase):
                                                                row_condition='a > 2')
         print(result["success"])
         result = validator.expect_column_values_to_match_regex("c", regex="^foo.*", condition_parser="spark",
-                                                               row_condition='a <= 2')
+                                                               row_condition='a <= 2', result_format=result_format)
         print("L1>", result["success"])
         # Repeat with argv, argc
         argc = ["c"]
         argv = {"regex": "^foo.*", "condition_parser": "spark", "row_condition": 'a <= 2'}
         result1 = validator.expect_column_values_to_match_regex(*argc, **argv)
-        print("L2>", result["success"])
+        print("L2>", result1["success"])
         # Repeat with dynamic code
         result2: Any = None
         expr = "validator.expect_column_values_to_match_regex(*argc, **argv)"
